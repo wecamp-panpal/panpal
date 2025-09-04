@@ -8,7 +8,7 @@ PanPal allows users to browse, view details, and add recipes. It supports search
 
 ## 2. Core Features
 
-### 2.1 Recipe List Page
+### 2.1 Recipe List Page - Khue
 
 **User Story:**
 
@@ -26,7 +26,7 @@ As a user, I want to see a list of recipes so that I can choose one to view in d
 
 ---
 
-### 2.2 Recipe Detail Page
+### 2.2 Recipe Detail Page - Khue
 
 **User Story:**
 
@@ -37,11 +37,14 @@ As a user, I want to see the full details of a recipe so that I can cook it step
 - [ ]  Displays recipe title, description, author, and category.
 - [ ]  Shows a list of ingredients.
 - [ ]  Shows step-by-step cooking instructions.
-- [ ]  (Optional) Displays recipe image from mock data.
+- Rating
+- Comment 
+- Favorite Button
+
 
 ---
 
-### 2.3 Add Recipe Page
+### 2.3 Add Recipe Page - Quynh Anh && Lam
 
 **User Story:**
 
@@ -51,18 +54,17 @@ As a user, I want to add my own recipes so that I can save and view them later.
 
 - [ ]  A form is provided with the following fields:
     - Title (text)
-    - Author (text)
     - Description (textarea)
     - Cooking time (number or text)
-    - Category (dropdown: Dessert, Main Dish, Drink)
+    - Category (dropdown: Appetizer, Dessert, Main Dish,Side Dish, Soup, Sauce, Drink, Salad)
     - Ingredients (dynamic list input)
-    - Steps (dynamic list input)
+    - Steps (dynamic list input): image, instruction
 - [ ]  Submitting the form saves the recipe in **local state** (and optionally **localStorage**).
 - [ ]  Newly added recipes appear in the **Recipe List Page**.
 
 ---
 
-### 2.4 Search & Filter
+### 2.4 Search & Filter - Khue
 
 **User Story:**
 
@@ -75,10 +77,32 @@ As a user, I want to search and filter recipes so that I can quickly find what I
 - [ ]  Search and filter can be used together.
 
 ---
+### 2.5 Authentication - Minh Vo
+
+---
+
+### 2.6 Profile User Button - Tu
+
+#### Favorite 
+
+#### Edit Profile
+
+#### Edit Recipe Post
+
+---
+### 2.7 Home Page - Tu && Quynh Anh
+
+#### After login page
+###  Landing Page
+
+---
+
+
 
 ## 3. Future Scope (Optional Features)
 
 - Favorite recipes (bookmark for later).
+- Random Recipe
 - Edit or delete existing recipes.
 - Pagination / infinite scroll on Recipe List.
 - Dark mode support.
