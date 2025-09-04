@@ -39,7 +39,8 @@ As a user, I want to see the full details of a recipe so that I can cook it step
 - [ ]  Shows step-by-step cooking instructions.
 - Rating
 - Comment 
-- Favorite Button
+- Favorite Button and its number of how many people have clicked favorite
+
 
 
 ---
