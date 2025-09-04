@@ -81,7 +81,7 @@ As a user, I want to search and filter recipes so that I can quickly find what I
 
 ---
 
-### 2.6 Profile User Button - Tu
+### 2.6 Profile User Button - Tu && Lam
 
 #### Favorite 
 
@@ -93,7 +93,7 @@ As a user, I want to search and filter recipes so that I can quickly find what I
 ### 2.7 Home Page - Tu && Quynh Anh
 
 #### After login page
-###  Landing Page
+###  Landing Page 
 
 ---
 
