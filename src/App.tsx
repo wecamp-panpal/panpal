@@ -1,15 +1,18 @@
-import { useState } from "react";
-import "./App.css";
-import { Button } from "@/components/ui/button";
+
+
+import { Route, Routes } from "react-router-dom";
+import AddRecipePage from "./pages/AddRecipe";
+import HomeLayout from "./layouts/HomLayout";
+
 
 function App() {
-  const [count, setCount] = useState(0);
 
   return (
-    <>
-      <p>Testing</p>
-      <Button variant="default" onClick={() => {setCount(count + 1)}}>Button from ShadcnUI</Button>
-    </>
+    <Routes>
+       <Route element={<HomeLayout />}> 
+    <Route path="/add-recipe" element={<AddRecipePage/>}/>
+</Route>
+    </Routes>
   );
 }
 
