@@ -1,15 +1,13 @@
-import { useState } from "react";
 import "./App.css";
-import { Button } from "@/components/ui/button";
+import { ThemeProvider } from "@mui/material/styles";
+import { muiTheme } from "@/lib/muiTheme";
+import LandingPage from "@/pages/LandingPage";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
-    <>
-      <p>Testing</p>
-      <Button variant="default" onClick={() => {setCount(count + 1)}}>Button from ShadcnUI</Button>
-    </>
+    <ThemeProvider theme={muiTheme}>
+      <LandingPage />
+    </ThemeProvider>
   );
 }
 
