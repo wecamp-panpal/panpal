@@ -6,7 +6,7 @@ const Footer = () => {
     <Box
       component="footer"
       sx={{
-        width: "100%",                  // full width
+        width: "100%",            
         backgroundColor: "#391F06",
         color: "#F5E2CC",
         textAlign: "center",
@@ -22,7 +22,7 @@ const Footer = () => {
       }}
     >
       <img src="/logo.svg" alt="PanPal logo" style={{ width: 50 }} />
-      <span>© 2025 PanPal. All rights reserved.</span>
+      <span style={{fontFamily:"Playfair Display"}}>© 2025 PanPal. All rights reserved.</span>
     </Box>
   );
   
