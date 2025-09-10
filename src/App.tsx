@@ -1,16 +1,25 @@
-import { useState } from "react";
-import "./App.css";
-import { Button } from "@/components/ui/button";
+import { Routes, Route, Navigate } from "react-router-dom";
+import Navbar from "./components/navbar";
+import RecipePage from "./pages/recipe";
 
-function App() {
-  const [count, setCount] = useState(0);
-
+function Placeholder({ label }: { label: string }) {
   return (
-    <>
-      <p>Testing</p>
-      <Button variant="default" onClick={() => {setCount(count + 1)}}>Button from ShadcnUI</Button>
-    </>
+    <div className="app-container" style={{ padding: "24px 0" }}>
+      <h2 className="h-title" style={{ margin: 0 }}>{label}</h2>
+    </div>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Placeholder label="Home" />} />
+        <Route path="/recipes" element={<RecipePage />} />
+        <Route path="/add" element={<Placeholder label="Add Recipe" />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
+  );
+}
