@@ -5,7 +5,6 @@ import {
   IconButton,
   Button,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
 } from '@mui/material';
@@ -59,11 +58,11 @@ const AddIngredient = () => {
               },
               '& .MuiInputBase-input': {
                 color: '#391F06',
-                fontFamily: 'Playfair Display',
+          
 
                 '&::placeholder': {
                   color: '#BFA980',
-                  fontFamily: 'Playfair Display',
+               
                   fontSize: 16,
                   opacity: 1,
                 },
@@ -80,7 +79,7 @@ const AddIngredient = () => {
       border: "1.5px solid #391F06",
       borderRadius: 2,
       color: "#391F06",
-      fontFamily: "Playfair Display",
+
     }}
     MenuProps={{
       PaperProps: {
@@ -90,7 +89,7 @@ const AddIngredient = () => {
           boxShadow: 3,
         
           "& .MuiMenuItem-root": {
-            fontFamily: "Playfair Display",
+  
             color: "#391F06",
             
             "&:hover": { backgroundColor: "#e6d2b7" },
@@ -115,7 +114,7 @@ const AddIngredient = () => {
                   key={u}
                   value={u}
                   sx={{
-                    fontFamily: 'Playfair Display',
+                   
                     color: '#391F06',
                     fontSize: 16,
                     background: '#f5e2cc',
@@ -165,11 +164,11 @@ const AddIngredient = () => {
               },
               '& .MuiInputBase-input': {
                 color: '#391F06',
-                fontFamily: 'Playfair Display',
+               
 
                 '&::placeholder': {
                   color: '#BFA980',
-                  fontFamily: 'Playfair Display',
+         
                   fontSize: 16,
                   opacity: 1,
                 },
@@ -183,7 +182,7 @@ const AddIngredient = () => {
       ))}
       <Button
         sx={{
-          fontFamily: 'Playfair Display',
+ 
           fontSize: 16,
           color: '#391F06',
           textTransform: 'none',

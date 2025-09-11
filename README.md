@@ -1,3 +1,17 @@
+### meeting notes 10/09/2025
+FE:
+    - pull theme từ nhánh dev
+    - gộp header tú với qanh lại (chung header và footer từ nhánh qanh/)
+    - cái của quỳnh anh làm ngắn lại
+    - chị Khuê sửa lại explore: bỏ trending, sort theo thời gian được tạo, chọn filter thì đc filter
+    - landing page thêm trending recipe dô giữa
+    - tạo layout cho các trang để dùng lại (DRY!!)
+    - thứ 7 11h: cafe 
+BE: 
+    - là gộp cái bảng comment với rating thành user rating á
+    - t7: xong backend hen, front end xong design
+
+
 # PanPal
 
 ## 1. Overview

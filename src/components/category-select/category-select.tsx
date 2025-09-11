@@ -27,7 +27,7 @@ export default function CategoryAutocomplete() {
             bgcolor: "#f5e2cc",
            
             "& .MuiAutocomplete-option": {
-              fontFamily: "Playfair Display",
+      
               color: "#391F06",
               "&[aria-selected='true']": {
                 backgroundColor: "#e6d2b7",
@@ -46,7 +46,7 @@ export default function CategoryAutocomplete() {
             key={option}
             label={option}
             sx={{
-              fontFamily: 'Playfair Display',
+          
               height: 28,
               display: 'flex',
               alignItems: 'center',
@@ -84,10 +84,10 @@ export default function CategoryAutocomplete() {
             },
             '& .MuiInputBase-input': {
               color: '#391F06',
-              fontFamily: 'Playfair Display',
+          
               '&::placeholder': {
                 color: '#BFA980',
-                fontFamily: 'Playfair Display',
+        
                 fontSize: 16,
                 opacity: 1,
               },

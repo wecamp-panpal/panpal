@@ -61,11 +61,11 @@ const AddStep = () =>{
               },
               '& .MuiInputBase-input': {
                 color: '#391F06',
-                fontFamily: 'Playfair Display',
+           
 
                 '&::placeholder': {
                   color: '#BFA980',
-                  fontFamily: 'Playfair Display',
+             
                   fontSize: 16,
                   opacity: 1,
                 },
@@ -78,7 +78,7 @@ const AddStep = () =>{
             ))}
             <Button
                     sx={{
-                      fontFamily: 'Playfair Display',
+                    
                       fontSize: 16,
                       color: '#391F06',
                       textTransform: 'none',

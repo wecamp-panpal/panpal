@@ -1,7 +1,9 @@
-import { AppBar, Box, Link, Toolbar, styled, Tooltip, IconButton } from '@mui/material';
+import { AppBar, Box, Link, Toolbar, styled, Tooltip, IconButton, Button } from '@mui/material';
 import { CircleUserRound, Settings } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SearchBar from '../search-bar/search-bar';
+import { useState } from 'react';
+import { getThemeColors } from "@/lib/muiTheme";
 
 interface NavBarProps {
   onSearch?: (query: string) => void;
@@ -27,8 +29,12 @@ const NavBarLink = styled(Link)(({ isActive }: { isActive?: boolean }) => ({
 }));
 
 const NavBar = ({ onSearch }: NavBarProps) => {
+  
+  const colors = getThemeColors();
+  
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const [isAuthenticate, setAuthenticate] = useState(true)
   return (
     <AppBar
       elevation={0}
@@ -108,7 +114,8 @@ const NavBar = ({ onSearch }: NavBarProps) => {
             gap: 6,
           }}
         >
-          <Tooltip title="User profile">
+          
+         {isAuthenticate ? ( <><Tooltip title="User profile">
             <IconButton>
               <CircleUserRound color="#EAC9A3" />
             </IconButton>
@@ -118,7 +125,55 @@ const NavBar = ({ onSearch }: NavBarProps) => {
             <IconButton>
               <Settings color="#EAC9A3" />
             </IconButton>
-          </Tooltip>
+          </Tooltip></>) :
+          ( 
+          <>
+          <Box
+          sx={{
+            display:'flex' ,
+            gap: 2
+          }}><Button 
+            variant="contained"
+            sx={{
+              backgroundColor: colors.background,
+              color: colors.primary,
+              border: `1px solid ${colors.background}`,
+              borderRadius: 0,
+              fontWeight: 500,
+              fontFamily: 'Montserrat',
+              textTransform: 'none',
+              padding: '3px 20px',
+              '&:hover': {
+                backgroundColor: colors.background,
+                opacity: 0.9,
+                
+              }
+            }}
+          >
+            Sign Up
+          </Button>
+          <Button 
+            variant="outlined"
+            sx={{
+              backgroundColor: 'transparent',
+              color: colors.background,
+              border: `1px solid ${colors.background}`,
+              borderRadius: 0,
+              fontWeight: 500,
+              fontFamily: 'Montserrat',
+              textTransform: 'none',
+              padding: '3px 20px',
+              '&:hover': {
+                backgroundColor: colors.background,
+                color: colors.primary,
+              }
+            }}
+          >
+            Log In
+          </Button>
+          </Box>
+          </>)
+           }
         </Box>
       </Toolbar>
     </AppBar>

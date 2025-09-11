@@ -4,8 +4,8 @@ import CategorySelect from '@/components/category-select/category-select';
 import AddIngredient from '@/components/add-ingredients/add-ingredient';
 import {
   CloudUpload as CloudUploadIcon,
-  Star as StarIcon,
-  AccountCircle as AccountCircleIcon,
+ 
+ 
 } from '@mui/icons-material';
 import { useState } from 'react';
 import AddStep from '@/components/add-step/add-step';
@@ -14,6 +14,7 @@ const AddRecipePage = () => {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [totalMinutes, setTotalMinutes] = useState(0);
+ 
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -26,18 +27,17 @@ const AddRecipePage = () => {
   return (
     <Box
       sx={{
-        fontFamily: 'Playfair Display',
-        marginLeft: '2rem',
-        paddingTop: '0.1rem',
-        marginRight: '2rem',
-    
+        marginLeft: '3rem',
+        paddingTop: '6rem',
+        marginRight: '3rem',
+        gap: 2,
       }}
     >
-      <h1 style={{ fontSize: 40, color: '#391F06' }}>Add New Recipe</h1>
-      <h3 style={{ fontSize: 20, color: '#391F06' }}>Basic Information</h3>
+      <h1 style={{ fontSize: 40, color: '#391F06', marginBottom: '1rem', fontWeight:600 }}>Add New Recipe</h1>
+      <h3 style={{ fontSize: 20, color: '#391F06', marginBottom: '0.5rem', fontWeight:600 }}>Basic Information</h3>
 
       <Box>
-        <h4 style={{ marginBottom: 10, color: '#391F06' }}>Title</h4>
+        <h4 style={{  color: '#391F06' }}>Title</h4>
         <TextField
           placeholder="Input your recipe name..."
           sx={{
@@ -64,23 +64,22 @@ const AddRecipePage = () => {
             },
             '& .MuiInputBase-input': {
               color: '#391F06',
-              fontFamily: 'Playfair Display',
 
               '&::placeholder': {
                 color: '#BFA980',
-                fontFamily: 'Playfair Display',
+
                 fontSize: 16,
                 opacity: 1,
               },
             },
           }}
         />
-        <h4 style={{ marginBottom: 10, color: '#391F06' }}>Description</h4>
+        <h4 style={{ color: '#391F06'}}>Description</h4>
+        <Box sx={{ mb: 3 }}>
+          <DescriptionEditor />
+        </Box>
 
-        <DescriptionEditor />
-
-        <h4 style={{ marginBottom: 10, color: '#391F06' }}> Recipe Picture</h4>
-
+        <h4 style={{ color: '#391F06' }}> Recipe Picture</h4>
         <Box
           sx={{
             height: 150,
@@ -89,6 +88,7 @@ const AddRecipePage = () => {
             textAlign: 'center',
             borderColor: '#391F06',
             pt: 2,
+            mb: 3,
           }}
         >
           <input
@@ -103,10 +103,8 @@ const AddRecipePage = () => {
             <IconButton component="span">
               <CloudUploadIcon fontSize="large" sx={{ color: '#391F06' }} />
             </IconButton>
-            <Typography sx={{ fontFamily: 'Playfair Display', color: '#391F06' }}>
-              Click to upload or drag and drop
-            </Typography>
-            <Typography variant="caption" sx={{ fontFamily: 'Playfair Display', color: '#391F06' }}>
+            <Typography sx={{ color: '#391F06' }}>Click to upload or drag and drop</Typography>
+            <Typography variant="caption" sx={{ color: '#391F06' }}>
               JPG, PNG, or GIF (max. 5MB)
             </Typography>
           </label>
@@ -126,7 +124,7 @@ const AddRecipePage = () => {
           </Grid>
         )}
       </Box>
-      <h3 style={{ fontSize: 20, color: '#391F06' }}>Recipe Information</h3>
+      <h3 style={{ fontSize: 20, color: '#391F06', marginBottom:10, fontWeight:600}}>Recipe Information</h3>
       <Box>
         <h4 style={{ marginBottom: 10, color: '#391F06' }}>Total Time (minutes)</h4>
         <TextField
@@ -157,11 +155,10 @@ const AddRecipePage = () => {
             },
             '& .MuiInputBase-input': {
               color: '#391F06',
-              fontFamily: 'Playfair Display',
 
               '&::placeholder': {
                 color: '#BFA980',
-                fontFamily: 'Playfair Display',
+
                 fontSize: 16,
                 opacity: 1,
               },
@@ -181,26 +178,31 @@ const AddRecipePage = () => {
           alignItems: 'center',
           justifyContent: 'center',
           mt: 2,
-          gap: 2
+          gap: 2,
         }}
       >
         <Button
-        sx={{
-          textTransform:'none',
-          background:'#391F06',
-          fontFamily:"Playfair Display",
-          color:"#F5E2CC",
-          width: 100
-        }}>Add Recipe</Button>
-         <Button sx={{
-          textTransform:'none',
-          color:'#391F06',
-          fontFamily:"Playfair Display",
-          background:"#F5E2CC",
-          border:1,
-          borderColor: '#391F06',
-           width: 100
-        }}>Cancel</Button>
+          sx={{
+            textTransform: 'none',
+            background: '#391F06',
+            color: '#F5E2CC',
+            width: 100,
+          }}
+        >
+          Add Recipe
+        </Button>
+        <Button
+          sx={{
+            textTransform: 'none',
+            color: '#391F06',
+            background: '#F5E2CC',
+            border: 1,
+            borderColor: '#391F06',
+            width: 100,
+          }}
+        >
+          Cancel
+        </Button>
       </Box>
     </Box>
   );

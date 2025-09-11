@@ -1,3 +1,15 @@
+#root {
+  width: 100%;
+  border: none;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
 .ProseMirror {
   border: none !important;
   box-shadow: none !important;

@@ -9,7 +9,7 @@ export default function HomeLayout() {
       <NavBar />
       <Box component="main" sx={{
           flexGrow: 1,
-          mt: '3.5rem',
+        
           pb: { xs: 4, md: 6 },          
           backgroundColor: '#f5e2cc',    
         }}>
