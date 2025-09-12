@@ -6,6 +6,8 @@ import { muiTheme } from "@/lib/muiTheme";
 import LandingPage from "@/pages/LandingPage";
 import './App.css';
 import ProfilePage from '@/pages/Profile';
+import ExploreRecipes from "@/pages/ExploreRecipes";
+import RecipeDetailPage from '@/pages/RecipeDetailPage';
 
 function App() {
   return (
@@ -13,8 +15,10 @@ function App() {
     <Routes>
       <Route element={<HomeLayout />}>
         <Route index element={<LandingPage />} />
+        <Route path="/explore" element={<ExploreRecipes />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/add-recipe" element={<AddRecipePage />} />
+        <Route path="/recipes/:id" element={<RecipeDetailPage />} />
       </Route>
     </Routes>
     </ThemeProvider>

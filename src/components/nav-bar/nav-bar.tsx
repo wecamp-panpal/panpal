@@ -113,7 +113,14 @@ const NavBar = ({ onSearch }: NavBarProps) => {
             <NavBarLink href="/add-recipe" isActive={pathname === '/add-recipe'}>
               Add Recipe
             </NavBarLink>
-            <SearchBar PlaceHolder="Search by dish, ingredient, or chef..." onSearch={onSearch} />
+            <SearchBar
+              PlaceHolder="Search by dish, ingredient, or chef..."
+              onSearch={(query) => {
+                if (query.trim()) {
+                  navigate(`/explore?q=${encodeURIComponent(query.trim())}`);
+                }
+              }}
+            />
           </Box>
         </Box>
         <Box
