@@ -119,16 +119,49 @@ export default function ExploreRecipes() {
       </Box>
 
       {totalPages > 1 && (
-        <Box sx={{ display: "flex", gap: 1, justifyContent: "center", mt: 3 }}>
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i}
-              className={`page-btn ${page === i + 1 ? "active" : ""}`}
-              onClick={() => setPage(i + 1)}
-            >
-              {i + 1}
-            </button>
-          ))}
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 4 }}>
+          {Array.from({ length: totalPages }).map((_, i) => {
+            const pageNum = i + 1;
+            const isActive = pageNum === page;
+
+            const shouldShow =
+              pageNum === 1 ||
+              pageNum === totalPages ||
+              Math.abs(pageNum - page) <= 1;
+
+            if (!shouldShow && pageNum !== 2 && pageNum !== totalPages - 1) {
+              if (
+                (pageNum === page - 2 && page > 4) ||
+                (pageNum === page + 2 && page < totalPages - 3)
+              ) {
+                return (
+                  <Typography key={pageNum} sx={{ px: 1 }}>
+                    ...
+                  </Typography>
+                );
+              }
+              return null;
+            }
+
+            return (
+              <button
+                key={pageNum}
+                onClick={() => setPage(pageNum)}
+                style={{
+                  padding: '6px 12px',
+                  border: isActive ? '2px solid #391F06' : '1px solid #ccc',
+                  backgroundColor: isActive ? '#391F06' : '#fff',
+                  color: isActive ? '#fff' : '#391F06',
+                  borderRadius: '6px',
+                  fontWeight: isActive ? 600 : 500,
+                  cursor: 'pointer',
+                  minWidth: 36,
+                }}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
         </Box>
       )}
     </Box>
