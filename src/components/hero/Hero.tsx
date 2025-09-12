@@ -45,7 +45,11 @@ const Hero = () => {
                   '&:hover': {
                     backgroundColor: colors.primary,
                     opacity: 0.9,
-                  }
+                  },
+                    '&:focus': {
+                    outline: 'none',
+                    boxShadow: 'none',
+                  },
                 }}
               >
                 Explore Recipe
@@ -67,7 +71,11 @@ const Hero = () => {
                     backgroundColor: 'transparent',
                     border: `2px solid ${colors.primary}`,
                     opacity: 0.8,
-                  }
+                  },
+                  '&:focus': {
+                    outline: 'none',
+                    boxShadow: 'none',
+                  },
                 }}
               >
                 Add Your Own

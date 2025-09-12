@@ -60,6 +60,11 @@ const SearchBar = ({ PlaceHolder, onSearch }: SearchBarProps) => {
             borderColor: '#EAC9A3',
             borderWidth: 2,
           },
+
+          '&:focus': {
+            outline: 'none',
+            boxShadow: 'none',
+          },
         },
         '& .MuiInputBase-input': {
           fontSize: { xs: 14, sm: 15, md: 16 },
@@ -72,6 +77,10 @@ const SearchBar = ({ PlaceHolder, onSearch }: SearchBarProps) => {
             letterSpacing: 0.5,
           },
           color: '#EAC9A3',
+          '&:focus': {
+            outline: 'none',
+            boxShadow: 'none',
+          },
         },
         '& .MuiOutlinedInput-notchedOutline': {
           borderColor: '#EAC9A3',

@@ -6,7 +6,6 @@ const FeaturedSection = () => {
 
   return (
     <section className="w-full">
-      {/* Nền be chạy hết viewport */}
       <Box
         sx={{
           backgroundColor: colors.accent, // Màu be
@@ -26,7 +25,6 @@ const FeaturedSection = () => {
         }}
       >
         <div className="relative">
-          {/* Ảnh pancake siêu to */}
           <img 
             src="/src/assets/pancake.png"
             alt="Pancake"
@@ -38,7 +36,6 @@ const FeaturedSection = () => {
             }}
           />
           
-          {/* Overlay content */}
           <Box
             sx={{
               position: 'absolute',
@@ -76,7 +73,11 @@ const FeaturedSection = () => {
                 '&:hover': {
                   backgroundColor: colors.primary,
                   opacity: 0.9,
-                }
+                },
+                '&:focus': {
+                  outline: 'none',
+                  boxShadow: 'none',
+                },
               }}
             >
               Register Now
