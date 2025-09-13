@@ -5,20 +5,10 @@ import {
 } from '@mui/material';
 import { Favorite as FavoriteIcon } from '@mui/icons-material';
 import RecipeCard from '../recipe-card/RecipeCard';
-
-interface Recipe {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-  cookTime: string;
-  difficulty: string;
-  rating: number;
-  category: string;
-}
+import type { UIRecipe } from '@/types/ui-recipe';
 
 interface FavoriteRecipesTabProps {
-  favoriteRecipes: Recipe[];
+  favoriteRecipes: UIRecipe[];
   onViewRecipe?: (recipeId: number) => void;
 }
 
@@ -60,8 +50,8 @@ const FavoriteRecipesTab: React.FC<FavoriteRecipesTabProps> = ({
             <RecipeCard
               key={recipe.id}
               recipe={recipe}
-              type="favorite"
-              onView={() => onViewRecipe?.(recipe.id)}
+              variant="public"
+              onClick={() => onViewRecipe?.(recipe.id)}
             />
           ))}
         </Box>

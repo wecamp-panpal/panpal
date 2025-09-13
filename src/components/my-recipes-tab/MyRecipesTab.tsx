@@ -6,20 +6,10 @@ import {
 } from '@mui/material';
 import { MenuBook as MenuBookIcon } from '@mui/icons-material';
 import RecipeCard from '../recipe-card/RecipeCard';
-
-interface Recipe {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-  cookTime: string;
-  difficulty: string;
-  rating: number;
-  category: string;
-}
+import type { UIRecipe } from '@/types/ui-recipe';
 
 interface MyRecipesTabProps {
-  myRecipes: Recipe[];
+  myRecipes: UIRecipe[];
   onAddNewRecipe?: () => void;
   onEditRecipe?: (recipeId: number) => void;
   onViewRecipe?: (recipeId: number) => void;
@@ -83,9 +73,8 @@ const MyRecipesTab: React.FC<MyRecipesTabProps> = ({
             <RecipeCard
               key={recipe.id}
               recipe={recipe}
-              type="my-recipe"
-              onEdit={() => onEditRecipe?.(recipe.id)}
-              onView={() => onViewRecipe?.(recipe.id)}
+              variant="public"
+              onClick={() => onViewRecipe?.(recipe.id)}
             />
           ))}
         </Box>
