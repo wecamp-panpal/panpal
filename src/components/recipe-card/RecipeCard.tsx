@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Card,
@@ -7,7 +7,9 @@ import {
   Button,
   Rating,
   CardMedia,
+  IconButton,
 } from '@mui/material';
+import { Favorite, FavoriteBorder } from '@mui/icons-material';
 
 interface Recipe {
   id: number;
@@ -29,11 +31,27 @@ interface RecipeCardProps {
   onEdit?: () => void;
   onView?: () => void;
   onClick?: () => void;
+  onToggleFavorite?: (recipeId: number) => void;
+  isFavorited?: boolean;
 }
 
-const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, type = 'my-recipe', variant = 'default', onEdit, onView, onClick }) => {
+const RecipeCard: React.FC<RecipeCardProps> = ({ 
+  recipe, 
+  type = 'my-recipe', 
+  variant = 'default', 
+  onEdit, 
+  onView, 
+  onClick, 
+  onToggleFavorite,
+  isFavorited = false 
+}) => {
   const isPublic = variant === 'public';
   const username = type === 'my-recipe' ? '@johndoe' : '@chef_master';
+
+  const handleLikeClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click when clicking like button
+    onToggleFavorite?.(recipe.id);
+  };
 
   const card = (
     <Card
@@ -68,6 +86,35 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, type = 'my-recipe', var
             aspectRatio: '1/1'
           }}
         />
+        {/* Like Button */}
+        <IconButton
+          onClick={handleLikeClick}
+          sx={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(4px)',
+            border: 'none',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 1)',
+              transform: 'scale(1.1)',
+            },
+            '&:focus': {
+              outline: 'none',
+              boxShadow: 'none',
+            },
+            transition: 'all 0.2s ease',
+            width: 40,
+            height: 40,
+          }}
+        >
+          {isFavorited ? (
+            <Favorite sx={{ color: '#dc3545', fontSize: 20 }} />
+          ) : (
+            <FavoriteBorder sx={{ color: '#8B6B47', fontSize: 20 }} />
+          )}
+        </IconButton>
       </Box>
 
       <CardContent sx={{ flexGrow: 1, p: 3, pb: 2 }}>
