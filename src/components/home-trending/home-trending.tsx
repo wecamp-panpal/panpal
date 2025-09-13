@@ -1,7 +1,6 @@
 import RecipeCard from '../recipe-card/RecipeCard';
 import { Typography, Box } from '@mui/material';
-import { listRecipes } from '@/services/recipes';
-import type { UIRecipe, UIRecipeCategory } from '@/types/ui-recipe';
+import type { UIRecipe } from '@/types/ui-recipe';
 
 const PAGE_SIZE = 24;
 

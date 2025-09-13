@@ -7,7 +7,7 @@ import { useState } from 'react';
 const LandingPage = () => {
   const [isAuthenticate, authenticate] = useState(false);
   return (
-    <div className="pt-16 sm:pt-18 lg:pt-20">
+    <div className="pt-10 sm:pt-8 lg:pt-10">
       <Hero />
       {isAuthenticate ? (
         <>

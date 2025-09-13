@@ -9,7 +9,7 @@ export default function HomeLayout() {
       <NavBar />
       <Box component="main" sx={{
           flexGrow: 1,
-          pt: { xs: '3rem', sm: '3.8rem' }, // Add padding to account for fixed navbar
+          pt: { xs: '2.8rem', sm: '3.5rem' }, // Add padding to account for fixed navbar
           pb: { xs: 0, md: 0 },          
           backgroundColor: '#f5e2cc',    
         }}>

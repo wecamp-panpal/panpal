@@ -90,7 +90,7 @@ const AddStep = () =>{
                     startIcon={<Add sx={{ color: '#391F06', '&:hover': { color: '#fff' } }} />}
                     onClick={addSteps}
                   >
-                    Add ingredient
+                    Add Step
                   </Button>
             
         </Box>

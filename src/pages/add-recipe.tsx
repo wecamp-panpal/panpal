@@ -5,7 +5,6 @@ import AddIngredient from '@/components/add-ingredients/add-ingredient';
 import {
   CloudUpload as CloudUploadIcon,
  
- 
 } from '@mui/icons-material';
 import { useState } from 'react';
 import AddStep from '@/components/add-step/add-step';
@@ -28,16 +27,16 @@ const AddRecipePage = () => {
     <Box
       sx={{
         marginLeft: '3rem',
-        paddingTop: '6rem',
+        paddingTop: '2rem',
         marginRight: '3rem',
         gap: 2,
       }}
     >
-      <h1 style={{ fontSize: 40, color: '#391F06', marginBottom: '1rem', fontWeight:600 }}>Add New Recipe</h1>
-      <h3 style={{ fontSize: 20, color: '#391F06', marginBottom: '0.5rem', fontWeight:600 }}>Basic Information</h3>
+      <h1 style={{ fontSize: 40, color: '#391F06', marginBottom: '1rem', fontWeight: "medium" }}>Add New Recipe</h1>
+      <Typography sx={{ fontSize: 25, color: '#391F06', marginBottom: '0.5rem', fontWeight: "medium", fontFamily:"Montserrat" }}>Basic Information</Typography>
 
       <Box>
-        <h4 style={{  color: '#391F06' }}>Title</h4>
+        <Typography sx={{  color: '#391F06', fontFamily:"Montserrat" , fontWeight: "medium" }}>Title</Typography>
         <TextField
           placeholder="Input your recipe name..."
           sx={{
@@ -74,12 +73,12 @@ const AddRecipePage = () => {
             },
           }}
         />
-        <h4 style={{ color: '#391F06'}}>Description</h4>
+        <Typography sx={{ color: '#391F06', fontFamily:"Montserrat", fontWeight:"medium"}}>Description</Typography>
         <Box sx={{ mb: 3 }}>
           <DescriptionEditor />
         </Box>
 
-        <h4 style={{ color: '#391F06' }}> Recipe Picture</h4>
+        <Typography sx={{ color: '#391F06' , fontFamily:"Montserrat", fontWeight:"medium"}}> Recipe Picture</Typography>
         <Box
           sx={{
             height: 150,
@@ -124,9 +123,9 @@ const AddRecipePage = () => {
           </Grid>
         )}
       </Box>
-      <h3 style={{ fontSize: 20, color: '#391F06', marginBottom:10, fontWeight:600}}>Recipe Information</h3>
+      <Typography sx={{ fontSize: 25, color: '#391F06', marginBottom: '0.5rem', fontWeight:"medium", fontFamily:"Montserrat"}}>Recipe Information</Typography>
       <Box>
-        <h4 style={{ marginBottom: 10, color: '#391F06' }}>Total Time (minutes)</h4>
+        <Typography sx={{  color: '#391F06', fontFamily:"Montserrat", fontWeight:"medium" }}>Total Time (minutes)</Typography>
         <TextField
           type="number"
           value={totalMinutes}
@@ -165,11 +164,11 @@ const AddRecipePage = () => {
             },
           }}
         />
-        <h4 style={{ marginBottom: 10, color: '#391F06' }}>Category</h4>
+        <Typography sx={{  color: '#391F06' , fontFamily:"Montserrat", fontWeight:"medium"}}>Category</Typography>
         <CategorySelect />
-        <h4 style={{ marginBottom: 10, color: '#391F06' }}>Ingredient</h4>
+        <Typography sx={{  color: '#391F06', fontFamily:"Montserrat", fontWeight:"medium" }}>Ingredient</Typography>
         <AddIngredient />
-        <h4 style={{ marginBottom: 10, color: '#391F06' }}>Steps</h4>
+        <Typography sx={{  color: '#391F06' , fontFamily:"Montserrat", fontWeight:"medium"}}>Steps</Typography>
         <AddStep />
       </Box>
       <Box
@@ -177,7 +176,7 @@ const AddRecipePage = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          mt: 2,
+          mb: 4,
           gap: 2,
         }}
       >
