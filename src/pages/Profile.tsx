@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Paper,
+  Box,
 } from '@mui/material';
 import { muiTheme } from '@/lib/muiTheme';
 import UserDashboardHeader from '@/components/user-dashboard-header/UserDashboardHeader';
@@ -9,6 +11,8 @@ import TabPanel from '@/components/tab-panel/TabPanel';
 import ProfileInfo from '@/components/profile-info/ProfileInfo';
 import MyRecipesTab from '@/components/my-recipes-tab/MyRecipesTab';
 import FavoriteRecipesTab from '@/components/favorite-recipes-tab/FavoriteRecipesTab';
+import type { UIRecipe } from '@/types/ui-recipe';
+import { listRecipes } from '@/services/recipes';
 
 interface UserProfile {
   fullName: string;
@@ -17,18 +21,8 @@ interface UserProfile {
   avatar: string;
 }
 
-interface Recipe {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-  cookTime: string;
-  difficulty: string;
-  rating: number;
-  category: string;
-}
-
 const Profile = () => {
+  const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [emailError, setEmailError] = useState('');
@@ -41,7 +35,6 @@ const Profile = () => {
 
   const [editedProfile, setEditedProfile] = useState<UserProfile>(userProfile);
 
-  // List of countries for dropdown
   const countries = [
     'Afghanistan', 'Albania', 'Algeria', 'Argentina', 'Armenia', 'Australia',
     'Austria', 'Azerbaijan', 'Bahrain', 'Bangladesh', 'Belarus', 'Belgium',
@@ -59,82 +52,41 @@ const Profile = () => {
     'Uruguay', 'Venezuela', 'Vietnam'
   ];
 
-  // Mock user's own recipes data
-  const [myRecipes] = useState<Recipe[]>([
-    {
-      id: 1,
-      title: 'My Special Pancakes',
-      description: 'Fluffy pancakes with a secret ingredient that makes them extra delicious',
-      image: '/src/assets/ramen.jpg',
-      cookTime: '25 mins',
-      difficulty: 'Easy',
-      rating: 4.7,
-      category: 'Breakfast'
-    },
-    {
-      id: 2,
-      title: 'Homemade Ramen Bowl',
-      description: 'Rich and flavorful ramen with homemade broth and fresh toppings',
-      image: '/src/assets/ramen.jpg',
-      cookTime: '2 hours',
-      difficulty: 'Hard',
-      rating: 4.9,
-      category: 'Asian'
-    },
-    {
-      id: 3,
-      title: 'Garden Fresh Salad',
-      description: 'Crispy vegetables from my garden with homemade vinaigrette',
-      image: '/src/assets/ramen.jpg',
-      cookTime: '10 mins',
-      difficulty: 'Easy',
-      rating: 4.3,
-      category: 'Healthy'
-    }
-  ]);
+  const [myRecipes, setMyRecipes] = useState<UIRecipe[]>([]);
+  const [favoriteRecipes, setFavoriteRecipes] = useState<UIRecipe[]>([]);
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
 
-  const [favoriteRecipes] = useState<Recipe[]>([
-    {
-      id: 1,
-      title: 'Spaghetti Carbonara',
-      description: 'Classic Italian pasta dish with eggs, cheese, and pancetta',
-      image: '/src/assets/ramen.jpg',
-      cookTime: '20 mins',
-      difficulty: 'Medium',
-      rating: 4.5,
-      category: 'Italian'
-    },
-    {
-      id: 2,
-      title: 'Chicken Teriyaki',
-      description: 'Tender chicken glazed with sweet teriyaki sauce',
-      image: '/src/assets/ramen.jpg',
-      cookTime: '30 mins',
-      difficulty: 'Easy',
-      rating: 4.8,
-      category: 'Japanese'
-    },
-    {
-      id: 3,
-      title: 'Vegetable Stir Fry',
-      description: 'Fresh vegetables stir-fried with aromatic spices',
-      image: '/src/assets/ramen.jpg',
-      cookTime: '15 mins',
-      difficulty: 'Easy',
-      rating: 4.2,
-      category: 'Asian'
-    },
-    {
-      id: 4,
-      title: 'Homemade Bread',
-      description: 'Freshly baked artisan bread with crispy crust',
-      image: '/src/assets/ramen.jpg',
-      cookTime: '3 hours',
-      difficulty: 'Hard',
-      rating: 4.6,
-      category: 'Bakery'
-    }
-  ]);
+  useEffect(() => {
+    const loadRecipes = async () => {
+      try {
+        const { data: allRecipes } = await listRecipes(1, 60, {});
+        
+        const userRecipes = allRecipes.slice(0, 6);
+        setMyRecipes(userRecipes);
+        
+        const favoritesFromStorage = allRecipes.slice(10, 18);
+        setFavoriteRecipes(favoritesFromStorage);
+      } catch (error) {
+        console.error('Error loading recipes:', error);
+      }
+    };
+
+    // Load favorites from localStorage
+    const loadFavorites = () => {
+      const saved = localStorage.getItem('favorite-recipes');
+      if (saved) {
+        try {
+          const favoriteIds = JSON.parse(saved);
+          setFavorites(new Set(favoriteIds));
+        } catch (error) {
+          console.error('Error loading favorites:', error);
+        }
+      }
+    };
+
+    loadRecipes();
+    loadFavorites();
+  }, []);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -214,8 +166,23 @@ const Profile = () => {
   };
 
   const handleViewRecipe = (recipeId: number) => {
-    console.log('View recipe:', recipeId);
-    // Navigate to recipe detail page
+    navigate(`/recipes/${recipeId}`);
+  };
+
+  const handleToggleFavorite = (recipeId: number) => {
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      if (next.has(recipeId)) {
+        next.delete(recipeId);
+        console.log('Removed from favorites');
+      } else {
+        next.add(recipeId);
+        console.log('Added to favorites');
+      }
+      // Save to localStorage
+      localStorage.setItem('favorite-recipes', JSON.stringify(Array.from(next)));
+      return next;
+    });
   };
 
   return (
@@ -242,16 +209,18 @@ const Profile = () => {
 
         {/* Tab Panels */}
         <TabPanel value={tabValue} index={0}>
-          <ProfileInfo
-            userProfile={userProfile}
-            editedProfile={editedProfile}
-            isEditing={isEditing}
-            emailError={emailError}
-            countries={countries}
-            onInputChange={handleInputChange}
-            onCountryChange={handleCountryChange}
-            onAvatarChange={handleAvatarChange}
-          />
+          <Box sx={{ p: 3 }}>
+            <ProfileInfo
+              userProfile={userProfile}
+              editedProfile={editedProfile}
+              isEditing={isEditing}
+              emailError={emailError}
+              countries={countries}
+              onInputChange={handleInputChange}
+              onCountryChange={handleCountryChange}
+              onAvatarChange={handleAvatarChange}
+            />
+          </Box>
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
@@ -260,6 +229,8 @@ const Profile = () => {
             onAddNewRecipe={handleAddNewRecipe}
             onEditRecipe={handleEditRecipe}
             onViewRecipe={handleViewRecipe}
+            onToggleFavorite={handleToggleFavorite}
+            favorites={favorites}
           />
         </TabPanel>
 
@@ -267,6 +238,8 @@ const Profile = () => {
           <FavoriteRecipesTab
             favoriteRecipes={favoriteRecipes}
             onViewRecipe={handleViewRecipe}
+            onToggleFavorite={handleToggleFavorite}
+            favorites={favorites}
           />
         </TabPanel>
       </Paper>

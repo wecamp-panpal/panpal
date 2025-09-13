@@ -7,7 +7,7 @@ import FeaturedSection from "@/components/feature-section/FeaturedSection";
 const LandingPage = () => {
   return (
    
-      <div className="pt-16 sm:pt-18 lg:pt-20">
+      <div className="pt-10 sm:pt-8 lg:pt-10">
         <Hero />
         <Community />
         <FeaturedSection />

@@ -6,23 +6,15 @@ import {
 } from '@mui/material';
 import { MenuBook as MenuBookIcon } from '@mui/icons-material';
 import RecipeCard from '../recipe-card/RecipeCard';
-
-interface Recipe {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-  cookTime: string;
-  difficulty: string;
-  rating: number;
-  category: string;
-}
+import type { UIRecipe } from '@/types/ui-recipe';
 
 interface MyRecipesTabProps {
-  myRecipes: Recipe[];
+  myRecipes: UIRecipe[];
   onAddNewRecipe?: () => void;
   onEditRecipe?: (recipeId: number) => void;
   onViewRecipe?: (recipeId: number) => void;
+  onToggleFavorite?: (recipeId: number) => void;
+  favorites?: Set<number>;
 }
 
 const MyRecipesTab: React.FC<MyRecipesTabProps> = ({
@@ -30,6 +22,8 @@ const MyRecipesTab: React.FC<MyRecipesTabProps> = ({
   onAddNewRecipe,
   onEditRecipe,
   onViewRecipe,
+  onToggleFavorite,
+  favorites = new Set(),
 }) => {
   return (
     <Box sx={{ px: 4, pb: 4 }}>
@@ -83,9 +77,10 @@ const MyRecipesTab: React.FC<MyRecipesTabProps> = ({
             <RecipeCard
               key={recipe.id}
               recipe={recipe}
-              type="my-recipe"
-              onEdit={() => onEditRecipe?.(recipe.id)}
-              onView={() => onViewRecipe?.(recipe.id)}
+              variant="public"
+              onClick={() => onViewRecipe?.(recipe.id)}
+              onToggleFavorite={onToggleFavorite}
+              isFavorited={favorites.has(recipe.id)}
             />
           ))}
         </Box>

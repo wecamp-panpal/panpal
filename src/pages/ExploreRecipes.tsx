@@ -16,6 +16,7 @@ export default function ExploreRecipes() {
   const [total, setTotal] = useState(0);
   const [recipes, setRecipes] = useState<UIRecipe[]>([]);
   const [loading, setLoading] = useState(false);
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -57,6 +58,35 @@ export default function ExploreRecipes() {
     });
     setPage(1);
   };
+
+  const handleToggleFavorite = (recipeId: number) => {
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      if (next.has(recipeId)) {
+        next.delete(recipeId);
+        console.log('Removed from favorites');
+      } else {
+        next.add(recipeId);
+        console.log('Added to favorites');
+      }
+      // Save to localStorage
+      localStorage.setItem('favorite-recipes', JSON.stringify(Array.from(next)));
+      return next;
+    });
+  };
+
+  // Load favorites from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('favorite-recipes');
+    if (saved) {
+      try {
+        const favoriteIds = JSON.parse(saved);
+        setFavorites(new Set(favoriteIds));
+      } catch (error) {
+        console.error('Error loading favorites:', error);
+      }
+    }
+  }, []);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -114,6 +144,8 @@ export default function ExploreRecipes() {
                 recipe={r}
                 variant="public"
                 onClick={() => navigate(`/recipes/${r.id}`)}
+                onToggleFavorite={handleToggleFavorite}
+                isFavorited={favorites.has(r.id)}
               />
             ))}
       </Box>
