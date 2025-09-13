@@ -174,11 +174,20 @@ const Hero = () => {
                   </Button>
                 </div>
               </div>
-              <div className="hidden lg:block absolutepointer-events-none">
+              {/* Hình ảnh ở layer dưới - chỉ hiện trên desktop */}
+              <div className="hidden lg:block absolute top-0 right-0 w-full h-full pointer-events-none">
+                {/* Vegetables - bự hơn và ở góc trên phải */}
                 <img
-                  src="hero-login.svg"
-                  alt="food"
-                  className="absolute right-10 mt-100 -bottom-32 w-120 h-auto "
+                  src="/src/assets/vegetables.png"
+                  alt="Vegetables"
+                  className="absolute -bottom-12 -right-64 w-[1052px] h-auto z-10"
+                />
+
+                {/* Bread - bự hơn và ở góc dưới phải */}
+                <img
+                  src="/src/assets/bread.png"
+                  alt="Bread"
+                  className="absolute -bottom-32 -right-64 w-[815px] h-auto z-20"
                 />
               </div>
             </>

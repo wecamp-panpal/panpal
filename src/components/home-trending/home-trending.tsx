@@ -1,19 +1,18 @@
-import RecipeCard from '../recipes/recipe-card';
-import { Typography } from '@mui/material';
+import RecipeCard from '../recipe-card/RecipeCard';
+import { Typography, Box } from '@mui/material';
+import { listRecipes } from '@/services/recipes';
+import type { UIRecipe, UIRecipeCategory } from '@/types/ui-recipe';
+
+const PAGE_SIZE = 24;
+
+import { useState } from 'react';
+import { makeMockRecipes } from '@/mocks/recipes.mock';
+import { useNavigate } from 'react-router-dom';
 
 const Trending = () => {
-  const recipes = [
-    {
-      id: 1,
-      title: 'Spaghetti Carbonara',
-      image: '/images/spaghetti.jpg',
-      author: 'Anna',
-      rating: 4.8,
-    },
-    { id: 2, title: 'Pho Bo', image: '/images/pho.jpg', author: 'Minh', rating: 4.9 },
-    { id: 3, title: 'Sushi', image: '/images/sushi.jpg', author: 'Yuki', rating: 4.7 },
-    { id: 4, title: 'Tacos', image: '/images/tacos.jpg', author: 'Carlos', rating: 4.6 },
-  ];
+  const [recipes, setRecipes] = useState<UIRecipe[]>(makeMockRecipes(8));
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <section className="w-full pt-16 pb-32 px-8 relative">
@@ -30,26 +29,40 @@ const Trending = () => {
             Trending
           </Typography>
         </div>
-        <div className="flex flex-wrap gap-8 mt-4">
-          {recipes.map(recipe => (
-            <RecipeCard
-              key={recipe.id}
-              recipe={{
-                id: recipe.id,
-                title: recipe.title,
-                description: '', 
-                image: recipe.image,
-                cookTime: '', 
-                cooking_time: '',
-                difficulty: '', 
-                rating: recipe.rating,
-                category: '', 
-                author_name: recipe.author,
-              }}
-              variant="public"
-            />
-          ))}
-        </div>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: 2,
+            mt: 4,
+          }}
+        >
+           {loading ? (
+            Array.from({ length: PAGE_SIZE }).map((_, i) => (
+              <Box
+                key={i}
+                sx={{
+                  height: 280,
+                  borderRadius: 2,
+                  bgcolor: 'rgba(0,0,0,.05)',
+                }}
+              />
+            ))
+          ) : recipes.length === 0 ? (
+            <Box sx={{ py: 6, textAlign: 'center', gridColumn: '1 / -1' }}>
+              <Typography>No recipes found.</Typography>
+            </Box>
+          ) : (
+            recipes.map(r => (
+              <RecipeCard
+                key={r.id}
+                recipe={r}
+                variant="public"
+                onClick={() => navigate(`/recipes/${r.id}`)}
+              />
+            ))
+          )}
+        </Box>
         <Typography
           variant="h2"
           sx={{
@@ -60,26 +73,40 @@ const Trending = () => {
         >
           Based on your Favourite
         </Typography>
-        <div className="flex flex-wrap gap-8 mt-4">
-          {recipes.map(recipe => (
-            <RecipeCard
-              key={recipe.id}
-              recipe={{
-                id: recipe.id,
-                title: recipe.title,
-                description: '', 
-                image: recipe.image,
-                cookTime: '', 
-                cooking_time: '',
-                difficulty: '', 
-                rating: recipe.rating,
-                category: '', 
-                author_name: recipe.author,
-              }}
-              variant="public"
-            />
-          ))}
-        </div>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: 2,
+            mt: 4,
+          }}
+        >
+          {loading ? (
+            Array.from({ length: PAGE_SIZE }).map((_, i) => (
+              <Box
+                key={i}
+                sx={{
+                  height: 280,
+                  borderRadius: 2,
+                  bgcolor: 'rgba(0,0,0,.05)',
+                }}
+              />
+            ))
+          ) : recipes.length === 0 ? (
+            <Box sx={{ py: 6, textAlign: 'center', gridColumn: '1 / -1' }}>
+              <Typography>No recipes found.</Typography>
+            </Box>
+          ) : (
+            recipes.map(r => (
+              <RecipeCard
+                key={r.id}
+                recipe={r}
+                variant="public"
+                onClick={() => navigate(`/recipes/${r.id}`)}
+              />
+            ))
+          )}
+        </Box>
       </div>
     </section>
   );

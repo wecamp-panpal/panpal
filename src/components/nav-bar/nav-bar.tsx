@@ -26,6 +26,10 @@ const NavBarLink = styled(Link)(({ isActive }: { isActive?: boolean }) => ({
     fontWeight: '600',
     borderBottom: '2px solid #F5E2CC',
   },
+  '&:focus': {
+    outline: 'none',
+    boxShadow: 'none',
+  },
 }));
 
 const NavBar = ({ onSearch }: NavBarProps) => {
@@ -81,6 +85,10 @@ const NavBar = ({ onSearch }: NavBarProps) => {
               gap: 1,
               textDecoration: 'none',
               cursor: 'pointer',
+              '&:focus': {
+                outline: 'none',
+                boxShadow: 'none',
+              },
             }}
             onClick={e => {
               e.preventDefault();
@@ -105,7 +113,14 @@ const NavBar = ({ onSearch }: NavBarProps) => {
             <NavBarLink href="/add-recipe" isActive={pathname === '/add-recipe'}>
               Add Recipe
             </NavBarLink>
-            <SearchBar PlaceHolder="Search by dish, ingredient, or chef..." onSearch={onSearch} />
+            <SearchBar
+              PlaceHolder="Search by dish, ingredient, or chef..."
+              onSearch={(query) => {
+                if (query.trim()) {
+                  navigate(`/explore?q=${encodeURIComponent(query.trim())}`);
+                }
+              }}
+            />
           </Box>
         </Box>
         <Box
@@ -116,13 +131,28 @@ const NavBar = ({ onSearch }: NavBarProps) => {
         >
           
          {isAuthenticate ? ( <><Tooltip title="User profile">
-            <IconButton>
+            <IconButton 
+              onClick={() => navigate('/profile')}
+              sx={{
+                '&:focus': {
+                  outline: 'none',
+                  boxShadow: 'none',
+                },
+              }}
+            >
               <CircleUserRound color="#EAC9A3" />
             </IconButton>
           </Tooltip>
 
           <Tooltip title="Settings">
-            <IconButton>
+            <IconButton
+              sx={{
+                '&:focus': {
+                  outline: 'none',
+                  boxShadow: 'none',
+                },
+              }}
+            >
               <Settings color="#EAC9A3" />
             </IconButton>
           </Tooltip></>) :
@@ -132,7 +162,7 @@ const NavBar = ({ onSearch }: NavBarProps) => {
           sx={{
             display:'flex' ,
             gap: 2
-          }}><Button 
+          }}>            <Button 
             variant="contained"
             sx={{
               backgroundColor: colors.background,
@@ -147,7 +177,11 @@ const NavBar = ({ onSearch }: NavBarProps) => {
                 backgroundColor: colors.background,
                 opacity: 0.9,
                 
-              }
+              },
+              '&:focus': {
+                outline: 'none',
+                boxShadow: 'none',
+              },
             }}
           >
             Sign Up
@@ -166,7 +200,11 @@ const NavBar = ({ onSearch }: NavBarProps) => {
               '&:hover': {
                 backgroundColor: colors.background,
                 color: colors.primary,
-              }
+              },
+              '&:focus': {
+                outline: 'none',
+                boxShadow: 'none',
+              },
             }}
           >
             Log In
