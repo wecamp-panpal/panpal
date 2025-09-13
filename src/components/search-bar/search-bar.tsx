@@ -68,12 +68,12 @@ const SearchBar = ({ PlaceHolder, onSearch }: SearchBarProps) => {
         },
         '& .MuiInputBase-input': {
           fontSize: { xs: 14, sm: 15, md: 16 },
-          fontFamily: 'Playfair Display',
+          fontFamily: 'Montserrat',
           '&::placeholder': {
             color: '#EAC9A3',
             opacity: 1,
             fontSize:15,
-            fontFamily: 'Popins',
+            fontFamily: 'Montserrat',
             letterSpacing: 0.5,
           },
           color: '#EAC9A3',

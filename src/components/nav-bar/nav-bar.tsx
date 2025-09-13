@@ -13,18 +13,18 @@ const NavBarLink = styled(Link)(({ isActive }: { isActive?: boolean }) => ({
   underline: 'hover',
   fontSize: 15,
   lineHeight: '24px',
-  textDecoration: isActive ? 'underline' : 'none',
+  textDecoration: 'none',
   textUnderlineOffset: 3,
   color: isActive ? '#F5E2CC' : '#FFFFFF',
   cursor: 'pointer',
   '&:hover': {
     color: '#F5E2CC',
-    textDecoration: 'underline',
+    textDecoration: 'none',
   },
   '&.Mui-selected': {
     color: '#F5E2CC',
     fontWeight: '600',
-    borderBottom: '2px solid #F5E2CC',
+    borderBottom: 'none',
   },
   '&:focus': {
     outline: 'none',
@@ -60,7 +60,7 @@ const NavBar = ({ onSearch }: NavBarProps) => {
       <Toolbar
         disableGutters
         sx={{
-          paddingX: 2,
+          paddingX: { xs: 3, sm: 4, md: 6, lg: 8 },
           justifyContent: 'center',
           flexWrap: 'wrap',
           minHeight: 'unset !important',

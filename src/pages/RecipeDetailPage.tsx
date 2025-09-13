@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Box, Typography, Rating, Skeleton } from "@mui/material";
+import { Box, Typography, Rating, Skeleton, IconButton, Tooltip } from "@mui/material";
+import { Favorite, FavoriteBorder } from "@mui/icons-material";
 import type { UIRecipe } from "@/types/ui-recipe";
 import { makeMockRecipes } from "@/mocks/recipes.mock";
 import { makeMockComments, type MockComment } from "@/mocks/comments.mock";
@@ -13,6 +14,7 @@ export default function RecipeDetailPage() {
   const [newComment, setNewComment] = useState("");
   const [newRating, setNewRating] = useState<number | null>(null);
   const [newImage, setNewImage] = useState<File | null>(null);
+  const [isFavorited, setIsFavorited] = useState(false);
 
   useEffect(() => {
     const recipeId = Number(id);
@@ -20,6 +22,18 @@ export default function RecipeDetailPage() {
     const found = all.find((r) => r.id === recipeId);
     setRecipe(found || null);
     setComments(makeMockComments(id ?? ''));
+    
+    // Load favorites from localStorage and check if this recipe is favorited
+    const saved = localStorage.getItem('favorite-recipes');
+    if (saved) {
+      try {
+        const favoriteIds = JSON.parse(saved);
+        setIsFavorited(favoriteIds.includes(recipeId));
+      } catch (error) {
+        console.error('Error loading favorites:', error);
+      }
+    }
+    
     setLoading(false);
   }, [id]);
 
@@ -44,6 +58,37 @@ export default function RecipeDetailPage() {
     setNewImage(null);
   };
 
+  const handleToggleFavorite = () => {
+    const recipeId = Number(id);
+    setIsFavorited(!isFavorited);
+    
+    // Update localStorage
+    const saved = localStorage.getItem('favorite-recipes');
+    let favoriteIds: number[] = [];
+    
+    if (saved) {
+      try {
+        favoriteIds = JSON.parse(saved);
+      } catch (error) {
+        console.error('Error parsing favorites:', error);
+      }
+    }
+    
+    if (!isFavorited) {
+      // Add to favorites
+      if (!favoriteIds.includes(recipeId)) {
+        favoriteIds.push(recipeId);
+        console.log('Added to favorites:', recipe?.title);
+      }
+    } else {
+      // Remove from favorites
+      favoriteIds = favoriteIds.filter(id => id !== recipeId);
+      console.log('Removed from favorites:', recipe?.title);
+    }
+    
+    localStorage.setItem('favorite-recipes', JSON.stringify(favoriteIds));
+  };
+
   if (loading) {
     return <Skeleton variant="rectangular" height={400} />;
   }
@@ -58,12 +103,55 @@ export default function RecipeDetailPage() {
 
   return (
     <Box sx={{ maxWidth: 900, mx: "auto", px: 2, py: 4 }}>
-      <Typography
-        variant="h3"
-        sx={{ fontFamily: '"Playfair Display", serif', mb: 2 }}
-      >
-        {recipe.title}
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <Typography
+          variant="h3"
+          sx={{ fontFamily: '"Playfair Display", serif', flex: 1 }}
+        >
+          {recipe.title}
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {isFavorited && (
+            <Typography
+              sx={{
+                fontFamily: 'Montserrat',
+                fontSize: '1rem',
+                color: '#dc3545',
+                fontWeight: 500,
+              }}
+            >
+              Added to favorites
+            </Typography>
+          )}
+          <Tooltip title={isFavorited ? "Remove from favorites" : "Add to favorites"}>
+            <IconButton
+              onClick={handleToggleFavorite}
+              sx={{
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                backdropFilter: 'blur(4px)',
+                border: 'none',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 1)',
+                  transform: 'scale(1.1)',
+                },
+                '&:focus': {
+                  outline: 'none',
+                  boxShadow: 'none',
+                },
+                transition: 'all 0.2s ease',
+                width: 56,
+                height: 56,
+              }}
+            >
+              {isFavorited ? (
+                <Favorite sx={{ color: '#dc3545', fontSize: 28 }} />
+              ) : (
+                <FavoriteBorder sx={{ color: '#8B6B47', fontSize: 28 }} />
+              )}
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
 
       <Box
         component="img"

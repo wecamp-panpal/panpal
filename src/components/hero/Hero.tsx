@@ -5,7 +5,7 @@ const Hero = () => {
   const colors = getThemeColors();
 
   return (
-    <section className="w-full py-26 px-8 relative">
+    <section className="w-full py-24 px-8 relative">
       <div className="max-w-7xl mx-auto py-5">
         <div className="flex items-center justify-start relative">
           <div className="max-w-2xl relative z-30 text-center lg:text-left w-full lg:w-auto">

@@ -54,6 +54,7 @@ const Profile = () => {
 
   const [myRecipes, setMyRecipes] = useState<UIRecipe[]>([]);
   const [favoriteRecipes, setFavoriteRecipes] = useState<UIRecipe[]>([]);
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     const loadRecipes = async () => {
@@ -63,14 +64,28 @@ const Profile = () => {
         const userRecipes = allRecipes.slice(0, 6);
         setMyRecipes(userRecipes);
         
-        const favorites = allRecipes.slice(10, 18);
-        setFavoriteRecipes(favorites);
+        const favoritesFromStorage = allRecipes.slice(10, 18);
+        setFavoriteRecipes(favoritesFromStorage);
       } catch (error) {
         console.error('Error loading recipes:', error);
       }
     };
 
+    // Load favorites from localStorage
+    const loadFavorites = () => {
+      const saved = localStorage.getItem('favorite-recipes');
+      if (saved) {
+        try {
+          const favoriteIds = JSON.parse(saved);
+          setFavorites(new Set(favoriteIds));
+        } catch (error) {
+          console.error('Error loading favorites:', error);
+        }
+      }
+    };
+
     loadRecipes();
+    loadFavorites();
   }, []);
 
   const handleEdit = () => {
@@ -154,6 +169,22 @@ const Profile = () => {
     navigate(`/recipes/${recipeId}`);
   };
 
+  const handleToggleFavorite = (recipeId: number) => {
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      if (next.has(recipeId)) {
+        next.delete(recipeId);
+        console.log('Removed from favorites');
+      } else {
+        next.add(recipeId);
+        console.log('Added to favorites');
+      }
+      // Save to localStorage
+      localStorage.setItem('favorite-recipes', JSON.stringify(Array.from(next)));
+      return next;
+    });
+  };
+
   return (
     <Container maxWidth="lg" sx={{ py: 2, my: 6 }}>
       <Paper 
@@ -198,6 +229,8 @@ const Profile = () => {
             onAddNewRecipe={handleAddNewRecipe}
             onEditRecipe={handleEditRecipe}
             onViewRecipe={handleViewRecipe}
+            onToggleFavorite={handleToggleFavorite}
+            favorites={favorites}
           />
         </TabPanel>
 
@@ -205,6 +238,8 @@ const Profile = () => {
           <FavoriteRecipesTab
             favoriteRecipes={favoriteRecipes}
             onViewRecipe={handleViewRecipe}
+            onToggleFavorite={handleToggleFavorite}
+            favorites={favorites}
           />
         </TabPanel>
       </Paper>

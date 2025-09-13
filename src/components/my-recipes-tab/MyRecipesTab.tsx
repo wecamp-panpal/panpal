@@ -13,6 +13,8 @@ interface MyRecipesTabProps {
   onAddNewRecipe?: () => void;
   onEditRecipe?: (recipeId: number) => void;
   onViewRecipe?: (recipeId: number) => void;
+  onToggleFavorite?: (recipeId: number) => void;
+  favorites?: Set<number>;
 }
 
 const MyRecipesTab: React.FC<MyRecipesTabProps> = ({
@@ -20,6 +22,8 @@ const MyRecipesTab: React.FC<MyRecipesTabProps> = ({
   onAddNewRecipe,
   onEditRecipe,
   onViewRecipe,
+  onToggleFavorite,
+  favorites = new Set(),
 }) => {
   return (
     <Box sx={{ px: 4, pb: 4 }}>
@@ -75,6 +79,8 @@ const MyRecipesTab: React.FC<MyRecipesTabProps> = ({
               recipe={recipe}
               variant="public"
               onClick={() => onViewRecipe?.(recipe.id)}
+              onToggleFavorite={onToggleFavorite}
+              isFavorited={favorites.has(recipe.id)}
             />
           ))}
         </Box>
