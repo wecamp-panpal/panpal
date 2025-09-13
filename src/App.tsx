@@ -21,9 +21,10 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/add-recipe" element={<AddRecipePage />} />
           <Route path="/recipes/:id" element={<RecipeDetailPage />} />
-          <Route path="/sign-in" element={<SignInPage />} />
+
           <Route path="/sign-up" element={<SignUpPage />} />
         </Route>
+        <Route path="/sign-in" element={<SignInPage />} />
       </Routes>
     </ThemeProvider>
   );

@@ -13,8 +13,6 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate, Link } from 'react-router-dom';
 import NavBar from '../components/nav-bar/nav-bar';
-import Footer from '../components/footer/footer';
-
 const SignInPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,25 +41,45 @@ const SignInPage: React.FC = () => {
   return (
     <Box display="flex" flexDirection="column" minHeight="100vh">
       <NavBar />
-      <Box flex={1} display="flex" justifyContent="center" alignItems="center">
-        <Paper elevation={3} sx={{ p: 4, minWidth: 350 }}>
+      <Box
+        flex={1}
+        display="flex"
+        justifyContent="right"
+        alignItems="center"
+        padding="5rem"
+        color={'#FDF2E5'}
+      >
+        <Box display={'flex'} justifyContent="center" alignItems="center" padding="2rem">
+          <img src="public/signin_img.svg" alt="Panpal Logo" width={800} height={800} />
+        </Box>
+        <Paper
+          elevation={3}
+          sx={{ p: 4, minWidth: 450, borderRadius: 7, backgroundColor: '#FDF2E5' }}
+        >
           <Stack spacing={3}>
-            <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="flex-start"
+              color={'#FDF2E5'}
+            >
               <Typography fontWeight={400} fontSize="0.9375rem" color="#000">
-                Welcome Back to Recipe Club
+                Welcome to Panpal
               </Typography>
-              <Typography fontSize="0.875rem" display="flex" gap="0.3125rem">
-                No Account?{' '}
+              <Box>
+                <Typography fontSize="0.875rem" display="block" mb={0.5} color="#000">
+                  No Account?
+                </Typography>
                 <Link
                   to="/signup"
-                  style={{ color: '#FF885B', textDecoration: 'underline', fontWeight: 600 }}
+                  style={{ color: '#FF885B', textDecoration: 'underline', fontWeight: 400 }}
                 >
                   Sign up
                 </Link>
-              </Typography>
+              </Box>
             </Box>
             <Typography fontSize="1.875rem" fontWeight={600}>
-              Sign in
+              Log In
             </Typography>
             <Typography color="#737373">Please enter your credentials to sign in</Typography>
             <TextField
@@ -71,14 +89,31 @@ const SignInPage: React.FC = () => {
               fullWidth
               value={email}
               onChange={e => setEmail(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <span role="img" aria-label="user">
-                      👤
-                    </span>
-                  </InputAdornment>
-                ),
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: '#F5E2CC !important',
+                  '&.Mui-disabled': {
+                    backgroundColor: '#F5E2CC !important',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'rgba(0, 0, 0, 0.23)',
+                  },
+                  '& fieldset': {
+                    borderColor: 'rgba(0, 0, 0, 0.23)',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'rgba(0, 0, 0, 0.23)',
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: 'rgba(0, 0, 0, 0.6)',
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: 'rgba(0, 0, 0, 0.6)',
+                },
+                '& .MuiOutlinedInput-input': {
+                  color: '#000',
+                },
               }}
             />
             <Tooltip
@@ -96,14 +131,34 @@ const SignInPage: React.FC = () => {
                 fullWidth
                 value={password}
                 onChange={e => setPassword(e.target.value)}
+                autoComplete="false"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: '#F5E2CC !important',
+                    '&.Mui-disabled': {
+                      backgroundColor: '#F5E2CC !important',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'rgba(0, 0, 0, 0.23)',
+                    },
+                    '& fieldset': {
+                      borderColor: 'rgba(0, 0, 0, 0.23)',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'rgba(0, 0, 0, 0.23)',
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: 'rgba(0, 0, 0, 0.6)',
+                  },
+                  '& .MuiInputLabel-root.Mui-focused': {
+                    color: 'rgba(0, 0, 0, 0.6)',
+                  },
+                  '& .MuiOutlinedInput-input': {
+                    color: '#000',
+                  },
+                }}
                 InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <span role="img" aria-label="lock">
-                        🔒
-                      </span>
-                    </InputAdornment>
-                  ),
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton onClick={() => setShowPassword(!showPassword)}>
@@ -133,13 +188,13 @@ const SignInPage: React.FC = () => {
             <Button
               type="submit"
               variant="contained"
-              style={{ background: '#FF885B' }}
+              style={{ background: 'primary', borderRadius: '12px' }}
               disabled={loading}
               onClick={handleSignIn}
             >
-              <Box display="flex" alignItems="center" gap="0.3125rem">
+              <Box display="flex" alignItems="center" gap="0.3125rem" padding={'0.5rem 1rem'}>
                 <Typography fontWeight={600} color="#fffff6">
-                  Sign in
+                  Log in
                 </Typography>
               </Box>
             </Button>
@@ -158,21 +213,20 @@ const SignInPage: React.FC = () => {
             <Button
               type="button"
               variant="contained"
-              style={{ background: '#FF885B' }}
+              style={{ background: '#836751', borderRadius: '12px' }}
               disabled={loading}
               onClick={handleSignInWithGoogle}
             >
-              <Box display="flex" alignItems="center" gap={2}>
-                <img src="/icons/google-logo.svg" width={24} height={24} alt="google-logo" />
+              <Box display="flex" alignItems="center" gap={2} padding={'0.5rem 1rem'}>
+                <img src="/public/google-logo.svg" width={24} height={24} alt="google-logo" />
                 <Typography fontWeight={600} color="#fffff6">
-                  Sign in with Google
+                  Log in with Google
                 </Typography>
               </Box>
             </Button>
           </Stack>
         </Paper>
       </Box>
-      <Footer />
     </Box>
   );
 };
