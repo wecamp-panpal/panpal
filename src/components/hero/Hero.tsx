@@ -1,18 +1,20 @@
 import { getThemeColors } from '@/lib/muiTheme';
 import { Button, Typography } from '@mui/material';
-import { useState } from 'react';
 
-const Hero = () => {
+interface HeroProps {
+  isAuthenticated: boolean;
+}
+
+const Hero = ({ isAuthenticated }: HeroProps) => {
   const colors = getThemeColors();
-  const [isAuthenticate, setAuthenticate] = useState(false);
 
   return (
     <section className="w-full py-24 px-8 relative">
       <div className="max-w-7xl mx-auto py-5">
         <div className="flex items-center justify-start relative">
-          {isAuthenticate ? (
+          {isAuthenticated ? (
             <>
-              <div className="max-w-2xl relative z-30 text-center lg:text-left w-full lg:w-auto">
+              <div className="max-w-2xl relative z-30 text-center lg:text-left w-full lg:w-auto" style={{ paddingTop: '80px' }}>
                 <Typography
                   variant="h1"
                   sx={{
@@ -21,7 +23,17 @@ const Hero = () => {
                     lineHeight: 'normal',
                   }}
                 >
-                  Recipes from culinary enthusiasts all over the world!
+                  Welcome Back,
+                </Typography>
+                <Typography
+                  variant="h1"
+                  sx={{
+                    fontSize: '70px',
+                    fontWeight: 400,
+                    lineHeight: 'normal',
+                  }}
+                >
+                  User
                 </Typography>
                 <Typography
                   sx={{
@@ -107,17 +119,7 @@ const Hero = () => {
                     lineHeight: 'normal',
                   }}
                 >
-                  Welcome Back,
-                </Typography>
-                <Typography
-                  variant="h1"
-                  sx={{
-                    fontSize: '70px',
-                    fontWeight: 400,
-                    lineHeight: 'normal',
-                  }}
-                >
-                  User
+                  Recipes from culinary enthusiasts all over the world!
                 </Typography>
 
                 <Typography
@@ -182,8 +184,6 @@ const Hero = () => {
                   alt="Vegetables"
                   className="absolute -bottom-12 -right-64 w-[1052px] h-auto z-10"
                 />
-
-                {/* Bread - bự hơn và ở góc dưới phải */}
                 <img
                   src="/src/assets/bread.png"
                   alt="Bread"

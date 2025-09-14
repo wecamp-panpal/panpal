@@ -11,24 +11,23 @@ import ProfilePage from '@/pages/Profile';
 import ExploreRecipes from '@/pages/ExploreRecipes';
 import RecipeDetailPage from '@/pages/RecipeDetailPage';
 import SignUpPage from '@/pages/SignUpPage';
-
 function App() {
   return (
     <ThemeProvider theme={muiTheme}>
-      <Routes>
-        <Route element={<HomeLayout />}>
-          <Route index element={<LandingPage />} />
-          <Route path="/explore" element={<ExploreRecipes />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/add-recipe" element={<AddRecipePage />} />
-          <Route path="/recipes/:id" element={<RecipeDetailPage />} />
-          <Route path="/recipes/:id/edit" element={<EditRecipePage />} />
+        <Routes>
+          <Route element={<HomeLayout />}>
+            <Route index element={<LandingPage />} />
+            <Route path="/explore" element={<ExploreRecipes />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/add-recipe" element={<AddRecipePage />} />
+            <Route path="/recipes/:id" element={<RecipeDetailPage />} />
+            <Route path="/recipes/:id/edit" element={<EditRecipePage />} />
 
-          <Route path="/sign-up" element={<SignUpPage />} />
-        </Route>
-        <Route path="/sign-in" element={<SignInPage />} />
-      </Routes>
-    </ThemeProvider>
+            <Route path="/sign-up" element={<SignUpPage />} />
+          </Route>
+          <Route path="/sign-in" element={<SignInPage />} />
+        </Routes>
+      </ThemeProvider>
   );
 }
 

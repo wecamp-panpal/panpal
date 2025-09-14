@@ -37,7 +37,7 @@ const NavBar = ({ onSearch }: NavBarProps) => {
 
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const [isAuthenticate, setAuthenticate] = useState(true);
+  const [isAuthenticate, setAuthenticate] = useState(false);
   if (pathname === '/sign-in' || pathname === '/sign-up') {
     return (
       <AppBar
