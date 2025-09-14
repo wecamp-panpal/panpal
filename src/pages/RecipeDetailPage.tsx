@@ -1,7 +1,7 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Box, Typography, Rating, Skeleton, IconButton, Tooltip } from "@mui/material";
-import { Favorite, FavoriteBorder } from "@mui/icons-material";
+import { Box, Typography, Rating, Skeleton, IconButton, Tooltip, Button } from "@mui/material";
+import { Favorite, FavoriteBorder, Edit } from "@mui/icons-material";
 import type { UIRecipe } from "@/types/ui-recipe";
 import { makeMockRecipes } from "@/mocks/recipes.mock";
 import { makeMockComments, type MockComment } from "@/mocks/comments.mock";
@@ -10,6 +10,8 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 
 export default function RecipeDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [recipe, setRecipe] = useState<UIRecipe | null>(null);
   const [comments, setComments] = useState<MockComment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,11 +20,33 @@ export default function RecipeDetailPage() {
   const [newImage, setNewImage] = useState<File | null>(null);
   const [isFavorited, setIsFavorited] = useState(false);
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
+  const [isEditedVersion, setIsEditedVersion] = useState(false);
+
+  const currentUser = "Chef A"; 
 
   useEffect(() => {
     const recipeId = Number(id);
     const all = makeMockRecipes(60);
-    const found = all.find((r) => r.id === recipeId);
+    let found = all.find((r) => r.id === recipeId);
+    
+    // Check if there's an edited version in localStorage
+    const editedRecipesData = localStorage.getItem('edited-recipes');
+    if (editedRecipesData) {
+      try {
+        const editedRecipes = JSON.parse(editedRecipesData);
+        if (editedRecipes[recipeId]) {
+          // Use the edited version if it exists
+          console.log('Original recipe image:', found?.image);
+          found = editedRecipes[recipeId];
+          console.log('Edited recipe image:', found?.image);
+          setIsEditedVersion(true);
+          console.log('Loading edited recipe from localStorage:', found);
+        }
+      } catch (error) {
+        console.error('Error loading edited recipes:', error);
+      }
+    }
+    
     setRecipe(found || null);
     setComments(makeMockComments(id ?? ''));
     
@@ -38,7 +62,7 @@ export default function RecipeDetailPage() {
     }
     
     setLoading(false);
-  }, [id]);
+  }, [id, location.search]); // Also depend on location.search to trigger reload when updated
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +116,13 @@ export default function RecipeDetailPage() {
     localStorage.setItem('favorite-recipes', JSON.stringify(favoriteIds));
   };
 
+  const handleEditRecipe = () => {
+    navigate(`/recipes/${id}/edit`);
+  };
+
+  // Check if current user owns this recipe
+  const isOwner = recipe?.author_name === currentUser;
+
   if (loading) {
     return <Skeleton variant="rectangular" height={400} />;
   }
@@ -107,12 +138,30 @@ export default function RecipeDetailPage() {
   return (
     <Box sx={{ maxWidth: 900, mx: "auto", px: 2, py: 4 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        <Typography
-          variant="h3"
-          sx={{ fontFamily: '"Playfair Display", serif', flex: 1 }}
-        >
-          {recipe.title}
-        </Typography>
+        <Box sx={{ flex: 1 }}>
+          <Typography
+            variant="h3"
+            sx={{ fontFamily: '"Playfair Display", serif' }}
+          >
+            {recipe.title}
+          </Typography>
+          {isEditedVersion && (
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#2e7d32',
+                fontFamily: 'Montserrat',
+                fontWeight: 500,
+                mt: 0.5,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5
+              }}
+            >
+              This recipe has been edited
+            </Typography>
+          )}
+        </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           {isFavorited && (
             <Typography
@@ -126,6 +175,40 @@ export default function RecipeDetailPage() {
               Added to favorites
             </Typography>
           )}
+          
+          {/* Show edit button only if user owns this recipe */}
+          {isOwner && (
+            <Tooltip title="Edit Recipe">
+              <Button
+                onClick={handleEditRecipe}
+                startIcon={<Edit />}
+                sx={{
+                  backgroundColor: 'primary.main',
+                  color: 'secondary.main',
+                  borderRadius: 2,
+                  px: 2,
+                  py: 1,
+                  fontFamily: 'Montserrat',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  '&:hover': {
+                    backgroundColor: 'secondary.main',
+                    color: 'primary.main',
+                    transform: 'scale(1.05)',
+                  },
+                  '&:focus': {
+                    outline: 'none',
+                    boxShadow: 'none',
+                  },
+                  transition: 'all 0.2s ease',
+                  mr: 1,
+                }}
+              >
+                Edit Recipe
+              </Button>
+            </Tooltip>
+          )}
+          
           <Tooltip title={isFavorited ? "Remove from favorites" : "Add to favorites"}>
             <IconButton
               onClick={handleToggleFavorite}
@@ -193,9 +276,16 @@ export default function RecipeDetailPage() {
         <strong>Cook Time:</strong> {recipe.cooking_time}
       </Typography>
 
-      <Typography variant="body1" sx={{ mb: 3 }}>
-        {recipe.description}
-      </Typography>
+      <Box 
+        sx={{ 
+          mb: 3,
+          '& p': { margin: 0, mb: 1 },
+          '& h1, & h2, & h3': { mb: 1 },
+          '& ul, & ol': { mb: 1, pl: 2 },
+          fontFamily: 'Montserrat'
+        }}
+        dangerouslySetInnerHTML={{ __html: recipe.description }}
+      />
 
       <Typography variant="h5" sx={{ mt: 4, mb: 1 }}>
         Ingredients

@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 import SignInPage from '@/pages/SignInPage';
 import AddRecipePage from './pages/add-recipe';
+import EditRecipePage from './pages/EditRecipePage';
 import HomeLayout from './layouts/home-layout';
 import { ThemeProvider } from '@mui/material/styles';
 import { muiTheme } from '@/lib/muiTheme';
@@ -21,6 +22,7 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/add-recipe" element={<AddRecipePage />} />
           <Route path="/recipes/:id" element={<RecipeDetailPage />} />
+          <Route path="/recipes/:id/edit" element={<EditRecipePage />} />
 
           <Route path="/sign-up" element={<SignUpPage />} />
         </Route>

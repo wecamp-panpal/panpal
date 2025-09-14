@@ -1,15 +1,53 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, TextField, IconButton, Button, FormControl, Select, MenuItem } from '@mui/material';
 import { Add, Delete } from '@mui/icons-material';
 
-const AddIngredient = () => {
-  const [ingredients, setIngredients] = useState([{ qty: '', unit: '', item: '' }]);
+interface AddIngredientProps {
+  initialIngredients?: { name: string; quantity: string }[];
+  onChange?: (ingredients: { name: string; quantity: string }[]) => void;
+}
+
+const AddIngredient = ({ initialIngredients, onChange }: AddIngredientProps) => {
+  const [ingredients, setIngredients] = useState(() => {
+    if (initialIngredients && initialIngredients.length > 0) {
+      return initialIngredients.map(ing => {
+        // Parse quantity and unit from "2 cups" format
+        const parts = ing.quantity.split(' ');
+        const qty = parts[0] || '';
+        const unit = parts.slice(1).join(' ') || '';
+        return { qty, unit, item: ing.name };
+      });
+    }
+    return [{ qty: '', unit: '', item: '' }];
+  });
   const units = ['g', 'kg', 'ml', 'l', 'tsp', 'cup', 'pcs'];
+
+  // Update ingredients when initialIngredients prop changes
+  useEffect(() => {
+    if (initialIngredients && initialIngredients.length > 0) {
+      const parsedIngredients = initialIngredients.map(ing => {
+        const parts = ing.quantity.split(' ');
+        const qty = parts[0] || '';
+        const unit = parts.slice(1).join(' ') || '';
+        return { qty, unit, item: ing.name };
+      });
+      setIngredients(parsedIngredients);
+    }
+  }, [initialIngredients]);
 
   const handleChange = (i: number, field: string, value: string) => {
     const updated = [...ingredients];
     (updated[i] as any)[field] = value;
     setIngredients(updated);
+    
+    // Call onChange with formatted data
+    const formatted = updated
+      .filter(ing => ing.item.trim())
+      .map(ing => ({
+        name: ing.item,
+        quantity: `${ing.qty} ${ing.unit}`.trim()
+      }));
+    onChange?.(formatted);
   };
 
   const addIngredient = () => {
@@ -19,6 +57,15 @@ const AddIngredient = () => {
   const removeIngredient = (i: number) => {
     const updated = ingredients.filter((_, index) => index !== i);
     setIngredients(updated.length ? updated : [{ qty: '', unit: '', item: '' }]);
+    
+    // Call onChange with updated data
+    const formatted = updated
+      .filter(ing => ing.item.trim())
+      .map(ing => ({
+        name: ing.item,
+        quantity: `${ing.qty} ${ing.unit}`.trim()
+      }));
+    onChange?.(formatted);
   };
 
   return (
@@ -27,7 +74,7 @@ const AddIngredient = () => {
         <Box key={i} sx={{ display: 'flex', gap: 1, mb: 1, rowGap: 0 }}>
           <TextField
             value={ingredient.qty}
-            onChange={e => handleChange(i, 'quantity', e.target.value)}
+            onChange={e => handleChange(i, 'qty', e.target.value)}
             placeholder='qty'
             sx={{
               width: 100,

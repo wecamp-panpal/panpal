@@ -1,27 +1,80 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, TextField, IconButton, Button, Typography, Chip } from '@mui/material';
 import { Add, Delete, Close } from '@mui/icons-material';
 
-const AddStep = () => {
-  const [steps, setSteps] = useState<string[]>(['']);
-  const [stepsFiles, setStepsFiles] = useState<(File | null)[]>([null]);
+interface AddStepProps {
+  initialSteps?: { step_number: number; instruction: string; image_url?: string }[];
+  onChange?: (steps: { step_number: number; instruction: string; image_url?: string }[]) => void;
+}
+
+const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
+  const [steps, setSteps] = useState<string[]>(() => {
+    if (initialSteps && initialSteps.length > 0) {
+      return initialSteps.map(step => step.instruction);
+    }
+    return [''];
+  });
+  const [stepsFiles, setStepsFiles] = useState<(File | null)[]>(() => {
+    if (initialSteps && initialSteps.length > 0) {
+      return initialSteps.map(() => null); // Files will be null for existing steps
+    }
+    return [null];
+  });
+  const [existingImages, setExistingImages] = useState<(string | null)[]>(() => {
+    if (initialSteps && initialSteps.length > 0) {
+      return initialSteps.map(step => step.image_url || null);
+    }
+    return [null];
+  });
+
+  // Update steps when initialSteps prop changes
+  useEffect(() => {
+    if (initialSteps && initialSteps.length > 0) {
+      setSteps(initialSteps.map(step => step.instruction));
+      setStepsFiles(initialSteps.map(() => null));
+      setExistingImages(initialSteps.map(step => step.image_url || null));
+    }
+  }, [initialSteps]);
 
   const addSteps = () => {
     setSteps(prev => [...prev, '']);
     setStepsFiles(prev => [...prev, null]);
+    setExistingImages(prev => [...prev, null]);
   };
 
   const deleteStep = (i: number) => {
     const newSteps = steps.filter((_, idx) => idx !== i);
     const newFiles = stepsFiles.filter((_, idx) => idx !== i);
+    const newImages = existingImages.filter((_, idx) => idx !== i);
     setSteps(newSteps.length ? newSteps : ['']);
     setStepsFiles(newFiles.length ? newFiles : [null]);
+    setExistingImages(newImages.length ? newImages : [null]);
+    
+    // Call onChange with updated data
+    const formatted = newSteps
+      .filter(s => s.trim())
+      .map((instruction, idx) => ({
+        step_number: idx + 1,
+        instruction: instruction.trim(),
+        image_url: newImages[idx] || undefined
+      }));
+    onChange?.(formatted);
   };
 
   const handleChange = (i: number, step: string) => {
     const update = [...steps];
     update[i] = step;
     setSteps(update);
+    
+    // Call onChange with formatted data
+    const formatted = update
+      .filter(s => s.trim())
+      .map((instruction, idx) => ({
+        step_number: idx + 1,
+        instruction: instruction.trim(),
+        image_url: existingImages[idx] || undefined
+      }));
+    onChange?.(formatted);
   };
 
   const handleFileChange = (i: number, event: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,6 +85,24 @@ const AddStep = () => {
       copy[i] = chosen;
       return copy;
     });
+    
+    // Update existing images with file URL for preview
+    setExistingImages(prev => {
+      const copy = [...prev];
+      copy[i] = URL.createObjectURL(chosen);
+      return copy;
+    });
+    
+    // Call onChange to notify parent
+    const formatted = steps
+      .filter(s => s.trim())
+      .map((instruction, idx) => ({
+        step_number: idx + 1,
+        instruction: instruction.trim(),
+        image_url: idx === i ? URL.createObjectURL(chosen) : existingImages[idx] || undefined
+      }));
+    onChange?.(formatted);
+    
     event.target.value = '';
   };
 
@@ -41,6 +112,22 @@ const AddStep = () => {
       copy[i] = null;
       return copy;
     });
+    
+    setExistingImages(prev => {
+      const copy = [...prev];
+      copy[i] = null;
+      return copy;
+    });
+    
+    // Call onChange to notify parent
+    const formatted = steps
+      .filter(s => s.trim())
+      .map((instruction, idx) => ({
+        step_number: idx + 1,
+        instruction: instruction.trim(),
+        image_url: idx === i ? undefined : existingImages[idx] || undefined
+      }));
+    onChange?.(formatted);
   };
 
   return (
@@ -92,7 +179,7 @@ const AddStep = () => {
                     overflow: 'hidden',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: file ? 'flex-start' : 'center',
+                    justifyContent: (file || existingImages[i]) ? 'flex-start' : 'center',
                     '&:hover': { backgroundColor: '#f0e4d3' },
                   }}
                 >
@@ -108,6 +195,30 @@ const AddStep = () => {
                     >
                       {file.name}
                     </Typography>
+                  ) : existingImages[i] ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: '#391F06',
+                          maxWidth: '70%',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        📷 Step image
+                      </Typography>
+                      <IconButton 
+                        size="small" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          removeFile(i);
+                        }}
+                        sx={{ p: 0.25 }}
+                      >
+                        <Close sx={{ fontSize: 16, color: '#8c7a55' }} />
+                      </IconButton>
+                    </Box>
                   ) : (
                     <Typography variant="body2" sx={{ color: '#8c7a55' }}>
                       choose image for step
