@@ -37,9 +37,9 @@ export function makeMockRecipes(count = 60): UIRecipeWithMeta[] {
         { name: "Milk", quantity: "1 cup" },
       ],
       steps: [
-        { step_number: 1, instruction: "Mix all dry ingredients." },
+        { step_number: 1, instruction: "Mix all dry ingredients.", image_url: `https://picsum.photos/seed/step-${i + 1}-1/600/400` },
         { step_number: 2, instruction: "Add wet ingredients and stir well." },
-        { step_number: 3, instruction: "Bake at 180°C for 25 minutes." },
+        { step_number: 3, instruction: "Bake at 180°C for 25 minutes.", image_url: `https://picsum.photos/seed/step-${i + 1}-3/600/400` },
       ],
     });
   }

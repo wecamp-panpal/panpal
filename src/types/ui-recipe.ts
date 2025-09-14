@@ -13,5 +13,5 @@ export interface UIRecipe {
   rating_count: number;
   category: UIRecipeCategory;
   ingredients: { name: string; quantity: string }[];
-  steps: { step_number: number; instruction: string }[];
+  steps: { step_number: number; instruction: string; image_url?: string;}[];
 }

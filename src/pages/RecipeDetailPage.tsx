@@ -5,6 +5,8 @@ import { Favorite, FavoriteBorder } from "@mui/icons-material";
 import type { UIRecipe } from "@/types/ui-recipe";
 import { makeMockRecipes } from "@/mocks/recipes.mock";
 import { makeMockComments, type MockComment } from "@/mocks/comments.mock";
+import Collapse from "@mui/material/Collapse";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 export default function RecipeDetailPage() {
   const { id } = useParams();
@@ -15,6 +17,7 @@ export default function RecipeDetailPage() {
   const [newRating, setNewRating] = useState<number | null>(null);
   const [newImage, setNewImage] = useState<File | null>(null);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [expandedStep, setExpandedStep] = useState<number | null>(null);
 
   useEffect(() => {
     const recipeId = Number(id);
@@ -212,10 +215,48 @@ export default function RecipeDetailPage() {
       </Typography>
       <Box component="ol" sx={{ pl: 3 }}>
         {recipe.steps.map((step) => (
-          <li key={step.step_number}>
-            <Typography variant="body2" sx={{ mb: 1 }}>
-              {step.instruction}
-            </Typography>
+          <li key={step.step_number} style={{ marginBottom: '1rem' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2">{step.instruction}</Typography>
+              {step.image_url && (
+                <IconButton
+                  size="small"
+                  onClick={() =>
+                    setExpandedStep((prev) =>
+                      prev === step.step_number ? null : step.step_number
+                    )
+                  }
+                  sx={{ color: '#8B6B47' }}
+                >
+                  {expandedStep === step.step_number ? (
+                    <ChevronUp size={18} />
+                  ) : (
+                    <ChevronDown size={18} />
+                  )}
+                </IconButton>
+              )}
+            </Box>
+
+            {step.image_url && (
+              <Collapse in={expandedStep === step.step_number}>
+                <Box sx={{ display: 'block', textAlign: 'left' }}>
+                  <Box
+                    component="img"
+                    src={step.image_url}
+                    alt={`Step ${step.step_number} image`}
+                    sx={{
+                      mt: 1,
+                      maxHeight: 300,
+                      width: 'auto',
+                      height: 'auto',
+                      objectFit: 'contain',
+                      display: 'block',
+                      margin: '0 !important',
+                    }}
+                  />
+                </Box>
+              </Collapse>
+            )}
           </li>
         ))}
       </Box>
