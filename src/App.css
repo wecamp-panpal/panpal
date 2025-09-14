@@ -14,13 +14,13 @@
   border: none !important;
   box-shadow: none !important;
   outline: none !important;
-  font-family: 'Playfair Display', Poppins, system-ui, sans-serif !important;
+  font-family: 'Montserrat', Montserrat, system-ui, sans-serif !important;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   color: #BFA980;
-  font-family: 'Playfair Display', Poppins, system-ui, sans-serif;
+  font-family: 'Montserrat', Montserrat, system-ui, sans-serif;
   opacity: 0.7;
   font-size: 1.1rem;
 }

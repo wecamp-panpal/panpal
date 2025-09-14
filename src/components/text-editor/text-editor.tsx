@@ -96,9 +96,9 @@ export default function DescriptionEditor({ value = '', onChange }: Props) {
     <Box
       sx={{
         background: '#f5e2cc',
-        border: '1.5px solid #391F06',
+        border: '1.5px solid',
+        borderColor: 'secondary.main',
         borderRadius: 2,
-
         overflow: 'hidden',
       }}
     >
@@ -283,9 +283,9 @@ export default function DescriptionEditor({ value = '', onChange }: Props) {
         editor={editor}
         style={{
           minHeight: 240,
-          padding: '6px 16px 16px 16px', 
+          padding: '6px 16px 16px 16px',
           color: '#391F06',
-          fontFamily: 'Playfair Display, Poppins, system-ui, sans-serif',
+          fontFamily: 'Montserrat, system-ui, sans-serif',
           outline: 'none',
           background: '#f5e2cc',
         }}

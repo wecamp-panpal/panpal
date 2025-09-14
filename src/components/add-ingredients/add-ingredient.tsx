@@ -1,13 +1,5 @@
 import { useState } from 'react';
-import {
-  Box,
-  TextField,
-  IconButton,
-  Button,
-  FormControl,
-  Select,
-  MenuItem,
-} from '@mui/material';
+import { Box, TextField, IconButton, Button, FormControl, Select, MenuItem } from '@mui/material';
 import { Add, Delete } from '@mui/icons-material';
 
 const AddIngredient = () => {
@@ -32,37 +24,36 @@ const AddIngredient = () => {
   return (
     <Box>
       {ingredients.map((ingredient, i) => (
-        <Box key={i} sx={{ display: 'flex', gap: 1, mb: 1 }}>
+        <Box key={i} sx={{ display: 'flex', gap: 1, mb: 1, rowGap: 0 }}>
           <TextField
             value={ingredient.qty}
-            onChange={e => handleChange(i, 'qty', e.target.value)}
+            onChange={e => handleChange(i, 'quantity', e.target.value)}
+            placeholder='qty'
             sx={{
               width: 100,
-              paddingBottom: 2,
+
               justifyContent: 'center',
               '& .MuiInputBase-root': {
                 borderRadius: 2,
               },
               '& .MuiOutlinedInput-root': {
-                border: '1.5px solid #391F06',
                 boxShadow: 'none',
                 '& fieldset': {
-                  borderColor: 'transparent',
+                  borderColor: 'secondary.main',
                 },
                 '&:hover fieldset': {
-                  borderColor: 'transparent',
+                  borderColor: 'primary.main',
                 },
                 '&.Mui-focused fieldset': {
-                  borderColor: 'transparent',
+                  borderColor: 'primary.main',
                 },
               },
               '& .MuiInputBase-input': {
                 color: '#391F06',
-          
 
                 '&::placeholder': {
                   color: '#BFA980',
-               
+
                   fontSize: 16,
                   opacity: 1,
                 },
@@ -73,63 +64,61 @@ const AddIngredient = () => {
             <Select
               value={ingredient.unit}
               onChange={e => handleChange(i, 'unit', e.target.value)}
-               sx={{
-      
-      "& .MuiOutlinedInput-notchedOutline": { border: "none" },
-      border: "1.5px solid #391F06",
-      borderRadius: 2,
-      color: "#391F06",
+              sx={{
+                '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                border: '1.5px solid',
+                borderColor: 'secondary.main',
+                borderRadius: 2,
+                color: '#391F06',
+              }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    bgcolor: '#f5e2cc',
+                    border: '1px solid',
+                    borderColor: 'secondary.main',
+                    boxShadow: 3,
 
-    }}
-    MenuProps={{
-      PaperProps: {
-        sx: {
-          bgcolor: "#f5e2cc",
-          border: "1px solid #391F06",
-          boxShadow: 3,
-        
-          "& .MuiMenuItem-root": {
-  
-            color: "#391F06",
-            
-            "&:hover": { backgroundColor: "#e6d2b7" },
-        
-            "&.Mui-focusVisible": { backgroundColor: "#f0d9b5" },
-      
-            "&.Mui-selected": {
-              backgroundColor: "#e6d2b7 !important",
-              color: "#391F06",
-            },
-     
-            "&.Mui-selected.Mui-focusVisible": {
-              backgroundColor: "#d8c2a5 !important",
-            },
-          },
-        },
-      },
-    }}
+                    '& .MuiMenuItem-root': {
+                      color: '#391F06',
+
+                      '&:hover': { backgroundColor: '#e6d2b7' },
+
+                      '&.Mui-focusVisible': { backgroundColor: '#f0d9b5' },
+
+                      '&.Mui-selected': {
+                        backgroundColor: '#e6d2b7 !important',
+                        color: '#391F06',
+                      },
+
+                      '&.Mui-selected.Mui-focusVisible': {
+                        backgroundColor: '#d8c2a5 !important',
+                      },
+                    },
+                  },
+                },
+              }}
             >
               {units.map(u => (
                 <MenuItem
                   key={u}
                   value={u}
+                  
                   sx={{
-                   
                     color: '#391F06',
                     fontSize: 16,
                     background: '#f5e2cc',
                     '&.Mui-selected': {
                       background: '#e6d2b7',
                       color: '#391F06',
-                       borderColor:'#391F06',
-
+                      borderColor: '#391F06',
                     },
                     '&:hover': {
                       background: '#e6d2b7',
                       color: '#391F06',
                     },
                     '&.Mui-focusVisible': {
-                        borderColor:'#391F06',
+                      borderColor: '#391F06',
                       color: '#391F06',
                     },
                   }}
@@ -142,33 +131,32 @@ const AddIngredient = () => {
           <TextField
             value={ingredient.item}
             onChange={e => handleChange(i, 'item', e.target.value)}
+            placeholder='Ingredient name...'
             sx={{
               flex: 1,
-              paddingBottom: 2,
+
               justifyContent: 'center',
               '& .MuiInputBase-root': {
                 borderRadius: 2,
               },
               '& .MuiOutlinedInput-root': {
-                border: '1.5px solid #391F06',
                 boxShadow: 'none',
                 '& fieldset': {
-                  borderColor: 'transparent',
+                  borderColor: 'secondary.main',
                 },
                 '&:hover fieldset': {
-                  borderColor: 'transparent',
+                  borderColor: 'primary.main',
                 },
                 '&.Mui-focused fieldset': {
-                  borderColor: 'transparent',
+                  borderColor: 'primary.main',
                 },
               },
               '& .MuiInputBase-input': {
                 color: '#391F06',
-               
 
                 '&::placeholder': {
                   color: '#BFA980',
-         
+
                   fontSize: 16,
                   opacity: 1,
                 },
@@ -182,10 +170,11 @@ const AddIngredient = () => {
       ))}
       <Button
         sx={{
- 
+          mt: 0,
           fontSize: 16,
           color: '#391F06',
           textTransform: 'none',
+          paddingBottom: 2,
           '&:hover': {
             background: '#e6d2b7',
             color: '#391F06',

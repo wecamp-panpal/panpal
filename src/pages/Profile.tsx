@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -12,7 +12,8 @@ import ProfileInfo from '@/components/profile-info/ProfileInfo';
 import MyRecipesTab from '@/components/my-recipes-tab/MyRecipesTab';
 import FavoriteRecipesTab from '@/components/favorite-recipes-tab/FavoriteRecipesTab';
 import type { UIRecipe } from '@/types/ui-recipe';
-import { listRecipes } from '@/services/recipes';
+import { makeMockRecipes } from '@/mocks/recipes.mock';
+import { useFavorites } from '@/hooks/useFavourite';
 
 interface UserProfile {
   fullName: string;
@@ -52,41 +53,15 @@ const Profile = () => {
     'Uruguay', 'Venezuela', 'Vietnam'
   ];
 
-  const [myRecipes, setMyRecipes] = useState<UIRecipe[]>([]);
-  const [favoriteRecipes, setFavoriteRecipes] = useState<UIRecipe[]>([]);
-  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [myRecipes, setMyRecipes] = useState<UIRecipe[]>(makeMockRecipes(8));
+    const [recipes, setRecipes] = useState<UIRecipe[]>(makeMockRecipes());
+  const { favorites, handleToggleFavorite } = useFavorites();
+   const favoriteRecipes = useMemo(() => {
+    return recipes.filter(recipe => favorites.has(recipe.id));
+  }, [recipes, favorites]);
 
-  useEffect(() => {
-    const loadRecipes = async () => {
-      try {
-        const { data: allRecipes } = await listRecipes(1, 60, {});
-        
-        const userRecipes = allRecipes.slice(0, 6);
-        setMyRecipes(userRecipes);
-        
-        const favoritesFromStorage = allRecipes.slice(10, 18);
-        setFavoriteRecipes(favoritesFromStorage);
-      } catch (error) {
-        console.error('Error loading recipes:', error);
-      }
-    };
 
-    // Load favorites from localStorage
-    const loadFavorites = () => {
-      const saved = localStorage.getItem('favorite-recipes');
-      if (saved) {
-        try {
-          const favoriteIds = JSON.parse(saved);
-          setFavorites(new Set(favoriteIds));
-        } catch (error) {
-          console.error('Error loading favorites:', error);
-        }
-      }
-    };
-
-    loadRecipes();
-    loadFavorites();
-  }, []);
+  
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -169,21 +144,6 @@ const Profile = () => {
     navigate(`/recipes/${recipeId}`);
   };
 
-  const handleToggleFavorite = (recipeId: number) => {
-    setFavorites((prev) => {
-      const next = new Set(prev);
-      if (next.has(recipeId)) {
-        next.delete(recipeId);
-        console.log('Removed from favorites');
-      } else {
-        next.add(recipeId);
-        console.log('Added to favorites');
-      }
-      // Save to localStorage
-      localStorage.setItem('favorite-recipes', JSON.stringify(Array.from(next)));
-      return next;
-    });
-  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 2, my: 6 }}>

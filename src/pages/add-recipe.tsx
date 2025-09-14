@@ -1,191 +1,244 @@
-import { Box, TextField, Grid, IconButton, Typography, Button } from '@mui/material';
+import { useState } from 'react';
+import { Box, Container, Typography, TextField, Button } from '@mui/material';
+import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
+
 import DescriptionEditor from '@/components/text-editor/text-editor';
 import CategorySelect from '@/components/category-select/category-select';
 import AddIngredient from '@/components/add-ingredients/add-ingredient';
-import {
-  CloudUpload as CloudUploadIcon,
- 
-} from '@mui/icons-material';
-import { useState } from 'react';
 import AddStep from '@/components/add-step/add-step';
 
 const AddRecipePage = () => {
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [files, setFiles] = useState<File[]>([]);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [totalMinutes, setTotalMinutes] = useState(0);
- 
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const newFiles = Array.from(event.target.files);
-      setFiles(prev => [...prev, ...newFiles]);
-      const previews = newFiles.map(file => URL.createObjectURL(file));
-      setImagePreviews(prev => [...prev, ...previews]);
-    }
+    if (!event.target.files || event.target.files.length === 0) return;
+    const newFile = event.target.files[0];
+    setImagePreview(URL.createObjectURL(newFile));
+    event.target.value = '';
   };
-  return (
-    <Box
-      sx={{
-        marginLeft: '3rem',
-        paddingTop: '2rem',
-        marginRight: '3rem',
-        gap: 2,
-      }}
-    >
-      <h1 style={{ fontSize: 40, color: '#391F06', marginBottom: '1rem', fontWeight: "medium" }}>Add New Recipe</h1>
-      <Typography sx={{ fontSize: 25, color: '#391F06', marginBottom: '0.5rem', fontWeight: "medium", fontFamily:"Montserrat" }}>Basic Information</Typography>
 
-      <Box>
-        <Typography sx={{  color: '#391F06', fontFamily:"Montserrat" , fontWeight: "medium" }}>Title</Typography>
+  return (
+    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 } }}>
+      <Typography
+        variant="h4"
+        sx={{
+          color: 'primary.main',
+          fontWeight: 700,
+          fontFamily: 'Playfair Display, serif',
+          mb: 3,
+        }}
+      >
+        Add New Recipe
+      </Typography>
+
+      <Box sx={{ mb: 4 }}>
+        <Typography
+          variant="h6"
+          sx={{
+            color: 'primary.main',
+            fontFamily: 'Montserrat',
+            fontWeight: 600,
+            mb: 2,
+          }}
+        >
+          Basic Information
+        </Typography>
+
+        <Typography
+          sx={{ color: 'primary.main', fontFamily: 'Montserrat', fontWeight: 500, mb: 0.75 }}
+        >
+          Title
+        </Typography>
         <TextField
+          fullWidth
           placeholder="Input your recipe name..."
           sx={{
-            width: '100%',
-            paddingBottom: 2,
-            justifyContent: 'center',
-            '& .MuiInputBase-root': {
-              height: 35,
-              borderRadius: 2,
-            },
+            mb: 2.5,
             '& .MuiOutlinedInput-root': {
-              height: 35,
-              border: '1.5px solid #391F06',
-              boxShadow: 'none',
+              height: 40,
+              borderRadius: 2,
               '& fieldset': {
-                borderColor: 'transparent',
+                borderColor: 'secondary.main',
               },
               '&:hover fieldset': {
-                borderColor: 'transparent',
+                borderColor: 'primary.main',
               },
               '&.Mui-focused fieldset': {
-                borderColor: 'transparent',
+                borderColor: 'primary.main',
               },
             },
             '& .MuiInputBase-input': {
-              color: '#391F06',
-
+              color: 'primary.main',
+              fontFamily: 'Montserrat',
               '&::placeholder': {
-                color: '#BFA980',
-
+                color: 'text.secondary',
                 fontSize: 16,
-                opacity: 1,
+                opacity: 0.7,
               },
             },
           }}
         />
-        <Typography sx={{ color: '#391F06', fontFamily:"Montserrat", fontWeight:"medium"}}>Description</Typography>
+
+        <Typography
+          sx={{ color: 'primary.main', fontFamily: 'Montserrat', fontWeight: 500, mb: 0.75 }}
+        >
+          Description
+        </Typography>
         <Box sx={{ mb: 3 }}>
           <DescriptionEditor />
         </Box>
 
-        <Typography sx={{ color: '#391F06' , fontFamily:"Montserrat", fontWeight:"medium"}}> Recipe Picture</Typography>
+        <Typography
+          sx={{ color: 'primary.main', fontFamily: 'Montserrat', fontWeight: 500, mb: 0.75 }}
+        >
+          Recipe Picture
+        </Typography>
         <Box
           sx={{
-            height: 150,
-            border: 1,
-            borderRadius: 1,
+            border: '2px dashed',
+            borderColor: 'secondary.main',
+            borderRadius: 2,
             textAlign: 'center',
-            borderColor: '#391F06',
-            pt: 2,
-            mb: 3,
+            py: 4,
+            mb: 2,
+            cursor: 'pointer',
+            transition: 'all .2s ease',
+            '&:hover': {
+              borderColor: 'primary.main',
+             
+              opacity: 0.8,
+            },
           }}
         >
           <input
+            id="file-upload"
             type="file"
             accept="image/*"
-            multiple
             onChange={handleFileChange}
             style={{ display: 'none' }}
-            id="file-upload"
           />
-          <label htmlFor="file-upload">
-            <IconButton component="span">
-              <CloudUploadIcon fontSize="large" sx={{ color: '#391F06' }} />
-            </IconButton>
-            <Typography sx={{ color: '#391F06' }}>Click to upload or drag and drop</Typography>
-            <Typography variant="caption" sx={{ color: '#391F06' }}>
+          <label htmlFor="file-upload" style={{ cursor: 'pointer', display: 'inline-block' }}>
+            <CloudUploadIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+            <Typography sx={{ color: 'primary.main', fontFamily: 'Montserrat', mt: 1 }}>
+              Click to upload or drag and drop
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{ color: 'text.secondary', fontFamily: 'Montserrat' }}
+            >
               JPG, PNG, or GIF (max. 5MB)
             </Typography>
           </label>
         </Box>
-        {imagePreviews.length > 0 && (
-          <Grid container spacing={1} sx={{ mb: 2 }}>
-            {imagePreviews.map((src, index) => (
-              <img
-                src={src}
-                alt={`preview ${index}`}
-                style={{
-                  width: '100%',
-                  borderRadius: 8,
-                }}
-              />
-            ))}
-          </Grid>
+
+        {imagePreview && (
+          <Box sx={{ maxWidth: { xs: '100%', sm: '400px', md: '500px' } }}>
+            <img
+              src={imagePreview}
+              alt="recipe preview"
+              style={{
+                width: '100%',
+                height: 250,
+                objectFit: 'cover',
+                borderRadius: 12,
+                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+              }}
+            />
+          </Box>
         )}
       </Box>
-      <Typography sx={{ fontSize: 25, color: '#391F06', marginBottom: '0.5rem', fontWeight:"medium", fontFamily:"Montserrat"}}>Recipe Information</Typography>
-      <Box>
-        <Typography sx={{  color: '#391F06', fontFamily:"Montserrat", fontWeight:"medium" }}>Total Time (minutes)</Typography>
+
+      <Box >
+        <Typography
+          variant="h6"
+          sx={{
+            color: 'primary.main',
+            fontFamily: 'Montserrat',
+            fontWeight: 600,
+            mb: 2,
+          }}
+        >
+          Recipe Information
+        </Typography>
+
+        <Typography
+          sx={{ color: 'primary.main', fontFamily: 'Montserrat', fontWeight: 500, mb: 0.75 }}
+        >
+          Total Time (minutes)
+        </Typography>
         <TextField
           type="number"
+          fullWidth
           value={totalMinutes}
           onChange={e => setTotalMinutes(Number(e.target.value))}
           sx={{
-            width: '100%',
-            paddingBottom: 2,
-            justifyContent: 'center',
-            '& .MuiInputBase-root': {
-              height: 35,
-              borderRadius: 2,
-            },
+            mb: 2.5,
             '& .MuiOutlinedInput-root': {
-              height: 35,
-              border: '1.5px solid #391F06',
-              boxShadow: 'none',
+              height: 40,
+              borderRadius: 2,
               '& fieldset': {
-                borderColor: 'transparent',
+                borderColor: 'secondary.main',
               },
               '&:hover fieldset': {
-                borderColor: 'transparent',
+                borderColor: 'primary.main',
               },
               '&.Mui-focused fieldset': {
-                borderColor: 'transparent',
+                borderColor: 'primary.main',
               },
             },
             '& .MuiInputBase-input': {
-              color: '#391F06',
-
-              '&::placeholder': {
-                color: '#BFA980',
-
-                fontSize: 16,
-                opacity: 1,
-              },
+              color: 'primary.main',
+              fontFamily: 'Montserrat',
             },
           }}
         />
-        <Typography sx={{  color: '#391F06' , fontFamily:"Montserrat", fontWeight:"medium"}}>Category</Typography>
-        <CategorySelect />
-        <Typography sx={{  color: '#391F06', fontFamily:"Montserrat", fontWeight:"medium" }}>Ingredient</Typography>
-        <AddIngredient />
-        <Typography sx={{  color: '#391F06' , fontFamily:"Montserrat", fontWeight:"medium"}}>Steps</Typography>
+
+        <Typography
+          sx={{ color: 'primary.main', fontFamily: 'Montserrat', fontWeight: 500, mb: 0.75 }}
+        >
+          Category
+        </Typography>
+        <Box sx={{ mb: 2.5 }}>
+          <CategorySelect />
+        </Box>
+
+        <Typography
+          sx={{ color: 'primary.main', fontFamily: 'Montserrat', fontWeight: 500, mb: 0.75 }}
+        >
+          Ingredient
+        </Typography>
+        <Box sx={{ mb: 2 }}>
+          <AddIngredient />
+        </Box>
+
+        <Typography
+          sx={{ color: 'primary.main', fontFamily: 'Montserrat', fontWeight: 500, mb: 0.75 }}
+        >
+          Steps
+        </Typography>
         <AddStep />
       </Box>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          mb: 4,
-          gap: 2,
-        }}
-      >
+
+      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 4 }}>
         <Button
           sx={{
             textTransform: 'none',
-            background: '#391F06',
-            color: '#F5E2CC',
-            width: 100,
+            backgroundColor: 'primary.main',
+            color: 'secondary.main',
+            px: 4,
+            py: 1.25,
+            borderRadius: 3,
+            fontFamily: 'Montserrat',
+            fontWeight: 700,
+      
+                  '&:hover': {
+                    backgroundColor: 'secondary.main',
+                    color: 'primary.main'
+                  },
+                  '&:focus': {
+                    outline: 'none',
+                    boxShadow: 'none' }
           }}
         >
           Add Recipe
@@ -193,17 +246,30 @@ const AddRecipePage = () => {
         <Button
           sx={{
             textTransform: 'none',
-            color: '#391F06',
-            background: '#F5E2CC',
-            border: 1,
-            borderColor: '#391F06',
-            width: 100,
+            color: 'primary.main',
+            backgroundColor: 'secondary.main',
+            border: '1.5px solid',
+            borderColor: 'primary.main',
+            px: 4,
+            py: 1.25,
+            borderRadius: 3,
+            fontFamily: 'Montserrat',
+            fontWeight: 600,
+             '&:hover': {
+                    borderColor: 'secondary.main',
+                    backgroundColor: 'secondary.main',
+                    color: 'primary.main'
+                  },
+                  '&:focus': {
+                    outline: 'none',
+                    boxShadow: 'none'
+                  }
           }}
         >
           Cancel
         </Button>
       </Box>
-    </Box>
+    </Container>
   );
 };
 
