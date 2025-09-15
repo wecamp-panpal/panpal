@@ -79,7 +79,7 @@ const SignInPage: React.FC = () => {
                     No Account?
                   </Typography>
                   <Link
-                    to="/signup"
+                    to="/sign-up"
                     style={{ color: '#FF885B', textDecoration: 'underline', fontWeight: 400 }}
                   >
                     Sign up
@@ -196,11 +196,11 @@ const SignInPage: React.FC = () => {
               <Button
                 type="submit"
                 variant="contained"
-                style={{ background: 'primary', borderRadius: '12px' }}
+                style={{ background: 'primary', borderRadius: '12px',}}
                 disabled={loading}
                 onClick={handleSignIn}
               >
-                <Box display="flex" alignItems="center" gap="0.3125rem" padding={'0.5rem 1rem'}>
+                <Box display="flex" alignItems="center" gap="0.3125rem" padding={'0.5rem 1rem'} >
                   <Typography fontWeight={600} color="#fffff6">
                     Log in
                   </Typography>

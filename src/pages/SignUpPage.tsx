@@ -13,7 +13,6 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate, Link } from 'react-router-dom';
 import NavBar from '../components/nav-bar/nav-bar';
-import Footer from '../components/footer/footer';
 
 const SignUpPage: React.FC = () => {
   const [focusInput, setFocusInput] = useState<string | null>('firstName');
@@ -72,14 +71,14 @@ const SignUpPage: React.FC = () => {
   return (
     <Box display="flex" flexDirection="column" minHeight="100vh">
       <NavBar />
-      <Box flex={1} display="flex" justifyContent="center" alignItems="center">
-        <Paper elevation={3} sx={{ p: 4, minWidth: 400 }}>
+      <Box flex={1} display="flex" justifyContent="left" alignItems="center" padding={'2rem'} color={'#FDF2E5'}>
+        <Paper elevation={3} sx={{ p: 4, minWidth: 400 , borderRadius:'12px', backgroundColor: '#FDF2E5',}}>
           <div ref={formRef}>
             <form onSubmit={handleSubmit}>
               <Stack sx={{ marginBottom: 3 }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                   <Typography fontWeight={400} fontSize="0.9375rem" color="#000">
-                    Welcome to Recipe Club
+                    Welcome to Panpal
                   </Typography>
                   <Typography fontSize="0.875rem" display="flex" gap={0.5}>
                     Have an Account?{' '}
@@ -110,15 +109,33 @@ const SignUpPage: React.FC = () => {
                       type="text"
                       focused={focusInput === 'firstName'}
                       onFocus={() => setFocusInput('firstName')}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <span role="img" aria-label="user">
-                              👤
-                            </span>
-                          </InputAdornment>
-                        ),
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          backgroundColor: '#F5E2CC !important',
+                          '&.Mui-disabled': {
+                            backgroundColor: '#F5E2CC !important',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: 'rgba(0, 0, 0, 0.23)',
+                          },
+                          '& fieldset': {
+                            borderColor: 'rgba(0, 0, 0, 0.23)',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: 'rgba(0, 0, 0, 0.23)',
+                          },
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: 'rgba(0, 0, 0, 0.6)',
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: 'rgba(0, 0, 0, 0.6)',
+                        },
+                        '& .MuiOutlinedInput-input': {
+                          color: '#000',
+                        },
                       }}
+
                     />
                   </Box>
                   <Box flex={1}>
@@ -134,15 +151,33 @@ const SignUpPage: React.FC = () => {
                       type="text"
                       focused={focusInput === 'lastName'}
                       onFocus={() => setFocusInput('lastName')}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <span role="img" aria-label="user">
-                              👤
-                            </span>
-                          </InputAdornment>
-                        ),
-                      }}
+                      sx={{
+                      '& .MuiOutlinedInput-root': {
+                        backgroundColor: '#F5E2CC !important',
+                        '&.Mui-disabled': {
+                          backgroundColor: '#F5E2CC !important',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: 'rgba(0, 0, 0, 0.23)',
+                        },
+                        '& fieldset': {
+                          borderColor: 'rgba(0, 0, 0, 0.23)',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(0, 0, 0, 0.23)',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'rgba(0, 0, 0, 0.6)',
+                      },
+                      '& .MuiInputLabel-root.Mui-focused': {
+                        color: 'rgba(0, 0, 0, 0.6)',
+                      },
+                      '& .MuiOutlinedInput-input': {
+                        color: '#000',
+                      },
+                    }}
+
                     />
                   </Box>
                 </Box>
@@ -160,15 +195,33 @@ const SignUpPage: React.FC = () => {
                       type="email"
                       focused={focusInput === 'email'}
                       onFocus={() => setFocusInput('email')}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <span role="img" aria-label="user">
-                              👤
-                            </span>
-                          </InputAdornment>
-                        ),
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          backgroundColor: '#F5E2CC !important',
+                          '&.Mui-disabled': {
+                            backgroundColor: '#F5E2CC !important',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: 'rgba(0, 0, 0, 0.23)',
+                          },
+                          '& fieldset': {
+                            borderColor: 'rgba(0, 0, 0, 0.23)',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: 'rgba(0, 0, 0, 0.23)',
+                          },
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: 'rgba(0, 0, 0, 0.6)',
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: 'rgba(0, 0, 0, 0.6)',
+                        },
+                        '& .MuiOutlinedInput-input': {
+                          color: '#000',
+                        },
                       }}
+
                     />
                   </Box>
                   <Box flex={1}>
@@ -184,15 +237,33 @@ const SignUpPage: React.FC = () => {
                       type="text"
                       focused={focusInput === 'username'}
                       onFocus={() => setFocusInput('username')}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <span role="img" aria-label="user">
-                              👤
-                            </span>
-                          </InputAdornment>
-                        ),
-                      }}
+                      sx={{
+                      '& .MuiOutlinedInput-root': {
+                        backgroundColor: '#F5E2CC !important',
+                        '&.Mui-disabled': {
+                          backgroundColor: '#F5E2CC !important',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: 'rgba(0, 0, 0, 0.23)',
+                        },
+                        '& fieldset': {
+                          borderColor: 'rgba(0, 0, 0, 0.23)',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(0, 0, 0, 0.23)',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'rgba(0, 0, 0, 0.6)',
+                      },
+                      '& .MuiInputLabel-root.Mui-focused': {
+                        color: 'rgba(0, 0, 0, 0.6)',
+                      },
+                      '& .MuiOutlinedInput-input': {
+                        color: '#000',
+                      },
+                    }}
+
                     />
                   </Box>
                 </Box>
@@ -220,13 +291,6 @@ const SignUpPage: React.FC = () => {
                         focused={focusInput === 'password'}
                         onFocus={() => setFocusInput('password')}
                         InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <span role="img" aria-label="lock">
-                                🔒
-                              </span>
-                            </InputAdornment>
-                          ),
                           endAdornment: (
                             <InputAdornment position="end">
                               <IconButton onClick={() => setShowPassword(!showPassword)}>
@@ -235,6 +299,33 @@ const SignUpPage: React.FC = () => {
                             </InputAdornment>
                           ),
                         }}
+                        sx={{
+                        '& .MuiOutlinedInput-root': {
+                          backgroundColor: '#F5E2CC !important',
+                          '&.Mui-disabled': {
+                            backgroundColor: '#F5E2CC !important',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: 'rgba(0, 0, 0, 0.23)',
+                          },
+                          '& fieldset': {
+                            borderColor: 'rgba(0, 0, 0, 0.23)',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: 'rgba(0, 0, 0, 0.23)',
+                          },
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: 'rgba(0, 0, 0, 0.6)',
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: 'rgba(0, 0, 0, 0.6)',
+                        },
+                        '& .MuiOutlinedInput-input': {
+                          color: '#000',
+                        },
+                      }}
+
                       />
                     </Tooltip>
                   </Box>
@@ -256,13 +347,6 @@ const SignUpPage: React.FC = () => {
                         focused={focusInput === 'confirmPassword'}
                         onFocus={() => setFocusInput('confirmPassword')}
                         InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <span role="img" aria-label="lock">
-                                🔒
-                              </span>
-                            </InputAdornment>
-                          ),
                           endAdornment: (
                             <InputAdornment position="end">
                               <IconButton onClick={() => setShowPassword(!showPassword)}>
@@ -271,6 +355,33 @@ const SignUpPage: React.FC = () => {
                             </InputAdornment>
                           ),
                         }}
+                        sx={{
+                        '& .MuiOutlinedInput-root': {
+                          backgroundColor: '#F5E2CC !important',
+                          '&.Mui-disabled': {
+                            backgroundColor: '#F5E2CC !important',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: 'rgba(0, 0, 0, 0.23)',
+                          },
+                          '& fieldset': {
+                            borderColor: 'rgba(0, 0, 0, 0.23)',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: 'rgba(0, 0, 0, 0.23)',
+                          },
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: 'rgba(0, 0, 0, 0.6)',
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: 'rgba(0, 0, 0, 0.6)',
+                        },
+                        '& .MuiOutlinedInput-input': {
+                          color: '#000',
+                        },
+                      }}
+
                       />
                     </Tooltip>
                   </Box>
@@ -286,9 +397,9 @@ const SignUpPage: React.FC = () => {
                     variant="contained"
                     fullWidth
                     disabled={loading}
-                    sx={{ backgroundColor: '#FF885B', '&:hover': { backgroundColor: '#ff7a47' } }}
+                    sx={{ backgroundColor: 'primary', borderRadius: 2 }}
                   >
-                    <Box display="flex" alignItems="center" gap={0.5}>
+                    <Box display="flex" alignItems="center" gap={0.5} padding={'0.5rem 1rem'}>
                       <Typography fontWeight={600} color="#fffff6">
                         Sign up
                       </Typography>
@@ -305,11 +416,11 @@ const SignUpPage: React.FC = () => {
                   <Button
                     fullWidth
                     variant="contained"
-                    sx={{ backgroundColor: '#FF885B', '&:hover': { backgroundColor: '#ff7a47' } }}
+                    sx={{ backgroundColor: '#836751', borderRadius:2}}
                     onClick={handleSignUpWithGoogle}
                   >
-                    <Box display="flex" alignItems="center" gap={2}>
-                      <img src="/icons/google-logo.svg" width={24} height={24} alt="google-logo" />
+                    <Box display="flex" alignItems="center" gap={2} padding={'0.5rem 1rem'}>
+                      <img src="google-logo.svg" width={24} height={24} alt="google-logo" />
                       <Typography fontWeight={600} color="#fffff6">
                         Sign up with Google
                       </Typography>
@@ -321,7 +432,6 @@ const SignUpPage: React.FC = () => {
           </div>
         </Paper>
       </Box>
-      <Footer />
     </Box>
   );
 };
