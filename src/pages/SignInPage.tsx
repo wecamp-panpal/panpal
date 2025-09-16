@@ -41,9 +41,35 @@ const SignInPage: React.FC = () => {
   return (
     <Box display="flex" flexDirection="column" minHeight="100vh">
       <NavBar />
-      <Box display="flex" flexDirection="row">
-        <Box flex={2} display={'flex'} justifyContent="center" alignItems="center">
-          <img src="public/signin_img.svg" alt="Panpal Logo" />
+      <Box display="flex" flexDirection="row" padding={'1rem'}>
+        <Box flex={1} display="flex" justifyContent="right" alignItems="center" flexDirection="column" style={{ overflow: 'hidden' }}>
+          <img
+            src="public/signin_img.svg"
+            alt="Panpal Logo"
+            style={{
+              width: 'calc(100% + 3.125rem)', // 50px = 3.125rem
+              height: 'auto',
+              marginRight: '-9.375rem', // 150px = 9.375rem
+              marginTop: '-1.25rem',    // cắt 1.25rem bên trên
+              marginBottom: '-1.25rem', // cắt 1.25rem bên dưới
+            }}
+          />
+          <Typography 
+            variant="h4" 
+            fontWeight={600} 
+            color="#333"
+            textAlign="left"
+            sx={{ 
+              marginTop: '-6rem', // thụt lên overlap với hình
+              marginRight: '12rem', // thụt sang phải
+              lineHeight: 1.2,
+              fontSize: '1.75rem' // chữ nhỏ hơn
+            }}
+          > 
+            Let's get cooking
+            <br />
+            Share your recipes with the world!
+          </Typography>
         </Box>
         <Box
           flex={1}
@@ -51,7 +77,6 @@ const SignInPage: React.FC = () => {
           justifyContent="center"
           alignItems="center"
           color={'#FDF2E5'}
-          padding={'2rem'}
         >
           <Paper
             elevation={3}
