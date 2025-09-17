@@ -1,7 +1,7 @@
 import RecipeCard from '../recipe-card/RecipeCard';
 import { Typography, Box } from '@mui/material';
 import type { UIRecipe } from '@/types/ui-recipe';
-import { useFavorites } from '@/hooks/useFavourite';
+import { useFavorites } from '@/hooks/use-favourite';
 
 const PAGE_SIZE = 24;
 
@@ -14,10 +14,9 @@ const Trending = () => {
   const [loading, setLoading] = useState(false);
   const { favorites, handleToggleFavorite } = useFavorites();
 
-   const favoriteRecipes = useMemo(() => {
+  const favoriteRecipes = useMemo(() => {
     return recipes.filter(recipe => favorites.has(recipe.id));
   }, [recipes, favorites]);
-
 
   const navigate = useNavigate();
 
@@ -44,7 +43,7 @@ const Trending = () => {
             mt: 4,
           }}
         >
-           {loading ? (
+          {loading ? (
             Array.from({ length: PAGE_SIZE }).map((_, i) => (
               <Box
                 key={i}
@@ -66,8 +65,8 @@ const Trending = () => {
                 recipe={r}
                 variant="public"
                 onClick={() => navigate(`/recipes/${r.id}`)}
-                 isFavorited={favorites.has(r.id)}
-              onToggleFavorite={() => handleToggleFavorite(r.id)}
+                isFavorited={favorites.has(r.id)}
+                onToggleFavorite={() => handleToggleFavorite(r.id)}
               />
             ))
           )}
@@ -80,18 +79,18 @@ const Trending = () => {
             fontWeight: 500,
           }}
         >
-           Favourite
+          Favourite
         </Typography>
-        
-            {favoriteRecipes.length === 0 ? (
+
+        {favoriteRecipes.length === 0 ? (
           <Box sx={{ py: 8, textAlign: 'center' }}>
-            <Typography 
-              variant="h6" 
-              sx={{ 
+            <Typography
+              variant="h6"
+              sx={{
                 color: 'text.secondary',
                 fontFamily: 'Montserrat',
                 fontSize: '18px',
-                fontWeight: 400
+                fontWeight: 400,
               }}
             >
               You have no favourite yet, start scrolling!
@@ -118,7 +117,6 @@ const Trending = () => {
             ))}
           </Box>
         )}
-       
       </div>
     </section>
   );

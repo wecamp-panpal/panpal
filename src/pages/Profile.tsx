@@ -1,10 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Container,
-  Paper,
-  Box,
-} from '@mui/material';
+import { Container, Paper, Box } from '@mui/material';
 import { muiTheme } from '@/lib/muiTheme';
 import UserDashboardHeader from '@/components/user-dashboard-header/UserDashboardHeader';
 import TabPanel from '@/components/tab-panel/TabPanel';
@@ -13,7 +9,7 @@ import MyRecipesTab from '@/components/my-recipes-tab/MyRecipesTab';
 import FavoriteRecipesTab from '@/components/favorite-recipes-tab/FavoriteRecipesTab';
 import type { UIRecipe } from '@/types/ui-recipe';
 import { makeMockRecipes } from '@/mocks/recipes.mock';
-import { useFavorites } from '@/hooks/useFavourite';
+import { useFavorites } from '@/hooks/use-favourite';
 
 interface UserProfile {
   fullName: string;
@@ -31,37 +27,104 @@ const Profile = () => {
     fullName: 'John Smith',
     email: 'john.smith@example.com',
     country: 'United States',
-    avatar: '/api/placeholder/150/150'
+    avatar: '/api/placeholder/150/150',
   });
 
   const [editedProfile, setEditedProfile] = useState<UserProfile>(userProfile);
 
   const countries = [
-    'Afghanistan', 'Albania', 'Algeria', 'Argentina', 'Armenia', 'Australia',
-    'Austria', 'Azerbaijan', 'Bahrain', 'Bangladesh', 'Belarus', 'Belgium',
-    'Bolivia', 'Brazil', 'Bulgaria', 'Cambodia', 'Canada', 'Chile', 'China',
-    'Colombia', 'Croatia', 'Czech Republic', 'Denmark', 'Ecuador', 'Egypt',
-    'Estonia', 'Finland', 'France', 'Georgia', 'Germany', 'Ghana', 'Greece',
-    'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland',
-    'Israel', 'Italy', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kuwait',
-    'Latvia', 'Lebanon', 'Lithuania', 'Luxembourg', 'Malaysia', 'Mexico',
-    'Morocco', 'Netherlands', 'New Zealand', 'Nigeria', 'Norway', 'Pakistan',
-    'Peru', 'Philippines', 'Poland', 'Portugal', 'Qatar', 'Romania', 'Russia',
-    'Saudi Arabia', 'Singapore', 'Slovakia', 'Slovenia', 'South Africa',
-    'South Korea', 'Spain', 'Sri Lanka', 'Sweden', 'Switzerland', 'Thailand',
-    'Turkey', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States',
-    'Uruguay', 'Venezuela', 'Vietnam'
+    'Afghanistan',
+    'Albania',
+    'Algeria',
+    'Argentina',
+    'Armenia',
+    'Australia',
+    'Austria',
+    'Azerbaijan',
+    'Bahrain',
+    'Bangladesh',
+    'Belarus',
+    'Belgium',
+    'Bolivia',
+    'Brazil',
+    'Bulgaria',
+    'Cambodia',
+    'Canada',
+    'Chile',
+    'China',
+    'Colombia',
+    'Croatia',
+    'Czech Republic',
+    'Denmark',
+    'Ecuador',
+    'Egypt',
+    'Estonia',
+    'Finland',
+    'France',
+    'Georgia',
+    'Germany',
+    'Ghana',
+    'Greece',
+    'Hungary',
+    'Iceland',
+    'India',
+    'Indonesia',
+    'Iran',
+    'Iraq',
+    'Ireland',
+    'Israel',
+    'Italy',
+    'Japan',
+    'Jordan',
+    'Kazakhstan',
+    'Kenya',
+    'Kuwait',
+    'Latvia',
+    'Lebanon',
+    'Lithuania',
+    'Luxembourg',
+    'Malaysia',
+    'Mexico',
+    'Morocco',
+    'Netherlands',
+    'New Zealand',
+    'Nigeria',
+    'Norway',
+    'Pakistan',
+    'Peru',
+    'Philippines',
+    'Poland',
+    'Portugal',
+    'Qatar',
+    'Romania',
+    'Russia',
+    'Saudi Arabia',
+    'Singapore',
+    'Slovakia',
+    'Slovenia',
+    'South Africa',
+    'South Korea',
+    'Spain',
+    'Sri Lanka',
+    'Sweden',
+    'Switzerland',
+    'Thailand',
+    'Turkey',
+    'Ukraine',
+    'United Arab Emirates',
+    'United Kingdom',
+    'United States',
+    'Uruguay',
+    'Venezuela',
+    'Vietnam',
   ];
 
   const [myRecipes, setMyRecipes] = useState<UIRecipe[]>(makeMockRecipes(8));
-    const [recipes, setRecipes] = useState<UIRecipe[]>(makeMockRecipes());
+  const [recipes, setRecipes] = useState<UIRecipe[]>(makeMockRecipes());
   const { favorites, handleToggleFavorite } = useFavorites();
-   const favoriteRecipes = useMemo(() => {
+  const favoriteRecipes = useMemo(() => {
     return recipes.filter(recipe => favorites.has(recipe.id));
   }, [recipes, favorites]);
-
-
-  
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -73,7 +136,7 @@ const Profile = () => {
     if (emailError) {
       return;
     }
-    
+
     setUserProfile(editedProfile);
     setIsEditing(false);
     setEmailError('');
@@ -89,9 +152,9 @@ const Profile = () => {
   const handleInputChange = (field: keyof UserProfile, value: string) => {
     setEditedProfile(prev => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
-    
+
     // Email validation
     if (field === 'email') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -106,7 +169,7 @@ const Profile = () => {
   const handleCountryChange = (value: string | null) => {
     setEditedProfile(prev => ({
       ...prev,
-      country: value || ''
+      country: value || '',
     }));
   };
 
@@ -114,11 +177,11 @@ const Profile = () => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         const result = e.target?.result as string;
         setEditedProfile(prev => ({
           ...prev,
-          avatar: result
+          avatar: result,
         }));
       };
       reader.readAsDataURL(file);
@@ -144,16 +207,15 @@ const Profile = () => {
     navigate(`/recipes/${recipeId}`);
   };
 
-
   return (
     <Container maxWidth="lg" sx={{ py: 2, my: 6 }}>
-      <Paper 
-        elevation={0} 
-        sx={{ 
+      <Paper
+        elevation={0}
+        sx={{
           backgroundColor: 'background.default',
           border: `2px solid ${muiTheme.palette.secondary.main}`,
           borderRadius: 2,
-          overflow: 'hidden'
+          overflow: 'hidden',
         }}
       >
         <UserDashboardHeader
