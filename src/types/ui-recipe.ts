@@ -5,6 +5,7 @@ export interface UIRecipe {
   title: string;
   description: string;
   author_name: string;
+  author_id: string;
   cooking_time: string;
   image: string;
   difficulty: string;

@@ -38,6 +38,7 @@ export default function ExploreRecipes() {
 
     listRecipes(page, PAGE_SIZE, filters, searchQuery)
       .then(({ data, total }) => {
+        console.log("API result:", { data, total });
         if (!ignore) {
           setRecipes(data);
           setTotal(total);

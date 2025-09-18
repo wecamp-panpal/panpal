@@ -1,19 +1,30 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Box, Typography, Rating, Skeleton, IconButton, Tooltip, Button } from "@mui/material";
+import { Box, Typography, Rating, Skeleton, IconButton, Tooltip, Button, Collapse } from "@mui/material";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { Delete } from "@mui/icons-material";
 import { Favorite, FavoriteBorder, Edit } from "@mui/icons-material";
 import type { UIRecipe } from "@/types/ui-recipe";
-import { makeMockRecipes } from "@/mocks/recipes.mock";
-import { makeMockComments, type MockComment } from "@/mocks/comments.mock";
-import Collapse from "@mui/material/Collapse";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import type { User } from "@/types/user";
+import { getRecipeById } from "@/services/recipes";
+import { getCurrentUser } from "@/services/auth";
+import { getCommentsByRecipeId, createComment, deleteCommentById } from "@/services/comments";
 
 export default function RecipeDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const [recipe, setRecipe] = useState<UIRecipe | null>(null);
-  const [comments, setComments] = useState<MockComment[]>([]);
+  const [comments, setComments] = useState<Array<{
+    id: string;
+    user_id: string;
+    user?: { id: string; name: string };
+    content: string;
+    rating: number;
+    image_url?: string;
+    created_at: string;
+    updated_at: string;
+  }>>([]);
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState("");
   const [newRating, setNewRating] = useState<number | null>(null);
@@ -21,71 +32,86 @@ export default function RecipeDetailPage() {
   const [isFavorited, setIsFavorited] = useState(false);
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
   const [isEditedVersion, setIsEditedVersion] = useState(false);
-
-  const currentUser = "Chef A"; 
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const recipeId = Number(id);
-    const all = makeMockRecipes(60);
-    let found = all.find((r) => r.id === recipeId);
-    
-    // Check if there's an edited version in localStorage
-    const editedRecipesData = localStorage.getItem('edited-recipes');
-    if (editedRecipesData) {
-      try {
-        const editedRecipes = JSON.parse(editedRecipesData);
-        if (editedRecipes[recipeId]) {
-          // Use the edited version if it exists
-          console.log('Original recipe image:', found?.image);
-          found = editedRecipes[recipeId];
-          console.log('Edited recipe image:', found?.image);
-          setIsEditedVersion(true);
-          console.log('Loading edited recipe from localStorage:', found);
-        }
-      } catch (error) {
-        console.error('Error loading edited recipes:', error);
-      }
-    }
-    
-    setRecipe(found || null);
-    setComments(makeMockComments(id ?? ''));
-    
-    // Load favorites from localStorage and check if this recipe is favorited
-    const saved = localStorage.getItem('favorite-recipes');
-    if (saved) {
-      try {
-        const favoriteIds = JSON.parse(saved);
-        setIsFavorited(favoriteIds.includes(recipeId));
-      } catch (error) {
-        console.error('Error loading favorites:', error);
-      }
-    }
-    
-    setLoading(false);
-  }, [id, location.search]); // Also depend on location.search to trigger reload when updated
+    getCurrentUser().then(setCurrentUser).catch(() => setCurrentUser(null));
+  }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!id) return;
+    const recipeId = id;
+
+  async function loadData() {
+    try {
+        const [fetchedRecipe, fetchedComments] = await Promise.all([
+          getRecipeById(recipeId),
+          getCommentsByRecipeId(recipeId),
+        ]);
+
+        setRecipe(fetchedRecipe);
+        setComments(fetchedComments);
+
+        try {
+          const user = await getCurrentUser();
+          setCurrentUser(user);
+        } catch {
+          setCurrentUser(null);
+        }
+
+        let recipeData = fetchedRecipe;
+        const editedRecipesData = localStorage.getItem("edited-recipes");
+        if (editedRecipesData) {
+          const editedRecipes = JSON.parse(editedRecipesData);
+          if (editedRecipes[recipeId]) {
+            recipeData = editedRecipes[recipeId];
+            setIsEditedVersion(true);
+          }
+        }
+
+        setRecipe(recipeData);
+        setComments(fetchedComments);
+
+        const saved = localStorage.getItem("favorite-recipes");
+        if (saved) {
+          const favoriteIds = JSON.parse(saved);
+          setIsFavorited(favoriteIds.includes(recipeId));
+        }
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      }
+      loadData();
+  }, [id, location.search]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    if(!currentUser) return;
     e.preventDefault();
     if (!newRating || !newComment.trim()) return;
 
-    const comment: MockComment = {
-      id: crypto.randomUUID(),
-      recipe_id: id ?? "",
-      user_id: "mock-user",
-      user_name: "You",
-      content: newComment,
-      rating: newRating,
-      image_url: newImage ? URL.createObjectURL(newImage) : undefined,
-      created_at: new Date().toISOString(),
-    };
+    const formData = new FormData();
+    formData.append("recipe_id", id ?? "");
+    formData.append("user_id", currentUser?.id || "");
+    formData.append("user_name", currentUser?.name || "");
+    formData.append("rating", newRating.toString());
+    formData.append("content", newComment);
+    if (newImage) formData.append("image", newImage);
 
-    setComments((prev) => [comment, ...prev]);
+    const created = await createComment(formData);
+    setComments((prev) => [created, ...prev]);
     setNewComment("");
     setNewRating(null);
     setNewImage(null);
   };
 
   const handleToggleFavorite = () => {
+    if (!currentUser) {
+      navigate("/sign-in");
+      return;
+    }
+
     const recipeId = Number(id);
     setIsFavorited(!isFavorited);
     
@@ -120,8 +146,16 @@ export default function RecipeDetailPage() {
     navigate(`/recipes/${id}/edit`);
   };
 
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      await deleteCommentById(commentId);
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+    } catch (err) {
+      console.error("Failed to delete comment:", err);
+    }
+  };
   // Check if current user owns this recipe
-  const isOwner = recipe?.author_name === currentUser;
+  const isOwner = currentUser?.id && recipe?.author_id === currentUser.id;
 
   if (loading) {
     return <Skeleton variant="rectangular" height={400} />;
@@ -356,39 +390,31 @@ export default function RecipeDetailPage() {
       </Typography>
 
       {comments.map((c) => (
-        <Box
-          key={c.id}
-          sx={{
-            borderRadius: 3,
-            border: "1px solid #ddd",
-            p: 2,
-            mb: 2,
-            backgroundColor: "#fff",
-          }}
-        >
+        <Box key={c.id} sx={{ borderRadius: 3, border: "1px solid #ddd", p: 2, mb: 2, backgroundColor: "#fff" }}>
           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-            <Typography fontWeight={600}>{c.user_name}</Typography>
+            <Typography fontWeight={600}>{c.user?.name ?? "Unknown"}</Typography>
             <Typography fontSize={12} color="text.secondary">
               {new Date(c.created_at).toLocaleString()}
             </Typography>
           </Box>
-
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
             <Rating value={c.rating} precision={0.1} size="small" readOnly />
             <Typography fontSize={14}>{c.rating}</Typography>
           </Box>
-
-          <Typography variant="body2" sx={{ mb: c.image_url ? 2 : 0 }}>
-            {c.content}
-          </Typography>
-
+          <Typography variant="body2" sx={{ mb: c.image_url ? 2 : 0 }}>{c.content}</Typography>
           {c.image_url && (
-            <Box
-              component="img"
-              src={c.image_url}
-              alt="Comment image"
-              sx={{ maxWidth: "100%", borderRadius: 2 }}
-            />
+            <Box component="img" src={c.image_url} alt="Comment image" sx={{ maxWidth: "100%", borderRadius: 2 }} />
+          )}
+          {c.user?.id === currentUser?.id && (
+            <Button
+              onClick={() => handleDeleteComment(c.id)}
+              color="error"
+              size="small"
+              sx={{ mt: 1 }}
+              startIcon={<Delete />}
+            >
+              Delete
+            </Button>
           )}
         </Box>
       ))}
@@ -397,70 +423,34 @@ export default function RecipeDetailPage() {
         Leave a Comment
       </Typography>
 
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-          border: "1px solid #ddd",
-          borderRadius: 3,
-          p: 3,
-          backgroundColor: "#fff",
-        }}
-      >
-        <Rating
-          value={newRating}
-          precision={0.1}
-          onChange={(_, val) => setNewRating(val)}
-        />
-
-        <textarea
-          placeholder="Write your comment..."
-          required
-          style={{
-            resize: "vertical",
-            padding: "8px",
-            minHeight: "80px",
-            fontSize: "0.95rem",
-            borderRadius: "6px",
-            border: "1px solid #ccc",
-            fontFamily: "inherit",
-          }}
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-        />
-
-        <Box>
-          <Typography fontSize={14} sx={{ mb: 1 }}>
-            Optional image:
-          </Typography>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setNewImage(e.target.files?.[0] || null)}
+      {currentUser ? (
+        <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2, border: "1px solid #ddd", borderRadius: 3, p: 3, backgroundColor: "#fff" }}>
+          <Rating value={newRating} precision={0.1} onChange={(_, val) => setNewRating(val)} />
+          <textarea
+            placeholder="Write your comment..."
+            required
+            style={{ resize: "vertical", padding: "8px", minHeight: "80px", fontSize: "0.95rem", borderRadius: "6px", border: "1px solid #ccc", fontFamily: "inherit" }}
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
           />
+          <Box>
+            <Typography fontSize={14} sx={{ mb: 1 }}>Optional image:</Typography>
+            <input type="file" accept="image/*" onChange={(e) => setNewImage(e.target.files?.[0] || null)} />
+          </Box>
+          <Box sx={{ textAlign: "right" }}>
+            <button
+              type="submit"
+              style={{ backgroundColor: "#8B6B47", color: "#fff", padding: "8px 16px", border: "none", borderRadius: "6px", fontWeight: 500, fontSize: "0.95rem", cursor: "pointer" }}
+            >
+              Submit
+            </button>
+          </Box>
         </Box>
-
-        <Box sx={{ textAlign: "right" }}>
-          <button
-            type="submit"
-            style={{
-              backgroundColor: "#8B6B47",
-              color: "#fff",
-              padding: "8px 16px",
-              border: "none",
-              borderRadius: "6px",
-              fontWeight: 500,
-              fontSize: "0.95rem",
-              cursor: "pointer",
-            }}
-          >
-            Submit
-          </button>
-        </Box>
-      </Box>
+      ) : (
+        <Typography sx={{ fontStyle: "italic", color: "#555" }}>
+          Please log in to leave a comment.
+        </Typography>
+      )}
     </Box>
   );
 }

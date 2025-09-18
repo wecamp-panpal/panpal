@@ -1,5 +1,4 @@
 import type { UIRecipe, UIRecipeCategory } from "@/types/ui-recipe";
-import { makeMockRecipes, type UIRecipeWithMeta } from "@/mocks/recipes.mock";
 
 export interface RecipeFilters {
   categories?: UIRecipeCategory[];
@@ -10,37 +9,48 @@ export interface ListResult {
   total: number;
 }
 
+const API_URL = "http://localhost:3000/api";
+
 export async function listRecipes(
   page: number,
   pageSize: number,
   filters: RecipeFilters,
   searchText?: string
 ): Promise<ListResult> {
-  const all: UIRecipeWithMeta[] = makeMockRecipes(60);
-  let filtered = all;
+  const params = new URLSearchParams();
 
-  if (filters.categories?.length) {
-    const set = new Set(filters.categories);
-    filtered = filtered.filter((r) => set.has(r.category));
+  params.set("page", page.toString());
+  params.set("limit", pageSize.toString());
+
+  if (filters.categories && filters.categories.length) {
+    filters.categories.forEach((cat) => {
+      params.append("category", cat);
+    });
   }
 
-  if (searchText && searchText.trim() !== "") {
-    const q = searchText.toLowerCase();
-    filtered = filtered.filter((r) =>
-      r.title.toLowerCase().includes(q)
-    );
+  if (searchText?.trim()) {
+    params.set("search", searchText.trim());
   }
 
-  filtered.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+  const url = `${API_URL}/recipes?${params.toString()}`;
 
-  const start = (page - 1) * pageSize;
-  const end = start + pageSize;
-  const sliced = filtered.slice(start, end);
+  console.log("Request URL:", url);
 
-  const data = sliced.map(({ created_at, ingredients, steps, rating_avg, rating_count, ...rest }) => rest);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Failed to fetch recipes");
+
+  const result = await res.json();
+
+  console.log("API result:", result);
 
   return {
-    data,
-    total: filtered.length,
+    data: result.items ?? [],
+    total: result.total ?? result.data?.length ?? 0,
   };
+}
+
+export async function getRecipeById(id: string): Promise<UIRecipe> {
+  const res = await fetch(`http://localhost:3000/api/recipes/${id}`);
+  if (!res.ok) throw new Error("Failed to fetch recipe");
+  return await res.json();
 }
