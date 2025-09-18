@@ -8,6 +8,7 @@ import {
   TextField,
   IconButton,
   Autocomplete,
+  CircularProgress,
 } from '@mui/material';
 import { Image as ImageIcon } from '@mui/icons-material';
 import { muiTheme } from '@/lib/muiTheme';
@@ -25,6 +26,7 @@ interface ProfileInfoProps {
   isEditing: boolean;
   emailError: string;
   countries: string[];
+  avatarUploading?: boolean;
   onInputChange: (field: keyof UserProfile, value: string) => void;
   onCountryChange: (value: string | null) => void;
   onAvatarChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -35,6 +37,7 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
   editedProfile,
   isEditing,
   emailError,
+  avatarUploading = false,
   countries,
   onInputChange,
   onCountryChange,
@@ -51,7 +54,8 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
       }}>
         <Box sx={{ position: 'relative', mb: 2 }}>
           <Avatar
-            src={isEditing ? editedProfile.avatar : userProfile.avatar}
+            key={userProfile.avatar} // Force re-render when avatar changes
+            src={userProfile.avatar !== '/api/placeholder/150/150' ? userProfile.avatar : undefined}
             sx={{
               width: 150,
               height: 150,
@@ -64,9 +68,11 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
             {userProfile.fullName.charAt(0)}
           </Avatar>
           
+          {/* Only show avatar upload button when editing */}
           {isEditing && (
             <IconButton
               component="label"
+              disabled={avatarUploading}
               sx={{
                 position: 'absolute',
                 bottom: 0,
@@ -80,15 +86,24 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
                 '&:focus': {
                   outline: 'none',
                   boxShadow: 'none'
+                },
+                '&.Mui-disabled': {
+                  backgroundColor: 'primary.main',
+                  color: 'text.disabled'
                 }
               }}
             >
-              <ImageIcon />
+              {avatarUploading ? (
+                <CircularProgress size={16} sx={{ color: 'secondary.main' }} />
+              ) : (
+                <ImageIcon />
+              )}
               <input
                 type="file"
                 hidden
                 accept="image/*"
                 onChange={onAvatarChange}
+                disabled={avatarUploading}
               />
             </IconButton>
           )}
@@ -104,6 +119,7 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
         >
           {userProfile.fullName}
         </Typography>
+        
       </Box>
 
       {/* Profile Information */}
@@ -326,7 +342,8 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
                       p: 2,
                       backgroundColor: 'secondary.main',
                       borderRadius: 1,
-                      color: 'primary.main'
+                      color: userProfile.country === 'Not specified' ? 'text.disabled' : 'primary.main',
+                      fontStyle: userProfile.country === 'Not specified' ? 'italic' : 'normal'
                     }}
                   >
                     {userProfile.country}

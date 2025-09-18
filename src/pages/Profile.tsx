@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Paper, Box } from '@mui/material';
+import { Container, Paper, Box, CircularProgress, Alert } from '@mui/material';
 import { muiTheme } from '@/lib/muiTheme';
 import UserDashboardHeader from '@/components/user-dashboard-header/UserDashboardHeader';
 import TabPanel from '@/components/tab-panel/TabPanel';
@@ -8,9 +8,12 @@ import ProfileInfo from '@/components/profile-info/ProfileInfo';
 import MyRecipesTab from '@/components/my-recipes-tab/MyRecipesTab';
 import FavoriteRecipesTab from '@/components/favorite-recipes-tab/FavoriteRecipesTab';
 import type { UIRecipe } from '@/types/ui-recipe';
+import type { User } from '@/types/user';
 import { makeMockRecipes } from '@/mocks/recipes.mock';
 import { useFavorites } from '@/hooks/use-favourite';
+import { userService } from '@/services/user';
 
+// For mapping backend User to frontend display format
 interface UserProfile {
   fullName: string;
   email: string;
@@ -23,16 +26,24 @@ const Profile = () => {
   const [tabValue, setTabValue] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile>({
-    fullName: 'John Smith',
-    email: 'john.smith@example.com',
-    country: 'United States',
+    fullName: '',
+    email: '',
+    country: '',
     avatar: '/api/placeholder/150/150',
   });
 
   const [editedProfile, setEditedProfile] = useState<UserProfile>(userProfile);
 
+  // Hardcoded user ID for testing
+  const TEST_USER_ID = 'df4be7d3-df32-4666-856c-46b5a295d754';
+
   const countries = [
+    'Not specified',
     'Afghanistan',
     'Albania',
     'Algeria',
@@ -126,21 +137,71 @@ const Profile = () => {
     return recipes.filter(recipe => favorites.has(recipe.id));
   }, [recipes, favorites]);
 
+  // Helper function to convert User to UserProfile format
+  const userToProfile = (user: User): UserProfile => ({
+    fullName: user.name || '',
+    email: user.email,
+    country: user.country || 'Not specified',
+    avatar: user.avatar_url || '/api/placeholder/150/150',
+  });
+
+  // Helper function to convert UserProfile to update data
+  const profileToUpdateData = (profile: UserProfile) => ({
+    name: profile.fullName,
+    email: profile.email,
+    country: profile.country === 'Not specified' ? null : profile.country || null,
+  });
+
+  // Load user data from API
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const userData = await userService.getUserById(TEST_USER_ID);
+        setUser(userData);
+        const profileData = userToProfile(userData);
+        setUserProfile(profileData);
+        setEditedProfile(profileData);
+      } catch (err) {
+        console.error('Failed to load user:', err);
+        setError('Failed to load user profile. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUser();
+  }, []);
+
   const handleEdit = () => {
     setIsEditing(true);
     setEditedProfile(userProfile);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Check for email validation before saving
     if (emailError) {
       return;
     }
 
-    setUserProfile(editedProfile);
-    setIsEditing(false);
-    setEmailError('');
-    console.log('Profile saved:', editedProfile);
+    try {
+      setError(null);
+      const updateData = profileToUpdateData(editedProfile);
+      const updatedUser = await userService.updateUserById(TEST_USER_ID, updateData);
+      setUser(updatedUser);
+      
+      const updatedProfile = userToProfile(updatedUser);
+      setUserProfile(updatedProfile);
+      setEditedProfile(updatedProfile);
+      setIsEditing(false);
+      setEmailError('');
+      
+      console.log('Profile updated successfully:', updatedUser);
+    } catch (err) {
+      console.error('Failed to update profile:', err);
+      setError('Failed to update profile. Please try again.');
+    }
   };
 
   const handleCancel = () => {
@@ -173,18 +234,45 @@ const Profile = () => {
     }));
   };
 
-  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = e => {
-        const result = e.target?.result as string;
-        setEditedProfile(prev => ({
-          ...prev,
-          avatar: result,
-        }));
-      };
-      reader.readAsDataURL(file);
+      // Validate file size (10MB limit)
+      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+      if (file.size > maxSize) {
+        setError(`File size too large. Maximum allowed size is ${Math.round(maxSize / (1024 * 1024))}MB. Your file is ${Math.round(file.size / (1024 * 1024))}MB.`);
+        event.target.value = ''; // Reset input
+        return;
+      }
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setError('Invalid file type. Please upload a JPG, PNG, or WebP image.');
+        event.target.value = ''; // Reset input
+        return;
+      }
+
+      try {
+        setAvatarUploading(true);
+        setError(null);
+        
+        const updatedUser = await userService.uploadAvatar(TEST_USER_ID, file);
+        setUser(updatedUser);
+        
+        const updatedProfile = userToProfile(updatedUser);
+        setUserProfile(updatedProfile);
+        setEditedProfile(updatedProfile);
+        
+        console.log('Avatar uploaded successfully!');
+      } catch (err) {
+        console.error('Failed to upload avatar:', err);
+        setError('Failed to upload avatar. Please try again.');
+      } finally {
+        setAvatarUploading(false);
+        // Reset input value để có thể upload cùng file lại
+        event.target.value = '';
+      }
     }
   };
 
@@ -207,8 +295,22 @@ const Profile = () => {
     navigate(`/recipes/${recipeId}`);
   };
 
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 2, my: 6, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
+
   return (
     <Container maxWidth="lg" sx={{ py: 2, my: 6 }}>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      
       <Paper
         elevation={0}
         sx={{
@@ -238,6 +340,7 @@ const Profile = () => {
               isEditing={isEditing}
               emailError={emailError}
               countries={countries}
+              avatarUploading={avatarUploading}
               onInputChange={handleInputChange}
               onCountryChange={handleCountryChange}
               onAvatarChange={handleAvatarChange}
