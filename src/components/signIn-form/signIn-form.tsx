@@ -5,6 +5,7 @@ import {
   IconButton,
   InputAdornment,
   Paper,
+  skeletonClasses,
   Stack,
   TextField,
   Tooltip,
@@ -13,7 +14,7 @@ import {
 
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-
+import { loginUser } from '@/services/auth';
 export default function SignInForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -24,14 +25,27 @@ export default function SignInForm() {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Dummy sign-in logic, replace with real API call if available
-    if (email === 'user@example.com' && password === 'password') {
-      setError('');
-      navigate('/'); // Redirect to home or dashboard
-    } else {
-      setError('Incorrect email or password!');
+    setError('');
+    // basic validation
+    if (!email || !password) {
+      setError('Please fill in all fields');
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+    try {
+      const response = await loginUser({ email, password });
+      console.log('Login response:', response);
+
+      if (response.success && response.token) {
+        navigate('/');
+      } else {
+        setError(response.message || 'Login failed');
+      }
+    } catch (error) {
+      setError((error as Error).message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSignInWithGoogle = () => {

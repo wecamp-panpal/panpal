@@ -13,46 +13,66 @@ interface LoginRequest{
 interface RegisterRequest{
     email: string;
     password: string;
-    firstName: string;
-    lastName: string;
+    name: string;
 
 }
 interface AuthResponse {
   success: boolean;
   message?: string;
-  user?: any;
-  token?: string;
-}
-// Base API function
-const API_BASE_URL = 'http://localhost:3000/api/auth'; 
-async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    ...options,
-  });
-  
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status}`);
-  }
-  
-  return response.json();
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+    // ... other fields
+  };
+  token?: string; // Will be mapped from accessToken
+  accessToken?: string; // Raw response field
+}// Base API function
+import axiosClient from '@/lib/axiosClient';
+import axios from 'axios';
+
+export async function loginUser(credentials: LoginRequest): Promise<AuthResponse> {
+    try{
+        const response = await axiosClient.post('/auth/login', credentials);
+        // save token after login successfully
+        if(response.data.accessToken){
+            localStorage.setItem('access_token', response.data.accessToken);
+        }
+        return {
+            success:true,
+            user: response.data.user,
+            token: response.data.accessToken,
+        }
+    }
+    catch(error){
+        if(axios.isAxiosError(error)){
+            throw new Error(error.response?.data?.message || 'Login failed');
+        }
+        throw new Error('Login failed');
+    }
 }
 
-// Auth functions
-export async function loginUser(credentials:LoginRequest):Promise<AuthResponse> {
-    return apiCall<AuthResponse>('/login',{
-        method: 'POST',
-        body: JSON.stringify(credentials),
-    })
-
-}
 export async function registerUser(userData: RegisterRequest): Promise<AuthResponse> {
-  return apiCall('/register', {
-    method: 'POST',
-    body: JSON.stringify(userData),
-  });
+    try{
+        const response=await axiosClient.post('/auth/register', userData);
+
+        // Save token after register successfully
+        if(response.data.accessToken){
+            localStorage.setItem('access_token', response.data.accessToken);
+        }
+        return {
+            success: true,
+            user: response.data.user,
+            token: response.data.accessToken,
+        }
+
+    }
+    catch(error){
+        if(axios.isAxiosError(error)){
+            throw new Error(error.response?.data?.message || 'Registration failed');
+        }
+        throw new Error('Registration failed');
+    }
 }
 
