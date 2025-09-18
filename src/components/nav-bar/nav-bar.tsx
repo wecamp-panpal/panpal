@@ -231,6 +231,7 @@ const NavBar = ({ onSearch }: NavBarProps) => {
               >
                 {' '}
                 <Button
+                  onClick={() => navigate('/sign-up')}
                   variant="contained"
                   sx={{
                     backgroundColor: colors.background,
@@ -254,6 +255,7 @@ const NavBar = ({ onSearch }: NavBarProps) => {
                   Sign Up
                 </Button>
                 <Button
+                  onClick={() => navigate('/sign-in')}
                   variant="outlined"
                   sx={{
                     backgroundColor: 'transparent',

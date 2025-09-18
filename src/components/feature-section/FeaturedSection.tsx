@@ -1,9 +1,10 @@
 import { Typography, Box, Button } from "@mui/material";
 import { getThemeColors } from "@/lib/muiTheme";
+import { useNavigate } from 'react-router-dom';
 
 const FeaturedSection = () => {
   const colors = getThemeColors();
-
+  const navigate = useNavigate();
   return (
     <section className="w-full">
       <Box
@@ -60,6 +61,7 @@ const FeaturedSection = () => {
             </Typography>
             
             <Button
+              onClick={() => navigate('/sign-up')}
               variant="contained"
               sx={{
                 backgroundColor: colors.primary,

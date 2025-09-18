@@ -1,5 +1,6 @@
 import { getThemeColors } from '@/lib/muiTheme';
 import { Button, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 interface HeroProps {
   isAuthenticated: boolean;
@@ -7,6 +8,7 @@ interface HeroProps {
 
 const Hero = ({ isAuthenticated }: HeroProps) => {
   const colors = getThemeColors();
+  const navigate = useNavigate();
 
   return (
     <section className="w-full py-24 px-8 relative">
@@ -48,6 +50,7 @@ const Hero = ({ isAuthenticated }: HeroProps) => {
 
                 <div className="flex items-center justify-center lg:justify-start gap-4 mt-8">
                   <Button
+                    onClick={() => navigate('/explore')}
                     variant="contained"
                     sx={{
                       backgroundColor: colors.primary,
@@ -62,12 +65,17 @@ const Hero = ({ isAuthenticated }: HeroProps) => {
                         backgroundColor: colors.primary,
                         opacity: 0.9,
                       },
+                      '&:focus': {
+                        outline: 'none',
+                        boxShadow: 'none',
+                      },
                     }}
                   >
                     Explore Recipe
                   </Button>
 
                   <Button
+                    onClick={() => navigate('/add-recipe')}
                     variant="outlined"
                     sx={{
                       backgroundColor: 'transparent',
@@ -83,6 +91,10 @@ const Hero = ({ isAuthenticated }: HeroProps) => {
                         backgroundColor: 'transparent',
                         border: `2px solid ${colors.primary}`,
                         opacity: 0.8,
+                      },
+                      '&:focus': {
+                        outline: 'none',
+                        boxShadow: 'none',
                       },
                     }}
                   >
@@ -134,6 +146,7 @@ const Hero = ({ isAuthenticated }: HeroProps) => {
                 </Typography>
                 <div className="flex items-center justify-center lg:justify-start gap-4 mt-8">
                   <Button
+                    onClick={() => navigate('/explore')}
                     variant="contained"
                     sx={{
                       backgroundColor: colors.primary,
@@ -148,12 +161,17 @@ const Hero = ({ isAuthenticated }: HeroProps) => {
                         backgroundColor: colors.primary,
                         opacity: 0.9,
                       },
+                      '&:focus': {
+                        outline: 'none',
+                        boxShadow: 'none',
+                      },
                     }}
                   >
                     Explore Recipe
                   </Button>
 
                   <Button
+                    onClick={() => navigate('/add-recipe')} 
                     variant="outlined"
                     sx={{
                       backgroundColor: 'transparent',
@@ -169,6 +187,10 @@ const Hero = ({ isAuthenticated }: HeroProps) => {
                         backgroundColor: 'transparent',
                         border: `2px solid ${colors.primary}`,
                         opacity: 0.8,
+                      },
+                      '&:focus': {
+                        outline: 'none',
+                        boxShadow: 'none',
                       },
                     }}
                   >
