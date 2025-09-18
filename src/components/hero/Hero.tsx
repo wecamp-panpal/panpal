@@ -1,5 +1,7 @@
 import { getThemeColors } from '@/lib/muiTheme';
 import { Button, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface HeroProps {
   isAuthenticated: boolean;
@@ -7,6 +9,8 @@ interface HeroProps {
 
 const Hero = ({ isAuthenticated }: HeroProps) => {
   const colors = getThemeColors();
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   return (
     <section className="w-full py-24 px-8 relative">
@@ -33,7 +37,7 @@ const Hero = ({ isAuthenticated }: HeroProps) => {
                     lineHeight: 'normal',
                   }}
                 >
-                  User
+                  {user?.name || 'Chef'}
                 </Typography>
                 <Typography
                   sx={{
@@ -49,6 +53,7 @@ const Hero = ({ isAuthenticated }: HeroProps) => {
                 <div className="flex items-center justify-center lg:justify-start gap-4 mt-8">
                   <Button
                     variant="contained"
+                    onClick={() => navigate('/explore')}
                     sx={{
                       backgroundColor: colors.primary,
                       color: '#FFFFFF',
@@ -69,6 +74,7 @@ const Hero = ({ isAuthenticated }: HeroProps) => {
 
                   <Button
                     variant="outlined"
+                    onClick={() => navigate('/add-recipe')}
                     sx={{
                       backgroundColor: 'transparent',
                       color: colors.primary,
@@ -135,6 +141,7 @@ const Hero = ({ isAuthenticated }: HeroProps) => {
                 <div className="flex items-center justify-center lg:justify-start gap-4 mt-8">
                   <Button
                     variant="contained"
+                    onClick={() => navigate('/explore')}
                     sx={{
                       backgroundColor: colors.primary,
                       color: '#FFFFFF',
@@ -148,6 +155,10 @@ const Hero = ({ isAuthenticated }: HeroProps) => {
                         backgroundColor: colors.primary,
                         opacity: 0.9,
                       },
+                      '&:focus': {
+                        outline: 'none',
+                        boxShadow: 'none',
+                      },
                     }}
                   >
                     Explore Recipe
@@ -155,6 +166,7 @@ const Hero = ({ isAuthenticated }: HeroProps) => {
 
                   <Button
                     variant="outlined"
+                    onClick={() => navigate('/add-recipe')}
                     sx={{
                       backgroundColor: 'transparent',
                       color: colors.primary,
@@ -169,6 +181,10 @@ const Hero = ({ isAuthenticated }: HeroProps) => {
                         backgroundColor: 'transparent',
                         border: `2px solid ${colors.primary}`,
                         opacity: 0.8,
+                      },
+                      '&:focus': {
+                        outline: 'none',
+                        boxShadow: 'none',
                       },
                     }}
                   >

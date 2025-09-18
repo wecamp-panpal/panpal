@@ -4,6 +4,7 @@ import {
   Container,
   Paper,
   Box,
+  Typography,
 } from '@mui/material';
 import { muiTheme } from '@/lib/muiTheme';
 import UserDashboardHeader from '@/components/user-dashboard-header/UserDashboardHeader';
@@ -14,8 +15,11 @@ import FavoriteRecipesTab from '@/components/favorite-recipes-tab/FavoriteRecipe
 import type { UIRecipe } from '@/types/ui-recipe';
 import { makeMockRecipes } from '@/mocks/recipes.mock';
 import { useFavorites } from '@/hooks/useFavourite';
+import { useAuth } from '@/contexts/AuthContext';
+import { userService } from '@/services/user';
 
 interface UserProfile {
+  id: string;
   fullName: string;
   email: string;
   country: string;
@@ -24,17 +28,57 @@ interface UserProfile {
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { user, refreshUser, isLoading: authLoading } = useAuth();
   const [tabValue, setTabValue] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile>({
-    fullName: 'John Smith',
-    email: 'john.smith@example.com',
-    country: 'United States',
+    id: '',
+    fullName: '',
+    email: '',
+    country: 'Vietnam', // Default country
     avatar: '/api/placeholder/150/150'
   });
 
   const [editedProfile, setEditedProfile] = useState<UserProfile>(userProfile);
+
+  console.log('🔵 Profile component render - user:', user, 'authLoading:', authLoading);
+
+  // Initialize profile data from user context
+  useEffect(() => {
+    console.log('🔵 Profile useEffect triggered - user:', user);
+    if (user) {
+      const profile: UserProfile = {
+        id: user.id,
+        fullName: user.name || '',
+        email: user.email,
+        country: user.country || 'Vietnam', // Use country from backend or default
+        avatar: user.avatarUrl || '/api/placeholder/150/150'
+      };
+      setUserProfile(profile);
+      setEditedProfile(profile);
+      console.log('🔵 Profile initialized with user data:', profile);
+    }
+  }, [user]);
+
+  // Show loading while auth is loading
+  if (authLoading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 } }}>
+        <div>Loading profile...</div>
+      </Container>
+    );
+  }
+
+  // Show error if no user
+  if (!user) {
+    return (
+      <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 } }}>
+        <div>No user data available. Please try logging in again.</div>
+      </Container>
+    );
+  }
 
   const countries = [
     'Afghanistan', 'Albania', 'Algeria', 'Argentina', 'Armenia', 'Australia',
@@ -53,8 +97,8 @@ const Profile = () => {
     'Uruguay', 'Venezuela', 'Vietnam'
   ];
 
-  const [myRecipes, setMyRecipes] = useState<UIRecipe[]>(makeMockRecipes(8));
-    const [recipes, setRecipes] = useState<UIRecipe[]>(makeMockRecipes());
+  const [myRecipes] = useState<UIRecipe[]>(makeMockRecipes(8));
+  const [recipes] = useState<UIRecipe[]>(makeMockRecipes());
   const { favorites, handleToggleFavorite } = useFavorites();
    const favoriteRecipes = useMemo(() => {
     return recipes.filter(recipe => favorites.has(recipe.id));
@@ -68,16 +112,49 @@ const Profile = () => {
     setEditedProfile(userProfile);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Check for email validation before saving
     if (emailError) {
       return;
     }
     
-    setUserProfile(editedProfile);
-    setIsEditing(false);
-    setEmailError('');
-    console.log('Profile saved:', editedProfile);
+    setIsLoading(true);
+    
+    try {
+      const updateData = {
+        name: editedProfile.fullName.trim(),
+        email: editedProfile.email.trim(),
+        country: editedProfile.country.trim(),
+      };
+      
+      console.log('🔵 Updating profile with data:', updateData);
+      
+      const updatedUser = await userService.updateProfile(userProfile.id, updateData);
+      
+      // Update local profile with backend response
+      const updatedProfile: UserProfile = {
+        id: updatedUser.id,
+        fullName: updatedUser.name || '',
+        email: updatedUser.email,
+        country: updatedUser.country || 'Vietnam', // Use backend country
+        avatar: updatedUser.avatarUrl || '/api/placeholder/150/150'
+      };
+      
+      setUserProfile(updatedProfile);
+      setIsEditing(false);
+      setEmailError('');
+      
+      // Refresh auth context with updated user data
+      await refreshUser();
+      
+      console.log('🔵 Profile updated successfully:', updatedProfile);
+      
+    } catch (error) {
+      console.error('🔴 Failed to update profile:', error);
+      alert('Failed to update profile. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -110,9 +187,10 @@ const Profile = () => {
     }));
   };
 
-  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Show preview immediately
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
@@ -122,6 +200,38 @@ const Profile = () => {
         }));
       };
       reader.readAsDataURL(file);
+
+      // Upload to backend
+      setIsLoading(true);
+      try {
+        console.log('🔵 Uploading avatar file:', file.name);
+        const updatedUser = await userService.uploadAvatar(file);
+        
+        // Update profile with new avatar URL from backend
+        const updatedProfile: UserProfile = {
+          ...userProfile,
+          avatar: updatedUser.avatarUrl || userProfile.avatar
+        };
+        
+        setUserProfile(updatedProfile);
+        setEditedProfile(updatedProfile);
+        
+        // Refresh auth context
+        await refreshUser();
+        
+        console.log('🔵 Avatar uploaded successfully');
+        
+      } catch (error) {
+        console.error('🔴 Failed to upload avatar:', error);
+        alert('Failed to upload avatar. Please try again.');
+        // Revert preview on error
+        setEditedProfile(prev => ({
+          ...prev,
+          avatar: userProfile.avatar
+        }));
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -174,6 +284,7 @@ const Profile = () => {
               userProfile={userProfile}
               editedProfile={editedProfile}
               isEditing={isEditing}
+              isLoading={isLoading}
               emailError={emailError}
               countries={countries}
               onInputChange={handleInputChange}

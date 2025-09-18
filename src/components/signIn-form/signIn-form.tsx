@@ -13,6 +13,8 @@ import {
 
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { authService } from '@/services/auth';
 
 export default function SignInForm() {
   const [loading, setLoading] = useState(false);
@@ -21,21 +23,25 @@ export default function SignInForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Dummy sign-in logic, replace with real API call if available
-    if (email === 'user@example.com' && password === 'password') {
-      setError('');
-      navigate('/'); // Redirect to home or dashboard
-    } else {
-      setError('Incorrect email or password!');
+    setError('');
+
+    try {
+      await login({ email, password });
+      navigate('/'); // Redirect to home after successful login
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleSignInWithGoogle = () => {
-    window.open('https://your-api-url/auth/google', '_self');
+    window.open(authService.getGoogleAuthUrl(), '_self');
   };
   return (
     <Box>

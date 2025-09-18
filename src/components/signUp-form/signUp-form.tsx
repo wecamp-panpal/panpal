@@ -4,6 +4,8 @@ import { Box, Button, IconButton, InputAdornment,  Paper, Stack, TextField, Tool
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useState, useRef, useLayoutEffect } from "react";
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { authService } from '@/services/auth';
 
 export default function SignUpForm (){
       const [focusInput, setFocusInput] = useState<string | null>('firstName');
@@ -40,23 +42,42 @@ export default function SignUpForm (){
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { register } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Dummy validation
+    setError('');
+
+    // Client-side validation
     if (form.password !== form.confirmPassword) {
       setError('Passwords must match');
       setLoading(false);
       return;
     }
-    setError('');
-    // Simulate success
-    navigate('/');
-    setLoading(false);
+
+    if (!form.firstName.trim() || !form.lastName.trim() || !form.email.trim() || !form.password.trim()) {
+      setError('Please fill in all required fields');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      await register({
+        name: `${form.firstName.trim()} ${form.lastName.trim()}`.trim(),
+        email: form.email.trim(),
+        password: form.password,
+      });
+      navigate('/'); // Redirect to home after successful registration
+    } catch (err: any) {
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSignUpWithGoogle = () => {
-    window.open('https://your-api-url/auth/google', '_self');
+    window.open(authService.getGoogleAuthUrl(), '_self');
   };
 
     return(

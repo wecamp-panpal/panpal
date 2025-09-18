@@ -11,24 +11,28 @@ import ProfilePage from '@/pages/Profile';
 import ExploreRecipes from '@/pages/ExploreRecipes';
 import RecipeDetailPage from '@/pages/RecipeDetailPage';
 import SignUpPage from '@/pages/SignUpPage';
+import { AuthProvider } from '@/contexts/AuthContext';
+import ProtectedRoute from '@/components/auth-guard/ProtectedRoute';
 function App() {
   return (
     <ThemeProvider theme={muiTheme}>
+      <AuthProvider>
         <Routes>
           <Route element={<HomeLayout />}>
             <Route index element={<LandingPage />} />
             <Route path="/explore" element={<ExploreRecipes />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/add-recipe" element={<AddRecipePage />} />
+            <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="/add-recipe" element={<ProtectedRoute><AddRecipePage /></ProtectedRoute>} />
             <Route path="/recipes/:id" element={<RecipeDetailPage />} />
-            <Route path="/recipes/:id/edit" element={<EditRecipePage />} />
+            <Route path="/recipes/:id/edit" element={<ProtectedRoute><EditRecipePage /></ProtectedRoute>} />
 
             
           </Route>
           <Route path="/sign-in" element={<SignInPage />} />
           <Route path="/sign-up" element={<SignUpPage />} />
         </Routes>
-      </ThemeProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

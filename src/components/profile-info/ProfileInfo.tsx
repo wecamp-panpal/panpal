@@ -13,6 +13,7 @@ import { Image as ImageIcon } from '@mui/icons-material';
 import { muiTheme } from '@/lib/muiTheme';
 
 interface UserProfile {
+  id: string;
   fullName: string;
   email: string;
   country: string;
@@ -23,6 +24,7 @@ interface ProfileInfoProps {
   userProfile: UserProfile;
   editedProfile: UserProfile;
   isEditing: boolean;
+  isLoading?: boolean;
   emailError: string;
   countries: string[];
   onInputChange: (field: keyof UserProfile, value: string) => void;
@@ -34,6 +36,7 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
   userProfile,
   editedProfile,
   isEditing,
+  isLoading = false,
   emailError,
   countries,
   onInputChange,

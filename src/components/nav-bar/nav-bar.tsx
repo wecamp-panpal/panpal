@@ -1,9 +1,10 @@
-import { AppBar, Box, Link, Toolbar, styled, Tooltip, IconButton, Button } from '@mui/material';
-import { CircleUserRound, Settings } from 'lucide-react';
+import { AppBar, Box, Link, Toolbar, styled, Tooltip, IconButton, Button, Menu, MenuItem, Typography } from '@mui/material';
+import { CircleUserRound, Settings, LogOut } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SearchBar from '../search-bar/search-bar';
 import { useState } from 'react';
 import { getThemeColors } from '@/lib/muiTheme';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface NavBarProps {
   onSearch?: (query: string) => void;
@@ -32,12 +33,26 @@ const NavBarLink = styled(Link)(({ isActive }: { isActive?: boolean }) => ({
   },
 }));
 
-const NavBar = ({ onSearch }: NavBarProps) => {
+const NavBar = ({ onSearch: _onSearch }: NavBarProps) => {
   const colors = getThemeColors();
-
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const [isAuthenticate, setAuthenticate] = useState(false);
+  const { isAuthenticated, user, logout } = useAuth();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleProfileClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    logout();
+    handleProfileClose();
+    navigate('/');
+  };
   if (pathname === '/sign-in' || pathname === '/sign-up') {
     return (
       <AppBar
@@ -192,11 +207,11 @@ const NavBar = ({ onSearch }: NavBarProps) => {
             gap: 6,
           }}
         >
-          {isAuthenticate ? (
+          {isAuthenticated ? (
             <>
               <Tooltip title="User profile">
                 <IconButton
-                  onClick={() => navigate('/profile')}
+                  onClick={handleProfileClick}
                   sx={{
                     '&:focus': {
                       outline: 'none',
@@ -207,6 +222,40 @@ const NavBar = ({ onSearch }: NavBarProps) => {
                   <CircleUserRound color="#EAC9A3" />
                 </IconButton>
               </Tooltip>
+              
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleProfileClose}
+                PaperProps={{
+                  sx: {
+                    mt: 1.5,
+                    '& .MuiMenuItem-root': {
+                      px: 2,
+                      py: 1,
+                    },
+                  },
+                }}
+              >
+                <MenuItem disabled>
+                  <Typography variant="body2" color="text.secondary">
+                    {user?.name || 'User'}
+                  </Typography>
+                </MenuItem>
+                <MenuItem disabled>
+                  <Typography variant="caption" color="text.secondary">
+                    {user?.email}
+                  </Typography>
+                </MenuItem>
+                <MenuItem onClick={() => {navigate('/profile'); handleProfileClose();}}>
+                  <CircleUserRound size={16} style={{ marginRight: 8 }} />
+                  Profile
+                </MenuItem>
+                <MenuItem onClick={handleLogout}>
+                  <LogOut size={16} style={{ marginRight: 8 }} />
+                  Logout
+                </MenuItem>
+              </Menu>
 
               <Tooltip title="Settings">
                 <IconButton
@@ -231,6 +280,7 @@ const NavBar = ({ onSearch }: NavBarProps) => {
               >
                 {' '}
                 <Button
+                  onClick={() => navigate('/sign-up')}
                   variant="contained"
                   sx={{
                     backgroundColor: colors.background,
@@ -254,6 +304,7 @@ const NavBar = ({ onSearch }: NavBarProps) => {
                   Sign Up
                 </Button>
                 <Button
+                  onClick={() => navigate('/sign-in')}
                   variant="outlined"
                   sx={{
                     backgroundColor: 'transparent',
