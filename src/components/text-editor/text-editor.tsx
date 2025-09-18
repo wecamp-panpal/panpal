@@ -52,7 +52,7 @@ export default function DescriptionEditor({ value = '', onChange }: Props) {
   }, [value, editor]);
 
   const fileRef = useRef<HTMLInputElement | null>(null);
-  const onPickImage = () => fileRef.current?.click();
+
   const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
@@ -230,9 +230,7 @@ export default function DescriptionEditor({ value = '', onChange }: Props) {
         >
           🔗
         </button>
-        <button title="Insert image" style={btn()} onClick={onPickImage}>
-          🖼️
-        </button>
+
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFile} />
         <button
           title="Blockquote"

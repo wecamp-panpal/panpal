@@ -3,20 +3,66 @@ import { Box, Container, Typography, TextField, Button } from '@mui/material';
 import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
 
 import DescriptionEditor from '@/components/text-editor/text-editor';
-import CategorySelect from '@/components/category-select/category-select';
+import CategorySelect, { type RecipeCategory } from '@/components/category-select/category-select';
 import AddIngredient from '@/components/add-ingredients/add-ingredient';
 import AddStep from '@/components/add-step/add-step';
+import axiosClient from '@/lib/axiosClient';
 
 const AddRecipePage = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [totalMinutes, setTotalMinutes] = useState(0);
+  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState('');
+const [category, setCategory] = useState<RecipeCategory | null>(null);
+  const [ingredients, setIngredients] = useState<{ name: string; quantity: string }[]>([]);
+  const [steps, setSteps] = useState<
+    { stepNumber: number; instruction: string; imageUrl?: string }[]
+  >([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files || event.target.files.length === 0) return;
     const newFile = event.target.files[0];
+    setImageFile(newFile);
     setImagePreview(URL.createObjectURL(newFile));
     event.target.value = '';
   };
+
+ const handleSubmit = async () => {
+  try {
+    if (!title.trim()) return alert('Missing title');
+    if (!category) return alert('Please choose a category');
+
+    const form = new FormData();
+    form.append('title', title);
+    form.append('description', description);        
+    form.append('category', category);              
+    form.append('cookingTime', `${totalMinutes} minutes`);
+    if (imageFile) form.append('image', imageFile); 
+
+   
+    ingredients.forEach((ing, i) => {
+      form.append(`ingredients[${i}][name]`, ing.name);
+      form.append(`ingredients[${i}][quantity]`, ing.quantity);
+    });
+
+   
+    steps.forEach((st, i) => {
+      if (st.stepNumber != null) form.append(`steps[${i}][stepNumber]`, String(st.stepNumber));
+      form.append(`steps[${i}][instruction]`, st.instruction);
+      if (st.imageUrl) form.append(`steps[${i}][imageUrl]`, st.imageUrl);
+    });
+
+    await axiosClient.post('/recipes', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    alert('Recipe created successfully');
+  } catch (err: any) {
+    console.error(err?.response?.data || err);
+    alert('Failed to create recipe');
+  }
+};
+
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 } }}>
@@ -78,6 +124,8 @@ const AddRecipePage = () => {
               },
             },
           }}
+          value={title}
+          onChange={e => setTitle(e.target.value)}
         />
 
         <Typography
@@ -86,7 +134,7 @@ const AddRecipePage = () => {
           Description
         </Typography>
         <Box sx={{ mb: 3 }}>
-          <DescriptionEditor />
+          <DescriptionEditor value={description} onChange={setDescription} />
         </Box>
 
         <Typography
@@ -106,7 +154,7 @@ const AddRecipePage = () => {
             transition: 'all .2s ease',
             '&:hover': {
               borderColor: 'primary.main',
-             
+
               opacity: 0.8,
             },
           }}
@@ -149,7 +197,7 @@ const AddRecipePage = () => {
         )}
       </Box>
 
-      <Box >
+      <Box>
         <Typography
           variant="h6"
           sx={{
@@ -200,7 +248,7 @@ const AddRecipePage = () => {
           Category
         </Typography>
         <Box sx={{ mb: 2.5 }}>
-          <CategorySelect />
+         <CategorySelect value={category} onChange={setCategory} />
         </Box>
 
         <Typography
@@ -209,7 +257,7 @@ const AddRecipePage = () => {
           Ingredient
         </Typography>
         <Box sx={{ mb: 2 }}>
-          <AddIngredient />
+          <AddIngredient initialIngredients={ingredients} onChange={setIngredients} />
         </Box>
 
         <Typography
@@ -217,7 +265,7 @@ const AddRecipePage = () => {
         >
           Steps
         </Typography>
-        <AddStep />
+        <AddStep initialSteps={steps} onChange={setSteps} />
       </Box>
 
       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 4 }}>
@@ -231,15 +279,17 @@ const AddRecipePage = () => {
             borderRadius: 3,
             fontFamily: 'Montserrat',
             fontWeight: 700,
-      
-                  '&:hover': {
-                    backgroundColor: 'secondary.main',
-                    color: 'primary.main'
-                  },
-                  '&:focus': {
-                    outline: 'none',
-                    boxShadow: 'none' }
+
+            '&:hover': {
+              backgroundColor: 'secondary.main',
+              color: 'primary.main',
+            },
+            '&:focus': {
+              outline: 'none',
+              boxShadow: 'none',
+            },
           }}
+          onClick={handleSubmit}
         >
           Add Recipe
         </Button>
@@ -255,15 +305,15 @@ const AddRecipePage = () => {
             borderRadius: 3,
             fontFamily: 'Montserrat',
             fontWeight: 600,
-             '&:hover': {
-                    borderColor: 'secondary.main',
-                    backgroundColor: 'secondary.main',
-                    color: 'primary.main'
-                  },
-                  '&:focus': {
-                    outline: 'none',
-                    boxShadow: 'none'
-                  }
+            '&:hover': {
+              borderColor: 'secondary.main',
+              backgroundColor: 'secondary.main',
+              color: 'primary.main',
+            },
+            '&:focus': {
+              outline: 'none',
+              boxShadow: 'none',
+            },
           }}
         >
           Cancel

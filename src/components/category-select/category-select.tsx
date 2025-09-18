@@ -1,61 +1,42 @@
-import { Autocomplete, TextField, Chip } from '@mui/material';
-import { useState } from 'react';
+import { Autocomplete, TextField } from '@mui/material';
 
-export default function CategoryAutocomplete() {
-  const [categories, setCategories] = useState<string[]>([]);
+export type RecipeCategory =
+  | 'APPETIZER'
+  | 'DESSERT'
+  | 'MAIN_DISH'
+  | 'SIDE_DISH'
+  | 'SOUP'
+  | 'SAUCE'
+  | 'DRINK'
+  | 'SALAD';
 
-  const options = [
-    'Appetizer',
-    'Dessert',
-    'Main Dish',
-    'Side Dish',
-    'Soup',
-    'Sauce',
-    'Drink',
-    'Salad',
-  ];
+type CategorySelectProps = {
+  value: RecipeCategory | null;
+  onChange: (value: RecipeCategory | null) => void;
+};
 
+const options: RecipeCategory[] = [
+  'APPETIZER',
+  'DESSERT',
+  'MAIN_DISH',
+  'SIDE_DISH',
+  'SOUP',
+  'SAUCE',
+  'DRINK',
+  'SALAD',
+];
+
+export default function CategorySelect({ value, onChange }: CategorySelectProps) {
   return (
-    <Autocomplete
-      multiple
+    <Autocomplete<RecipeCategory, false, false, false>
       options={options}
-      value={categories}
-      onChange={(_, newValue) => setCategories(newValue)}
-      slotProps={{
-        paper: {
-          sx: {
-            bgcolor: '#f5e2cc',
-
-            '& .MuiAutocomplete-option': {
-              color: '#391F06',
-              "&[aria-selected='true']": {
-                backgroundColor: '#e6d2b7',
-              },
-              '&.Mui-focused': {
-                backgroundColor: '#f0d9b5',
-              },
-            },
-          },
-        },
-      }}
-      renderTags={(value, getTagProps) =>
-        value.map((option, index) => (
-          <Chip
-            {...getTagProps({ index })}
-            key={option}
-            label={option}
-            sx={{
-              height: 28,
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          />
-        ))
-      }
+      value={value}
+      onChange={(_, newValue) => onChange(newValue)}
+      isOptionEqualToValue={(opt, val) => opt === val}
       renderInput={params => (
         <TextField
           {...params}
-          placeholder="Add Category"
+          placeholder="Select Category"
           sx={{
             width: '100%',
             paddingBottom: 2,
@@ -68,29 +49,29 @@ export default function CategoryAutocomplete() {
             '& .MuiOutlinedInput-root': {
               height: 55,
               boxShadow: 'none',
-              '& fieldset': {
-                borderColor: 'secondary.main',
-              },
-              '&:hover fieldset': {
-                borderColor: 'primary.main',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: 'primary.main',
-              },
+              '& fieldset': { borderColor: 'secondary.main' },
+              '&:hover fieldset': { borderColor: 'primary.main' },
+              '&.Mui-focused fieldset': { borderColor: 'primary.main' },
             },
             '& .MuiInputBase-input': {
               color: '#391F06',
-
-              '&::placeholder': {
-                color: '#BFA980',
-
-                fontSize: 16,
-                opacity: 1,
-              },
+              '&::placeholder': { color: '#BFA980', fontSize: 16, opacity: 1 },
             },
           }}
         />
       )}
+      slotProps={{
+        paper: {
+          sx: {
+            bgcolor: '#f5e2cc',
+            '& .MuiAutocomplete-option': {
+              color: '#391F06',
+              "&[aria-selected='true']": { backgroundColor: '#e6d2b7' },
+              '&.Mui-focused': { backgroundColor: '#f0d9b5' },
+            },
+          },
+        },
+      }}
     />
   );
 }

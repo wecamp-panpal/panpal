@@ -3,8 +3,8 @@ import { Box, TextField, IconButton, Button, Typography, Chip } from '@mui/mater
 import { Add, Delete, Close } from '@mui/icons-material';
 
 interface AddStepProps {
-  initialSteps?: { step_number: number; instruction: string; image_url?: string }[];
-  onChange?: (steps: { step_number: number; instruction: string; image_url?: string }[]) => void;
+  initialSteps?: {  stepNumber: number; instruction: string;  imageUrl?: string }[];
+  onChange?: (steps: {  stepNumber: number; instruction: string;  imageUrl?: string }[]) => void;
 }
 
 const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
@@ -22,7 +22,7 @@ const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
   });
   const [existingImages, setExistingImages] = useState<(string | null)[]>(() => {
     if (initialSteps && initialSteps.length > 0) {
-      return initialSteps.map(step => step.image_url || null);
+      return initialSteps.map(step => step. imageUrl || null);
     }
     return [null];
   });
@@ -32,7 +32,7 @@ const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
     if (initialSteps && initialSteps.length > 0) {
       setSteps(initialSteps.map(step => step.instruction));
       setStepsFiles(initialSteps.map(() => null));
-      setExistingImages(initialSteps.map(step => step.image_url || null));
+      setExistingImages(initialSteps.map(step => step. imageUrl || null));
     }
   }, [initialSteps]);
 
@@ -54,9 +54,9 @@ const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
     const formatted = newSteps
       .filter(s => s.trim())
       .map((instruction, idx) => ({
-        step_number: idx + 1,
+         stepNumber: idx + 1,
         instruction: instruction.trim(),
-        image_url: newImages[idx] || undefined
+         imageUrl: newImages[idx] || undefined
       }));
     onChange?.(formatted);
   };
@@ -70,9 +70,9 @@ const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
     const formatted = update
       .filter(s => s.trim())
       .map((instruction, idx) => ({
-        step_number: idx + 1,
+         stepNumber: idx + 1,
         instruction: instruction.trim(),
-        image_url: existingImages[idx] || undefined
+         imageUrl: existingImages[idx] || undefined
       }));
     onChange?.(formatted);
   };
@@ -97,9 +97,9 @@ const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
     const formatted = steps
       .filter(s => s.trim())
       .map((instruction, idx) => ({
-        step_number: idx + 1,
+         stepNumber: idx + 1,
         instruction: instruction.trim(),
-        image_url: idx === i ? URL.createObjectURL(chosen) : existingImages[idx] || undefined
+         imageUrl: idx === i ? URL.createObjectURL(chosen) : existingImages[idx] || undefined
       }));
     onChange?.(formatted);
     
@@ -123,9 +123,9 @@ const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
     const formatted = steps
       .filter(s => s.trim())
       .map((instruction, idx) => ({
-        step_number: idx + 1,
+         stepNumber: idx + 1,
         instruction: instruction.trim(),
-        image_url: idx === i ? undefined : existingImages[idx] || undefined
+         imageUrl: idx === i ? undefined : existingImages[idx] || undefined
       }));
     onChange?.(formatted);
   };
