@@ -9,6 +9,7 @@ import type { User } from "@/types/user";
 import { getRecipeById } from "@/services/recipes";
 import { getCurrentUser } from "@/services/auth";
 import { getCommentsByRecipeId, createComment, deleteCommentById } from "@/services/comments";
+import { useFavorites } from "@/hooks/useFavorites";
 
 export default function RecipeDetailPage() {
   const { id } = useParams();
@@ -29,23 +30,9 @@ export default function RecipeDetailPage() {
   const [newComment, setNewComment] = useState("");
   const [newRating, setNewRating] = useState<number | null>(null);
   const [newImage, setNewImage] = useState<File | null>(null);
-  const [isFavorited, setIsFavorited] = useState(false);
 
-  // Listen for favorite changes to keep heart icon in sync
-  useEffect(() => {
-    const handleFavoriteChange = (event: CustomEvent) => {
-      const { recipeId: changedRecipeId, isFavorited: newStatus } = event.detail;
-      if (changedRecipeId === Number(id)) {
-        setIsFavorited(newStatus);
-      }
-    };
-
-    window.addEventListener('favoriteChanged', handleFavoriteChange as EventListener);
-    
-    return () => {
-      window.removeEventListener('favoriteChanged', handleFavoriteChange as EventListener);
-    };
-  }, [id]);
+  // Use favorites hook for consistent state management
+  const { favorites, toggleFavorite } = useFavorites();
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
   const [isEditedVersion, setIsEditedVersion] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -87,13 +74,6 @@ export default function RecipeDetailPage() {
 
         setRecipe(recipeData);
         setComments(fetchedComments);
-
-        // Check favorite status from localStorage (this may have been updated during recipe conversion)
-        const saved = localStorage.getItem("favorite-recipes");
-        if (saved) {
-          const favoriteIds = JSON.parse(saved);
-          setIsFavorited(favoriteIds.includes(Number(recipeId)));
-        }
         } catch (err) {
           console.error(err);
         } finally {
@@ -130,23 +110,7 @@ export default function RecipeDetailPage() {
     }
 
     const recipeId = Number(id);
-    const wasCurrentlyFavorited = isFavorited;
-    
-    // Optimistic update
-    setIsFavorited(!isFavorited);
-    
-    try {
-      // Import and use favoriteService
-      const { favoriteService } = await import('@/services/favorites');
-      await favoriteService.toggleFavorite(recipeId, wasCurrentlyFavorited);
-      
-      console.log(`${wasCurrentlyFavorited ? 'Removed from' : 'Added to'} favorites:`, recipe?.title);
-    } catch (error) {
-      console.error('Error toggling favorite:', error);
-      // Revert optimistic update on error
-      setIsFavorited(wasCurrentlyFavorited);
-      alert('Failed to update favorite status. Please try again.');
-    }
+    await toggleFavorite(recipeId);
   };
 
   const handleEditRecipe = () => {
@@ -180,12 +144,46 @@ export default function RecipeDetailPage() {
     <Box sx={{ maxWidth: 900, mx: "auto", px: 2, py: 4 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
         <Box sx={{ flex: 1 }}>
-          <Typography
-            variant="h3"
-            sx={{ fontFamily: '"Playfair Display", serif' }}
-          >
-            {recipe.title}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+            <Typography
+              variant="h3"
+              sx={{ fontFamily: '"Playfair Display", serif' }}
+            >
+              {recipe.title}
+            </Typography>
+            {/* Show edit button only if user owns this recipe */}
+            {isOwner && (
+              <Tooltip title="Edit Recipe">
+                <Button
+                  onClick={handleEditRecipe}
+                  startIcon={<Edit />}
+                  sx={{
+                    backgroundColor: 'primary.main',
+                    color: 'secondary.main',
+                    borderRadius: 2,
+                    px: 2,
+                    py: 1,
+                    mt: 2,
+                    fontFamily: 'Montserrat',
+                    fontWeight: 600,
+                    textTransform: 'none',
+                    '&:hover': {
+                      backgroundColor: 'secondary.main',
+                      color: 'primary.main',
+                      transform: 'scale(1.05)',
+                    },
+                    '&:focus': {
+                      outline: 'none',
+                      boxShadow: 'none',
+                    },
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  Edit
+                </Button>
+              </Tooltip>
+            )}
+          </Box>
           {isEditedVersion && (
             <Typography
               variant="body2"
@@ -204,7 +202,7 @@ export default function RecipeDetailPage() {
           )}
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {isFavorited && (
+          {favorites.has(Number(id)) && (
             <Typography
               sx={{
                 fontFamily: 'Montserrat',
@@ -217,40 +215,8 @@ export default function RecipeDetailPage() {
             </Typography>
           )}
           
-          {/* Show edit button only if user owns this recipe */}
-          {isOwner && (
-            <Tooltip title="Edit Recipe">
-              <Button
-                onClick={handleEditRecipe}
-                startIcon={<Edit />}
-                sx={{
-                  backgroundColor: 'primary.main',
-                  color: 'secondary.main',
-                  borderRadius: 2,
-                  px: 2,
-                  py: 1,
-                  fontFamily: 'Montserrat',
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  '&:hover': {
-                    backgroundColor: 'secondary.main',
-                    color: 'primary.main',
-                    transform: 'scale(1.05)',
-                  },
-                  '&:focus': {
-                    outline: 'none',
-                    boxShadow: 'none',
-                  },
-                  transition: 'all 0.2s ease',
-                  mr: 1,
-                }}
-              >
-                Edit Recipe
-              </Button>
-            </Tooltip>
-          )}
           
-          <Tooltip title={isFavorited ? "Remove from favorites" : "Add to favorites"}>
+          <Tooltip title={favorites.has(Number(id)) ? "Remove from favorites" : "Add to favorites"}>
             <IconButton
               onClick={handleToggleFavorite}
               sx={{
@@ -270,7 +236,7 @@ export default function RecipeDetailPage() {
                 height: 56,
               }}
             >
-              {isFavorited ? (
+              {favorites.has(Number(id)) ? (
                 <Favorite sx={{ color: '#dc3545', fontSize: 28 }} />
               ) : (
                 <FavoriteBorder sx={{ color: '#8B6B47', fontSize: 28 }} />
