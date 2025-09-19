@@ -47,7 +47,7 @@ const FavoriteRecipesTab: React.FC<FavoriteRecipesTabProps> = ({
       ) : (
         <Box sx={{ 
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
           gap: 2.5
         }}>
           {favoriteRecipes.map((recipe) => (

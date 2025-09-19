@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Container, Paper, Box, CircularProgress, Alert } from '@mui/material';
 import { muiTheme } from '@/lib/muiTheme';
 import UserDashboardHeader from '@/components/user-dashboard-header/UserDashboardHeader';
@@ -13,6 +13,7 @@ import { makeMockRecipes } from '@/mocks/recipes.mock';
 import { useFavorites } from '@/hooks/use-favourite';
 import { userService } from '@/services/user';
 import { getCurrentUser, clearCurrentUserCache } from '@/services/auth';
+import { getUserRecipes } from '@/services/recipes';
 
 // For mapping backend User to frontend display format
 interface UserProfile {
@@ -24,7 +25,12 @@ interface UserProfile {
 
 const Profile = () => {
   const navigate = useNavigate();
-  const [tabValue, setTabValue] = useState(0);
+  const [searchParams] = useSearchParams();
+  const [tabValue, setTabValue] = useState(() => {
+    // Get tab from URL query params (e.g., /profile?tab=1)
+    const tabFromUrl = searchParams.get('tab');
+    return tabFromUrl ? parseInt(tabFromUrl, 10) : 0;
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -130,8 +136,9 @@ const Profile = () => {
     'Vietnam',
   ];
 
-  const [myRecipes, setMyRecipes] = useState<UIRecipe[]>(makeMockRecipes(8));
-  const [recipes, setRecipes] = useState<UIRecipe[]>(makeMockRecipes());
+  const [myRecipes, setMyRecipes] = useState<UIRecipe[]>([]);
+  const [recipes] = useState<UIRecipe[]>(makeMockRecipes());
+  const [myRecipesLoading, setMyRecipesLoading] = useState(false);
   const { favorites, handleToggleFavorite } = useFavorites();
   const favoriteRecipes = useMemo(() => {
     return recipes.filter(recipe => favorites.has(recipe.id));
@@ -174,6 +181,10 @@ const Profile = () => {
           avatarUrl: userData.avatarUrl,
           profileAvatar: profileData.avatar
         });
+        
+        // Load user's recipes
+        const shouldForceRefresh = searchParams.get('tab') === '1'; // Force refresh if coming to My Recipes tab
+        loadMyRecipes(userData.id, shouldForceRefresh);
       } catch (err) {
         console.error('Failed to load user:', err);
         setError('Failed to load user profile. Please try again.');
@@ -185,7 +196,41 @@ const Profile = () => {
     };
 
     loadUser();
-  }, [navigate]);
+  }, [navigate, searchParams]);
+
+  // Load user's recipes
+  const loadMyRecipes = async (userId: string, forceRefresh = false) => {
+    try {
+      setMyRecipesLoading(true);
+      console.log('Loading recipes for user:', userId, { forceRefresh });
+      
+      if (forceRefresh) {
+        // Clear cache to force fresh data
+        clearCurrentUserCache();
+      }
+      
+      const result = await getUserRecipes(userId);
+      setMyRecipes(result.data);
+      
+      console.log('User recipes loaded:', result);
+    } catch (err) {
+      console.error('Failed to load user recipes:', err);
+      setError('Failed to load your recipes. Please try again.');
+    } finally {
+      setMyRecipesLoading(false);
+    }
+  };
+
+  // Refresh recipes when switching to My Recipes tab
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+    
+    // If switching to My Recipes tab (index 1) and user exists, refresh recipes
+    if (newValue === 1 && user?.id) {
+      console.log('Switching to My Recipes tab, refreshing...');
+      loadMyRecipes(user.id, true);
+    }
+  };
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -305,14 +350,9 @@ const Profile = () => {
     }
   };
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
-
   // Recipe action handlers
   const handleAddNewRecipe = () => {
-    console.log('Add new recipe');
-    // Navigate to add recipe page or open modal
+    navigate('/add-recipe');
   };
 
   const handleEditRecipe = (recipeId: number) => {
@@ -378,14 +418,20 @@ const Profile = () => {
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
-          <MyRecipesTab
-            myRecipes={myRecipes}
-            onAddNewRecipe={handleAddNewRecipe}
-            onEditRecipe={handleEditRecipe}
-            onViewRecipe={handleViewRecipe}
-            onToggleFavorite={handleToggleFavorite}
-            favorites={favorites}
-          />
+          {myRecipesLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <MyRecipesTab
+              myRecipes={myRecipes}
+              onAddNewRecipe={handleAddNewRecipe}
+              onEditRecipe={handleEditRecipe}
+              onViewRecipe={handleViewRecipe}
+              onToggleFavorite={handleToggleFavorite}
+              favorites={favorites}
+            />
+          )}
         </TabPanel>
 
         <TabPanel value={tabValue} index={2}>
