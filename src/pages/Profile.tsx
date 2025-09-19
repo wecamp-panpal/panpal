@@ -12,6 +12,7 @@ import type { User } from '@/types/user';
 import { makeMockRecipes } from '@/mocks/recipes.mock';
 import { useFavorites } from '@/hooks/use-favourite';
 import { userService } from '@/services/user';
+import { getCurrentUser, clearCurrentUserCache } from '@/services/auth';
 
 // For mapping backend User to frontend display format
 interface UserProfile {
@@ -39,8 +40,7 @@ const Profile = () => {
 
   const [editedProfile, setEditedProfile] = useState<UserProfile>(userProfile);
 
-  // Hardcoded user ID for testing
-  const TEST_USER_ID = 'df4be7d3-df32-4666-856c-46b5a295d754';
+  // Remove hardcoded user ID - will use getCurrentUser instead
 
   const countries = [
     'Not specified',
@@ -142,7 +142,7 @@ const Profile = () => {
     fullName: user.name || '',
     email: user.email,
     country: user.country || 'Not specified',
-    avatar: user.avatar_url || '/api/placeholder/150/150',
+    avatar: user.avatarUrl || '/api/placeholder/150/150',
   });
 
   // Helper function to convert UserProfile to update data
@@ -158,21 +158,34 @@ const Profile = () => {
       try {
         setLoading(true);
         setError(null);
-        const userData = await userService.getUserById(TEST_USER_ID);
+        const userData = await getCurrentUser();
+        if (!userData) {
+          // User not authenticated, redirect to sign in
+          navigate('/sign-in');
+          return;
+        }
         setUser(userData);
         const profileData = userToProfile(userData);
         setUserProfile(profileData);
         setEditedProfile(profileData);
+        
+        console.log('User loaded:', {
+          userData,
+          avatarUrl: userData.avatarUrl,
+          profileAvatar: profileData.avatar
+        });
       } catch (err) {
         console.error('Failed to load user:', err);
         setError('Failed to load user profile. Please try again.');
+        // If error getting current user, redirect to login
+        navigate('/sign-in');
       } finally {
         setLoading(false);
       }
     };
 
     loadUser();
-  }, []);
+  }, [navigate]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -188,8 +201,14 @@ const Profile = () => {
     try {
       setError(null);
       const updateData = profileToUpdateData(editedProfile);
-      const updatedUser = await userService.updateUserById(TEST_USER_ID, updateData);
+      if (!user?.id) {
+        throw new Error('User not found');
+      }
+      const updatedUser = await userService.updateUserById(user.id, updateData);
       setUser(updatedUser);
+      
+      // Clear auth cache so navbar gets updated user info
+      clearCurrentUserCache();
       
       const updatedProfile = userToProfile(updatedUser);
       setUserProfile(updatedProfile);
@@ -257,14 +276,24 @@ const Profile = () => {
         setAvatarUploading(true);
         setError(null);
         
-        const updatedUser = await userService.uploadAvatar(TEST_USER_ID, file);
+        if (!user?.id) {
+          throw new Error('User not found');
+        }
+        const updatedUser = await userService.uploadAvatar(user.id, file);
         setUser(updatedUser);
+        
+        // Clear auth cache so navbar gets updated user info
+        clearCurrentUserCache();
         
         const updatedProfile = userToProfile(updatedUser);
         setUserProfile(updatedProfile);
         setEditedProfile(updatedProfile);
         
-        console.log('Avatar uploaded successfully!');
+        console.log('Avatar uploaded successfully!', {
+          updatedUser,
+          avatarUrl: updatedUser.avatarUrl,
+          profileAvatar: updatedProfile.avatar
+        });
       } catch (err) {
         console.error('Failed to upload avatar:', err);
         setError('Failed to upload avatar. Please try again.');
