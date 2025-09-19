@@ -1,6 +1,8 @@
 import { AppBar, Box, Link, Toolbar, styled, Tooltip, IconButton, Button } from '@mui/material';
 import { CircleUserRound, Settings } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '@/hooks/use-app-dispatch';
+import { useAppSelector } from '@/hooks/use-app-selector';
 import SearchBar from '../search-bar/search-bar';
 import { useState } from 'react';
 import { getThemeColors } from '@/lib/muiTheme';
@@ -34,10 +36,10 @@ const NavBarLink = styled(Link)(({ isActive }: { isActive?: boolean }) => ({
 
 const NavBar = ({ onSearch }: NavBarProps) => {
   const colors = getThemeColors();
-
+  const {  isAuthenticated } = useAppSelector((state) => state.user)
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const [isAuthenticate, setAuthenticate] = useState(false);
+
   if (pathname === '/sign-in' || pathname === '/sign-up') {
     return (
       <AppBar
@@ -192,7 +194,7 @@ const NavBar = ({ onSearch }: NavBarProps) => {
             gap: 6,
           }}
         >
-          {isAuthenticate ? (
+          { isAuthenticated ? (
             <>
               <Tooltip title="User profile">
                 <IconButton

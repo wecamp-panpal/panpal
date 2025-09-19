@@ -16,7 +16,7 @@ const Hero = ({ isAuthenticated }: HeroProps) => {
         <div className="flex items-center justify-start relative">
           {isAuthenticated ? (
             <>
-              <div className="max-w-2xl relative z-30 text-center lg:text-left w-full lg:w-auto" style={{ paddingTop: '80px' }}>
+              <div className="max-w-2xl relative z-30 text-center lg:text-left w-full lg:w-auto">
                 <Typography
                   variant="h1"
                   sx={{

@@ -27,7 +27,7 @@ const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
     return [null];
   });
 
-  // Update steps when initialSteps prop changes
+ 
   useEffect(() => {
     if (initialSteps && initialSteps.length > 0) {
       setSteps(initialSteps.map(step => step.instruction));
@@ -50,7 +50,6 @@ const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
     setStepsFiles(newFiles.length ? newFiles : [null]);
     setExistingImages(newImages.length ? newImages : [null]);
     
-    // Call onChange with updated data
     const formatted = newSteps
       .filter(s => s.trim())
       .map((instruction, idx) => ({
@@ -66,7 +65,7 @@ const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
     update[i] = step;
     setSteps(update);
     
-    // Call onChange with formatted data
+    
     const formatted = update
       .filter(s => s.trim())
       .map((instruction, idx) => ({
@@ -86,14 +85,13 @@ const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
       return copy;
     });
     
-    // Update existing images with file URL for preview
     setExistingImages(prev => {
       const copy = [...prev];
       copy[i] = URL.createObjectURL(chosen);
       return copy;
     });
     
-    // Call onChange to notify parent
+
     const formatted = steps
       .filter(s => s.trim())
       .map((instruction, idx) => ({
@@ -119,7 +117,6 @@ const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
       return copy;
     });
     
-    // Call onChange to notify parent
     const formatted = steps
       .filter(s => s.trim())
       .map((instruction, idx) => ({
