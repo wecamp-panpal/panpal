@@ -11,6 +11,8 @@ import ProfilePage from '@/pages/Profile';
 import ExploreRecipes from '@/pages/ExploreRecipes';
 import RecipeDetailPage from '@/pages/RecipeDetailPage';
 import SignUpPage from '@/pages/SignUpPage';
+import NotFound from '@/pages/not-found';
+
 function App() {
   return (
     <ThemeProvider theme={muiTheme}>
@@ -22,9 +24,8 @@ function App() {
             <Route path="/add-recipe" element={<AddRecipePage />} />
             <Route path="/recipes/:id" element={<RecipeDetailPage />} />
             <Route path="/recipes/:id/edit" element={<EditRecipePage />} />
-
-            
           </Route>
+          <Route path="*" element={<NotFound />} />
           <Route path="/sign-in" element={<SignInPage />} />
           <Route path="/sign-up" element={<SignUpPage />} />
         </Routes>
