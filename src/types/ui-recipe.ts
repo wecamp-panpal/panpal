@@ -1,4 +1,4 @@
-export type UIRecipeCategory = "Dessert" | "Drink" | "Main Dish";
+export type UIRecipeCategory = "APPETIZER" | "DESSERT" | "MAIN_DISH" | "SIDE_DISH" | "SOUP" | "SAUCE" | "DRINK" | "SALAD";
 
 export interface UIRecipe {
   id: number;

@@ -1,21 +1,17 @@
 import { Stack, Chip, Box, Button } from "@mui/material";
 import type { UIRecipeCategory } from "@/types/ui-recipe";
 
-type ChipType = UIRecipeCategory;
-const CHIPS: ChipType[] = ["Dessert", "Drink", "Main Dish"];
+const CHIPS: UIRecipeCategory[] = ["APPETIZER", "DESSERT", "MAIN_DISH", "SIDE_DISH", "SOUP", "SAUCE", "DRINK", "SALAD"];
 
-export type FilterState = Set<ChipType>;
+export type FilterState = UIRecipeCategory | null;
 
 export default function FilterBar({
   selected,
   onToggle,
-  onClear,
 }: {
   selected: FilterState;
-  onToggle: (c: ChipType) => void;
-  onClear: () => void;
+  onToggle: (c: UIRecipeCategory) => void;
 }) {
-  const hasFilter = selected.size > 0;
 
   return (
     <Box sx={{ mb: 3 }}>
@@ -23,20 +19,15 @@ export default function FilterBar({
         <Box component="h2" sx={{ m: 0, fontFamily: '"Playfair Display", serif' }}>
           Filter
         </Box>
-        {hasFilter && (
-          <Button variant="text" size="small" onClick={onClear} sx={{ textTransform: "none" }}>
-            Clear all
-          </Button>
-        )}
       </Stack>
 
       <Stack direction="row" useFlexGap flexWrap="wrap" gap={1.2}>
         {CHIPS.map((c) => {
-          const active = selected.has(c);
+          const active = selected === c;
           return (
             <Chip
               key={c}
-              label={c}
+              label={c.replace("_", " ").toLowerCase().replace(/^\w/, l => l.toUpperCase())}
               color={active ? "primary" : "default"}
               variant={active ? "filled" : "outlined"}
               onClick={() => onToggle(c)}

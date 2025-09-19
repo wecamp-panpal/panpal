@@ -12,7 +12,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 const PAGE_SIZE = 24;
 
 export default function ExploreRecipes() {
-  const [selected, setSelected] = useState<FilterState>(new Set());
+  const [selected, setSelected] = useState<FilterState>(null);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [recipes, setRecipes] = useState<UIRecipe[]>([]);
@@ -38,12 +38,9 @@ export default function ExploreRecipes() {
   const navigate = useNavigate();
 
   const searchQuery = new URLSearchParams(location.search).get('q') || '';
-
+  
   const filters: RecipeFilters = useMemo(() => {
-    const cats = ['Dessert', 'Drink', 'Main dish', 'Party', 'Vegan'].filter(c =>
-      selected.has(c as UIRecipeCategory)
-    ) as UIRecipeCategory[];
-    return { categories: cats };
+    return selected ? { categories: [selected] } : {};
   }, [selected]);
 
   useEffect(() => {
@@ -70,12 +67,7 @@ export default function ExploreRecipes() {
   }, [page, filters, searchQuery]);
 
   const onToggle = (chip: UIRecipeCategory) => {
-    setSelected(prev => {
-      const next = new Set(prev);
-      if (next.has(chip)) next.delete(chip);
-      else next.add(chip);
-      return next;
-    });
+    setSelected(prev => (prev === chip ? null : chip));
     setPage(1);
   };
 
@@ -90,10 +82,6 @@ export default function ExploreRecipes() {
       <FilterBar
         selected={selected}
         onToggle={onToggle}
-        onClear={() => {
-          setSelected(new Set());
-          setPage(1);
-        }}
       />
 
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
