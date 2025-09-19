@@ -8,13 +8,25 @@ interface CategorySelectSingleProps {
 }
 
 export default function CategorySelectSingle({ initialValue, onChange }: CategorySelectSingleProps) {
-  const [category, setCategory] = useState<UIRecipeCategory>(initialValue || 'Main Dish');
+  const [category, setCategory] = useState<UIRecipeCategory>(initialValue || 'MAIN_DISH');
 
   const options: UIRecipeCategory[] = [
-    'Dessert',
-    'Drink', 
-    'Main Dish'
+    'DESSERT',
+    'DRINK', 
+    'MAIN_DISH'
   ];
+
+  // Display names for UI
+  const displayNames: Record<UIRecipeCategory, string> = {
+    'APPETIZER': 'Appetizer',
+    'DESSERT': 'Dessert', 
+    'MAIN_DISH': 'Main Dish',
+    'SIDE_DISH': 'Side Dish',
+    'SOUP': 'Soup',
+    'SAUCE': 'Sauce', 
+    'DRINK': 'Drink',
+    'SALAD': 'Salad'
+  };
 
   useEffect(() => {
     if (initialValue) {
@@ -87,7 +99,7 @@ export default function CategorySelectSingle({ initialValue, onChange }: Categor
               },
             }}
           >
-            {option}
+            {displayNames[option] || option}
           </MenuItem>
         ))}
       </Select>

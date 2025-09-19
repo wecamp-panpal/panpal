@@ -25,7 +25,7 @@ const SignUpPage: React.FC = () => {
           }}
         >
           <img
-            src="public/signup_img.svg"
+            src="/signup_img.svg"
             alt="Panpal Logo"
             style={{
               width: 'calc(100% + 4rem)', // tăng width để bù phần bị cắt

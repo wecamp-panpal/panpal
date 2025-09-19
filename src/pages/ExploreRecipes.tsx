@@ -7,41 +7,54 @@ import { listRecipes } from '@/services/recipes';
 import FilterBar from '@/components/recipes/FilterBar';
 import type { FilterState } from '@/components/recipes/FilterBar';
 import RecipeCard from '@/components/recipe-card/RecipeCard';
-import { useFavorites } from '@/hooks/use-favourite';
+import { useFavorites } from '@/hooks/useFavorites';
 
 const PAGE_SIZE = 24;
 
 export default function ExploreRecipes() {
-  const [selected, setSelected] = useState<FilterState>(new Set());
+  const [selected, setSelected] = useState<FilterState>(null);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [recipes, setRecipes] = useState<UIRecipe[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const { favorites, handleToggleFavorite } = useFavorites();
+  const { favorites, handleToggleFavorite, syncFromLocalStorage } = useFavorites();
+
+  // Listen for favorite changes to keep UI in sync across components
+  useEffect(() => {
+    const handleFavoriteChange = () => {
+      // Sync favorites state when changes occur from other pages
+      syncFromLocalStorage();
+    };
+
+    window.addEventListener('favoriteChanged', handleFavoriteChange);
+    
+    return () => {
+      window.removeEventListener('favoriteChanged', handleFavoriteChange);
+    };
+  }, [syncFromLocalStorage]);
 
   const location = useLocation();
   const navigate = useNavigate();
 
   const searchQuery = new URLSearchParams(location.search).get('q') || '';
-
+  
   const filters: RecipeFilters = useMemo(() => {
-    const cats = ['Dessert', 'Drink', 'Main dish', 'Party', 'Vegan'].filter(c =>
-      selected.has(c as UIRecipeCategory)
-    ) as UIRecipeCategory[];
-    return { categories: cats };
+    return selected ? { categories: [selected] } : {};
   }, [selected]);
 
   useEffect(() => {
     let ignore = false;
     setLoading(true);
 
-    listRecipes(page, PAGE_SIZE, filters, searchQuery)
+    listRecipes(page, PAGE_SIZE, filters, searchQuery || undefined)
       .then(({ data, total }) => {
         console.log("API result:", { data, total });
         if (!ignore) {
           setRecipes(data);
           setTotal(total);
+          // Sync favorites after recipes are loaded
+          syncFromLocalStorage();
         }
       })
       .finally(() => {
@@ -54,12 +67,7 @@ export default function ExploreRecipes() {
   }, [page, filters, searchQuery]);
 
   const onToggle = (chip: UIRecipeCategory) => {
-    setSelected(prev => {
-      const next = new Set(prev);
-      if (next.has(chip)) next.delete(chip);
-      else next.add(chip);
-      return next;
-    });
+    setSelected(prev => (prev === chip ? null : chip));
     setPage(1);
   };
 
@@ -74,10 +82,6 @@ export default function ExploreRecipes() {
       <FilterBar
         selected={selected}
         onToggle={onToggle}
-        onClear={() => {
-          setSelected(new Set());
-          setPage(1);
-        }}
       />
 
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>

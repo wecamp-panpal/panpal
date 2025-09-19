@@ -1,5 +1,7 @@
 import { getThemeColors } from '@/lib/muiTheme';
+import { getCurrentUser } from "@/services/auth";
 import { Button, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface HeroProps {
@@ -9,14 +11,26 @@ interface HeroProps {
 const Hero = ({ isAuthenticated }: HeroProps) => {
   const colors = getThemeColors();
   const navigate = useNavigate();
+  const [username, setUsername] = useState<string>("");
 
+ 
+useEffect(() => {
+  const fetchUser = async () => {
+    const user = await getCurrentUser();
+    if (user) {
+     
+      setUsername(user.name); 
+    }
+  };
+  fetchUser();
+}, []);
   return (
     <section className="w-full py-24 px-8 relative">
       <div className="max-w-7xl mx-auto py-5">
         <div className="flex items-center justify-start relative">
           {isAuthenticated ? (
             <>
-              <div className="max-w-2xl relative z-30 text-center lg:text-left w-full lg:w-auto" style={{ paddingTop: '80px' }}>
+              <div className="max-w-2xl relative z-30 text-center lg:text-left w-full lg:w-auto">
                 <Typography
                   variant="h1"
                   sx={{
@@ -35,7 +49,7 @@ const Hero = ({ isAuthenticated }: HeroProps) => {
                     lineHeight: 'normal',
                   }}
                 >
-                  User
+                  {username}
                 </Typography>
                 <Typography
                   sx={{

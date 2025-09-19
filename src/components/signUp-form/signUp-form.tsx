@@ -111,7 +111,7 @@ export default function SignUpForm() {
                   Have an Account?{' '}
                   <Link
                     to="/sign-in"
-                    style={{ color: '#FF885B', textDecoration: 'underline', fontWeight: 600 }}
+                    style={{ color: '#primary.main', textDecoration: 'underline', fontWeight: 600 }}
                   >
                     Sign in
                   </Link>

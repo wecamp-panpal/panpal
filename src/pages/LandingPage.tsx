@@ -3,15 +3,16 @@ import Community from '@/components/community/Community';
 import FeaturedSection from '@/components/feature-section/FeaturedSection';
 import Trending from '@/components/home-trending/home-trending';
 import TrendingPublic from '@/components/trending-public/TrendingPublic';
-import { useState } from 'react';
+import { useAppSelector } from '@/hooks/use-app-selector';
 
 const LandingPage = () => {
-  const [isAuthenticate] = useState(false);
+  const {isAuthenticated} = useAppSelector((state) => state.user);
+
   
   return (
     <div className="pt-10 sm:pt-8 lg:pt-10">
-      <Hero isAuthenticated={isAuthenticate} />
-      {isAuthenticate ? (
+      <Hero isAuthenticated={isAuthenticated} />
+      {isAuthenticated ? (
         <>
           <Trending/>
         </>

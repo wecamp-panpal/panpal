@@ -5,7 +5,6 @@ import {
   IconButton,
   InputAdornment,
   Paper,
-  skeletonClasses,
   Stack,
   TextField,
   Tooltip,
@@ -15,7 +14,10 @@ import {
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { loginUser } from '@/services/auth';
+import { useAppDispatch } from '@/hooks/use-app-dispatch';
+import { signIn } from '@/stores/user-slice';
 export default function SignInForm() {
+  const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -37,6 +39,27 @@ export default function SignInForm() {
       console.log('Login response:', response);
 
       if (response.success && response.token) {
+        localStorage.setItem('access_token', response.token);
+        if (
+          response.user &&
+          response.user.id &&
+          response.user.email &&
+          response.user.name &&
+          response.user.role
+        ) {
+          dispatch(
+            signIn({
+              id: response.user.id,
+              email: response.user.email,
+              name: response.user.name,
+              role: response.user.role,
+              created_at: '',
+              updated_at: ''
+            })
+          );
+        } else {
+          setError('Invalid user data received.');
+        }
         navigate('/');
       } else {
         setError(response.message || 'Login failed');
@@ -212,7 +235,6 @@ export default function SignInForm() {
             <Button
               type="submit"
               variant="contained"
-              style={{ background: 'primary', borderRadius: '12px' }}
               disabled={loading}
               onClick={handleSignIn}
               fullWidth

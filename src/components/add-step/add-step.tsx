@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Box, TextField, IconButton, Button, Typography, Chip } from '@mui/material';
 import { Add, Delete, Close } from '@mui/icons-material';
 
@@ -8,31 +8,30 @@ interface AddStepProps {
 }
 
 const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
-  const [steps, setSteps] = useState<string[]>(() => {
-    if (initialSteps && initialSteps.length > 0) {
-      return initialSteps.map(step => step.instruction);
-    }
-    return [''];
-  });
-  const [stepsFiles, setStepsFiles] = useState<(File | null)[]>(() => {
-    if (initialSteps && initialSteps.length > 0) {
-      return initialSteps.map(() => null); // Files will be null for existing steps
-    }
-    return [null];
-  });
-  const [existingImages, setExistingImages] = useState<(string | null)[]>(() => {
-    if (initialSteps && initialSteps.length > 0) {
-      return initialSteps.map(step => step. imageUrl || null);
-    }
-    return [null];
-  });
+  const hasInitializedRef = useRef(false);
+  
+  const [steps, setSteps] = useState<string[]>(['']);
+  
+  const [stepsFiles, setStepsFiles] = useState<(File | null)[]>([null]);
+  
+  const [existingImages, setExistingImages] = useState<(string | null)[]>([null]);
 
-  // Update steps when initialSteps prop changes
+ 
   useEffect(() => {
-    if (initialSteps && initialSteps.length > 0) {
-      setSteps(initialSteps.map(step => step.instruction));
-      setStepsFiles(initialSteps.map(() => null));
-      setExistingImages(initialSteps.map(step => step. imageUrl || null));
+    console.log('🔄 Props changed:', initialSteps, 'Already initialized:', hasInitializedRef.current);
+    
+    // Initialize only once when we first get initial steps
+    if (initialSteps && initialSteps.length > 0 && !hasInitializedRef.current) {
+      const instructions = initialSteps.map(step => step.instruction);
+      const files = initialSteps.map(() => null);
+      const images = initialSteps.map(step => step.imageUrl || null);
+      
+      console.log('🎯 First-time initialization:', { instructions, files, images });
+      
+      setSteps(instructions);
+      setStepsFiles(files);
+      setExistingImages(images);
+      hasInitializedRef.current = true;
     }
   }, [initialSteps]);
 
@@ -43,21 +42,33 @@ const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
   };
 
   const deleteStep = (i: number) => {
+    console.log('🗑️ Delete step clicked:', i, 'Current steps:', steps);
+    
     const newSteps = steps.filter((_, idx) => idx !== i);
     const newFiles = stepsFiles.filter((_, idx) => idx !== i);
     const newImages = existingImages.filter((_, idx) => idx !== i);
-    setSteps(newSteps.length ? newSteps : ['']);
-    setStepsFiles(newFiles.length ? newFiles : [null]);
-    setExistingImages(newImages.length ? newImages : [null]);
     
-    // Call onChange with updated data
-    const formatted = newSteps
-      .filter(s => s.trim())
+    console.log('After filter:', { newSteps, newFiles, newImages });
+    
+    // Ensure at least one empty step exists
+    const finalSteps = newSteps.length ? newSteps : [''];
+    const finalFiles = newFiles.length ? newFiles : [null];
+    const finalImages = newImages.length ? newImages : [null];
+    
+    setSteps(finalSteps);
+    setStepsFiles(finalFiles);
+    setExistingImages(finalImages);
+    
+    // Send formatted data to parent (only non-empty steps)
+    const formatted = finalSteps
       .map((instruction, idx) => ({
          stepNumber: idx + 1,
         instruction: instruction.trim(),
-         imageUrl: newImages[idx] || undefined
-      }));
+         imageUrl: finalImages[idx] || undefined
+      }))
+      .filter(step => step.instruction); 
+    
+    console.log('Sending to parent:', formatted);
     onChange?.(formatted);
   };
 
@@ -66,14 +77,16 @@ const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
     update[i] = step;
     setSteps(update);
     
-    // Call onChange with formatted data
+    // CRITICAL FIX: Don't filter while typing! 
+    // Send ALL steps with their original indices to maintain React key consistency
     const formatted = update
-      .filter(s => s.trim())
       .map((instruction, idx) => ({
          stepNumber: idx + 1,
-        instruction: instruction.trim(),
+        instruction: instruction.trim(), 
          imageUrl: existingImages[idx] || undefined
-      }));
+      }))
+      .filter(step => step.instruction); // Only filter non-empty for parent
+    
     onChange?.(formatted);
   };
 
@@ -86,21 +99,20 @@ const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
       return copy;
     });
     
-    // Update existing images with file URL for preview
     setExistingImages(prev => {
       const copy = [...prev];
       copy[i] = URL.createObjectURL(chosen);
       return copy;
     });
     
-    // Call onChange to notify parent
+
     const formatted = steps
-      .filter(s => s.trim())
       .map((instruction, idx) => ({
          stepNumber: idx + 1,
         instruction: instruction.trim(),
          imageUrl: idx === i ? URL.createObjectURL(chosen) : existingImages[idx] || undefined
-      }));
+      }))
+      .filter(step => step.instruction); // Filter only for parent
     onChange?.(formatted);
     
     event.target.value = '';
@@ -119,14 +131,13 @@ const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
       return copy;
     });
     
-    // Call onChange to notify parent
     const formatted = steps
-      .filter(s => s.trim())
       .map((instruction, idx) => ({
          stepNumber: idx + 1,
         instruction: instruction.trim(),
          imageUrl: idx === i ? undefined : existingImages[idx] || undefined
-      }));
+      }))
+      .filter(step => step.instruction); // Filter only for parent  
     onChange?.(formatted);
   };
 
