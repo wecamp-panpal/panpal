@@ -50,7 +50,7 @@ export default function ExploreRecipes() {
     let ignore = false;
     setLoading(true);
 
-    listRecipes(page, PAGE_SIZE, filters, searchQuery)
+    listRecipes(page, PAGE_SIZE, filters, searchQuery || undefined)
       .then(({ data, total }) => {
         console.log("API result:", { data, total });
         if (!ignore) {

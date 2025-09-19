@@ -15,10 +15,10 @@ const SearchBar = ({ PlaceHolder, onSearch }: SearchBarProps) => {
 
   const onHandleKey = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter' && searchRef.current?.value.trim()) {
-        const query = searchRef.current.value.trim();
+      if (event.key === 'Enter') {
+        const query = searchRef.current?.value ?? '';
         if (onSearch) {
-          onSearch(query);
+          onSearch(query.trim());
         }
       }
     },
@@ -26,11 +26,7 @@ const SearchBar = ({ PlaceHolder, onSearch }: SearchBarProps) => {
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setValue(newValue);
-    if (onSearch) {
-      onSearch(newValue);
-    }
+    setValue(e.target.value);
   };
 
   return (

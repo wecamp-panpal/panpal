@@ -202,8 +202,12 @@ const NavBar = ({ onSearch }: NavBarProps) => {
             <SearchBar
               PlaceHolder="Search by dish, ingredient, or chef..."
               onSearch={query => {
-                if (query.trim()) {
-                  navigate(`/explore?q=${encodeURIComponent(query.trim())}`);
+                const trimmed = query.trim();
+                const basePath = '/explore';
+                if (trimmed) {
+                  navigate(`${basePath}?q=${encodeURIComponent(trimmed)}`);
+                } else {
+                  navigate(basePath);
                 }
               }}
             />

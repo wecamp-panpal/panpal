@@ -293,6 +293,17 @@ export default function RecipeDetailPage() {
         }}
       />
 
+      <Box 
+        sx={{ 
+          mb: 3,
+          '& p': { margin: 0, mb: 1 },
+          '& h1, & h2, & h3': { mb: 1 },
+          '& ul, & ol': { mb: 1, pl: 2 },
+          fontFamily: 'Montserrat'
+        }}
+        dangerouslySetInnerHTML={{ __html: recipe.description }}
+      />
+
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
         <Rating
           value={recipe.rating_avg}
@@ -316,17 +327,6 @@ export default function RecipeDetailPage() {
       <Typography variant="body1" sx={{ mb: 1 }}>
         <strong>Cook Time:</strong> {recipe.cooking_time}
       </Typography>
-
-      <Box 
-        sx={{ 
-          mb: 3,
-          '& p': { margin: 0, mb: 1 },
-          '& h1, & h2, & h3': { mb: 1 },
-          '& ul, & ol': { mb: 1, pl: 2 },
-          fontFamily: 'Montserrat'
-        }}
-        dangerouslySetInnerHTML={{ __html: recipe.description }}
-      />
 
       <Typography variant="h5" sx={{ mt: 4, mb: 1 }}>
         Ingredients
