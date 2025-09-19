@@ -61,7 +61,7 @@ export default function RecipeDetailPage() {
   async function loadData() {
     try {
         const [fetchedRecipe, fetchedComments] = await Promise.all([
-          getRecipeById(recipeId),
+          getRecipeById(Number(recipeId)),
           getCommentsByRecipeId(recipeId),
         ]);
 

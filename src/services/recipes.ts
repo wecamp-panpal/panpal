@@ -136,9 +136,15 @@ export async function getUserRecipes(
   return listRecipes(page, pageSize, {}, undefined, userId);
 }
 
-export async function getRecipeById(id: string): Promise<UIRecipe> {
+function convertUIIdToBackendId(uiRecipeId: number): string {
+  const mapping = JSON.parse(localStorage.getItem('recipe_id_mapping') || '{}');
+  return mapping[uiRecipeId] || uiRecipeId.toString();
+}
+
+export async function getRecipeById(uiId: number): Promise<UIRecipe> {
   try {
-    const response = await axiosClient.get(`/recipes/${id}`);
+    const backendId = convertUIIdToBackendId(uiId);
+    const response = await axiosClient.get(`/recipes/${backendId}`);
     return convertBackendRecipeToUI(response.data);
   } catch (error) {
     console.error("Failed to fetch recipe:", error);
