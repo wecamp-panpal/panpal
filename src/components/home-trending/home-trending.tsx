@@ -1,7 +1,7 @@
 import RecipeCard from '../recipe-card/RecipeCard';
 import { Typography, Box } from '@mui/material';
 import type { UIRecipe } from '@/types/ui-recipe';
-import { useFavorites } from '@/hooks/use-favourite';
+import { useFavorites } from '@/hooks/useFavorites';
 
 const PAGE_SIZE = 24;
 

@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { Box, Container, Typography, TextField, Button } from '@mui/material';
 import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 import DescriptionEditor from '@/components/text-editor/text-editor';
 import CategorySelect, { type RecipeCategory } from '@/components/category-select/category-select';
 import AddIngredient from '@/components/add-ingredients/add-ingredient';
 import AddStep from '@/components/add-step/add-step';
 import axiosClient from '@/lib/axiosClient';
+import { clearCurrentUserCache } from '@/services/auth';
 
 const AddRecipePage = () => {
+  const navigate = useNavigate();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [totalMinutes, setTotalMinutes] = useState(0);
   const [description, setDescription] = useState('');
@@ -56,7 +59,16 @@ const [category, setCategory] = useState<RecipeCategory | null>(null);
     await axiosClient.post('/recipes', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    alert('Recipe created successfully');
+    
+    // Clear user cache to refresh recipes in profile
+    clearCurrentUserCache();
+    
+    alert('Recipe created successfully! Redirecting to your profile...');
+    
+    // Redirect to profile page My Recipes tab to see the new recipe
+    setTimeout(() => {
+      navigate('/profile?tab=1'); // Tab 1 is My Recipes
+    }, 1000);
   } catch (err: any) {
     console.error(err?.response?.data || err);
     alert('Failed to create recipe');

@@ -56,6 +56,12 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
           <Avatar
             key={userProfile.avatar} // Force re-render when avatar changes
             src={userProfile.avatar !== '/api/placeholder/150/150' ? userProfile.avatar : undefined}
+            onError={(e) => {
+              console.error('Avatar failed to load:', userProfile.avatar, e);
+            }}
+            onLoad={() => {
+              console.log('Avatar loaded successfully:', userProfile.avatar);
+            }}
             sx={{
               width: 150,
               height: 150,

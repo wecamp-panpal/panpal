@@ -1,11 +1,11 @@
 import { AppBar, Box, Link, Toolbar, styled, Tooltip, IconButton, Button } from '@mui/material';
-import { CircleUserRound, Settings } from 'lucide-react';
+import { CircleUserRound, Settings, LogOut } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAppDispatch } from '@/hooks/use-app-dispatch';
 import { useAppSelector } from '@/hooks/use-app-selector';
 import SearchBar from '../search-bar/search-bar';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getThemeColors } from '@/lib/muiTheme';
+import { getCurrentUser, logoutUser } from '@/services/auth';
 
 interface NavBarProps {
   onSearch?: (query: string) => void;
@@ -40,6 +40,27 @@ const NavBar = ({ onSearch }: NavBarProps) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
+  const [isAuthenticate, setAuthenticate] = useState(false);
+
+  // Check authentication status on component mount and location change
+  useEffect(() => {
+    const checkAuth = async () => {
+      const user = await getCurrentUser();
+      setAuthenticate(!!user);
+    };
+    
+    // Only check auth on mount and when navigating to/from auth pages
+    if (pathname === '/sign-in' || pathname === '/sign-up' || 
+        pathname === '/profile' || pathname === '/') {
+      checkAuth();
+    }
+  }, [pathname]);
+
+  const handleLogout = async () => {
+    await logoutUser();
+    setAuthenticate(false);
+    navigate('/');
+  };
   if (pathname === '/sign-in' || pathname === '/sign-up') {
     return (
       <AppBar
@@ -210,7 +231,7 @@ const NavBar = ({ onSearch }: NavBarProps) => {
                 </IconButton>
               </Tooltip>
 
-              <Tooltip title="Settings">
+              {/* <Tooltip title="Settings">
                 <IconButton
                   sx={{
                     '&:focus': {
@@ -220,6 +241,20 @@ const NavBar = ({ onSearch }: NavBarProps) => {
                   }}
                 >
                   <Settings color="#EAC9A3" />
+                </IconButton>
+              </Tooltip> */}
+
+              <Tooltip title="Logout">
+                <IconButton
+                  onClick={handleLogout}
+                  sx={{
+                    '&:focus': {
+                      outline: 'none',
+                      boxShadow: 'none',
+                    },
+                  }}
+                >
+                  <LogOut color="#EAC9A3" />
                 </IconButton>
               </Tooltip>
             </>
