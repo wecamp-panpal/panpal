@@ -38,6 +38,7 @@ export async function loginUser(credentials: LoginRequest): Promise<AuthResponse
         // save token after login successfully
         if(response.data.accessToken){
             localStorage.setItem('access_token', response.data.accessToken);
+            localStorage.setItem('user', JSON.stringify(response.data.user)); // Save user data if needed
         }
         return {
             success:true,
@@ -60,6 +61,7 @@ export async function registerUser(userData: RegisterRequest): Promise<AuthRespo
         // Save token after register successfully
         if(response.data.accessToken){
             localStorage.setItem('access_token', response.data.accessToken);
+            localStorage.setItem('user', JSON.stringify(response.data.user)); // Save user data if needed
         }
         return {
             success: true,
