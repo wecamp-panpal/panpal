@@ -30,6 +30,22 @@ export default function RecipeDetailPage() {
   const [newRating, setNewRating] = useState<number | null>(null);
   const [newImage, setNewImage] = useState<File | null>(null);
   const [isFavorited, setIsFavorited] = useState(false);
+
+  // Listen for favorite changes to keep heart icon in sync
+  useEffect(() => {
+    const handleFavoriteChange = (event: CustomEvent) => {
+      const { recipeId: changedRecipeId, isFavorited: newStatus } = event.detail;
+      if (changedRecipeId === Number(id)) {
+        setIsFavorited(newStatus);
+      }
+    };
+
+    window.addEventListener('favoriteChanged', handleFavoriteChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('favoriteChanged', handleFavoriteChange as EventListener);
+    };
+  }, [id]);
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
   const [isEditedVersion, setIsEditedVersion] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -72,10 +88,11 @@ export default function RecipeDetailPage() {
         setRecipe(recipeData);
         setComments(fetchedComments);
 
+        // Check favorite status from localStorage (this may have been updated during recipe conversion)
         const saved = localStorage.getItem("favorite-recipes");
         if (saved) {
           const favoriteIds = JSON.parse(saved);
-          setIsFavorited(favoriteIds.includes(recipeId));
+          setIsFavorited(favoriteIds.includes(Number(recipeId)));
         }
         } catch (err) {
           console.error(err);
@@ -106,40 +123,30 @@ export default function RecipeDetailPage() {
     setNewImage(null);
   };
 
-  const handleToggleFavorite = () => {
+  const handleToggleFavorite = async () => {
     if (!currentUser) {
       navigate("/sign-in");
       return;
     }
 
     const recipeId = Number(id);
+    const wasCurrentlyFavorited = isFavorited;
+    
+    // Optimistic update
     setIsFavorited(!isFavorited);
     
-    // Update localStorage
-    const saved = localStorage.getItem('favorite-recipes');
-    let favoriteIds: number[] = [];
-    
-    if (saved) {
-      try {
-        favoriteIds = JSON.parse(saved);
-      } catch (error) {
-        console.error('Error parsing favorites:', error);
-      }
+    try {
+      // Import and use favoriteService
+      const { favoriteService } = await import('@/services/favorites');
+      await favoriteService.toggleFavorite(recipeId, wasCurrentlyFavorited);
+      
+      console.log(`${wasCurrentlyFavorited ? 'Removed from' : 'Added to'} favorites:`, recipe?.title);
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      // Revert optimistic update on error
+      setIsFavorited(wasCurrentlyFavorited);
+      alert('Failed to update favorite status. Please try again.');
     }
-    
-    if (!isFavorited) {
-      // Add to favorites
-      if (!favoriteIds.includes(recipeId)) {
-        favoriteIds.push(recipeId);
-        console.log('Added to favorites:', recipe?.title);
-      }
-    } else {
-      // Remove from favorites
-      favoriteIds = favoriteIds.filter(id => id !== recipeId);
-      console.log('Removed from favorites:', recipe?.title);
-    }
-    
-    localStorage.setItem('favorite-recipes', JSON.stringify(favoriteIds));
   };
 
   const handleEditRecipe = () => {

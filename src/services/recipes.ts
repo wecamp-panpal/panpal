@@ -1,10 +1,42 @@
 import type { UIRecipe, UIRecipeCategory, BackendRecipe } from "@/types/ui-recipe";
 import axiosClient from '@/lib/axiosClient';
+import { storeRecipeIdMapping } from '@/services/favorites';
 
 // Convert backend recipe to frontend UI recipe format
 function convertBackendRecipeToUI(backendRecipe: BackendRecipe): UIRecipe {
+  const uiId = parseInt(backendRecipe.id.slice(-8), 16); // Convert UUID to number for UI compatibility
+  
+  // Store ID mapping for favorites API
+  storeRecipeIdMapping(uiId, backendRecipe.id);
+  
+  // If backend provides isFavorite info, sync it with localStorage favorites
+  if (backendRecipe.isFavorite !== undefined) {
+    const saved = localStorage.getItem('favorite-recipes');
+    let favoriteIds: number[] = [];
+    
+    if (saved) {
+      try {
+        favoriteIds = JSON.parse(saved);
+      } catch (error) {
+        favoriteIds = [];
+      }
+    }
+    
+    const isCurrentlyInLocalStorage = favoriteIds.includes(uiId);
+    
+    if (backendRecipe.isFavorite && !isCurrentlyInLocalStorage) {
+      // Backend says it's favorited but not in localStorage - add it
+      favoriteIds.push(uiId);
+      localStorage.setItem('favorite-recipes', JSON.stringify(favoriteIds));
+    } else if (!backendRecipe.isFavorite && isCurrentlyInLocalStorage) {
+      // Backend says it's not favorited but it's in localStorage - remove it
+      favoriteIds = favoriteIds.filter(id => id !== uiId);
+      localStorage.setItem('favorite-recipes', JSON.stringify(favoriteIds));
+    }
+  }
+  
   return {
-    id: parseInt(backendRecipe.id.slice(-8), 16), // Convert UUID to number for UI compatibility
+    id: uiId,
     title: backendRecipe.title,
     description: backendRecipe.description || '',
     author_name: backendRecipe.authorName,
@@ -27,6 +59,8 @@ function convertBackendRecipeToUI(backendRecipe: BackendRecipe): UIRecipe {
     }))
   };
 }
+
+// ID mapping function is now imported from favorites service
 
 // Map backend category to UI category
 function mapBackendCategoryToUI(backendCategory: string): UIRecipeCategory {

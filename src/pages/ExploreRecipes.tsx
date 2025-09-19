@@ -7,7 +7,7 @@ import { listRecipes } from '@/services/recipes';
 import FilterBar from '@/components/recipes/FilterBar';
 import type { FilterState } from '@/components/recipes/FilterBar';
 import RecipeCard from '@/components/recipe-card/RecipeCard';
-import { useFavorites } from '@/hooks/use-favourite';
+import { useFavorites } from '@/hooks/useFavorites';
 
 const PAGE_SIZE = 24;
 
@@ -18,7 +18,21 @@ export default function ExploreRecipes() {
   const [recipes, setRecipes] = useState<UIRecipe[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const { favorites, handleToggleFavorite } = useFavorites();
+  const { favorites, handleToggleFavorite, syncFromLocalStorage } = useFavorites();
+
+  // Listen for favorite changes to keep UI in sync across components
+  useEffect(() => {
+    const handleFavoriteChange = () => {
+      // Sync favorites state when changes occur from other pages
+      syncFromLocalStorage();
+    };
+
+    window.addEventListener('favoriteChanged', handleFavoriteChange);
+    
+    return () => {
+      window.removeEventListener('favoriteChanged', handleFavoriteChange);
+    };
+  }, [syncFromLocalStorage]);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -42,6 +56,8 @@ export default function ExploreRecipes() {
         if (!ignore) {
           setRecipes(data);
           setTotal(total);
+          // Sync favorites after recipes are loaded
+          syncFromLocalStorage();
         }
       })
       .finally(() => {
