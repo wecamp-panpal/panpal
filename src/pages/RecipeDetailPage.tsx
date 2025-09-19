@@ -41,14 +41,55 @@ export default function RecipeDetailPage() {
     getCurrentUser().then(setCurrentUser).catch(() => setCurrentUser(null));
   }, []);
 
+  // Listen for recipe updates to refresh detail page immediately
+  useEffect(() => {
+    const handleRecipeUpdate = (event: CustomEvent) => {
+      const { recipeId } = event.detail;
+      console.log('🔄 Recipe updated event received:', { recipeId, currentId: id });
+      
+      if (recipeId === Number(id) && id) {
+        console.log('Refreshing current recipe detail...');
+        const loadData = async () => {
+          try {
+            setLoading(true);
+            
+            // Force cache bust when refreshing due to update
+            const [fetchedRecipe, fetchedComments] = await Promise.all([
+              getRecipeById(Number(id), true), // Force cache bust
+              getCommentsByRecipeId(id),
+            ]);
+
+            setRecipe(fetchedRecipe);
+            setComments(fetchedComments);
+          } catch (err) {
+            console.error('Failed to refresh recipe:', err);
+          } finally {
+            setLoading(false);
+          }
+        };
+        
+        loadData();
+      }
+    };
+
+    window.addEventListener('recipeUpdated', handleRecipeUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('recipeUpdated', handleRecipeUpdate as EventListener);
+    };
+  }, [id]);
+
   useEffect(() => {
     if (!id) return;
     const recipeId = id;
 
   async function loadData() {
     try {
+        // Check if we need to bust cache (when coming from edit page with timestamp or force refresh)
+        const shouldBustCache = location.search.includes('updated=') || location.search.includes('refresh=');
+        
         const [fetchedRecipe, fetchedComments] = await Promise.all([
-          getRecipeById(Number(recipeId)),
+          getRecipeById(Number(recipeId), shouldBustCache),
           getCommentsByRecipeId(recipeId),
         ]);
 

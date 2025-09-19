@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Container, Typography, TextField, Button } from '@mui/material';
+import { useAppSelector } from '@/hooks/use-app-selector';
 import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
 
 import DescriptionEditor from '@/components/text-editor/text-editor';
@@ -9,7 +10,7 @@ import AddIngredient from '@/components/add-ingredients/add-ingredient';
 import AddStep from '@/components/add-step/add-step';
 import SimpleSuccessModal from '@/components/success-modal/SimpleSuccessModal';
 import type { UIRecipe } from '@/types/ui-recipe';
-import { makeMockRecipes } from '@/mocks/recipes.mock';
+import { getRecipeById, updateRecipe, updateRecipeImage } from '@/services/recipes';
 
 const EditRecipePage = () => {
   const { id } = useParams();
@@ -20,88 +21,119 @@ const EditRecipePage = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [totalMinutes, setTotalMinutes] = useState(0);
-  const [category, setCategory] = useState<UIRecipe['category']>('Main Dish');
+  const [category, setCategory] = useState<UIRecipe['category']>('MAIN_DISH');
   const [ingredients, setIngredients] = useState<{name: string; quantity: string}[]>([]);
   const [steps, setSteps] = useState<{step_number: number; instruction: string; image_url?: string}[]>([]);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  // Mock current user
-  const currentUser = "Chef A";
+  // Get current user from Redux store
+  const { user, isAuthenticated } = useAppSelector((state) => state.user);
 
   useEffect(() => {
-    const recipeId = Number(id);
-    const all = makeMockRecipes(60);
-    const found = all.find((r) => r.id === recipeId);
-    
-    if (found) {
-      // Check if current user owns this recipe
-      if (found.author_name !== currentUser) {
-        navigate('/recipes/' + id); // Redirect back to detail page if not owner
+    const loadRecipe = async () => {
+      if (!id || !isAuthenticated) {
+        navigate('/signin');
         return;
       }
-      
-      setRecipe(found);
-      setTitle(found.title);
-      setDescription(found.description);
-      setImagePreview(found.image); // Keep original image for preview
-      setCategory(found.category);
-      setIngredients(found.ingredients);
-      setSteps(found.steps);
-      
-      // Extract minutes from cooking_time string (e.g., "30 mins" -> 30)
-      const timeMatch = found.cooking_time.match(/(\d+)/);
-      if (timeMatch) {
-        setTotalMinutes(parseInt(timeMatch[1]));
+
+      try {
+        // Clean up old localStorage data
+        if (localStorage.getItem('edited-recipes')) {
+          console.log('Cleaning up old localStorage data...');
+          localStorage.removeItem('edited-recipes');
+        }
+        
+        const recipeId = Number(id);
+        const found = await getRecipeById(recipeId);
+        
+        // Check if current user owns this recipe
+        if (found.author_id !== user?.id) {
+          navigate('/recipes/' + id); // Redirect back to detail page if not owner
+          return;
+        }
+        
+        setRecipe(found);
+        setTitle(found.title);
+        setDescription(found.description);
+        setImagePreview(found.image); // Keep original image for preview
+        setCategory(found.category);
+        setIngredients(found.ingredients);
+        setSteps(found.steps);
+        
+        // Extract minutes from cooking_time string (e.g., "30 mins" -> 30)
+        const timeMatch = found.cooking_time.match(/(\d+)/);
+        if (timeMatch) {
+          setTotalMinutes(parseInt(timeMatch[1]));
+        }
+      } catch (error) {
+        console.error('Error loading recipe:', error);
+        navigate('/'); // Redirect to home if recipe not found or error
       }
-    } else {
-      navigate('/'); // Redirect to home if recipe not found
-    }
-    
-    setLoading(false);
-  }, [id, navigate, currentUser]);
+      
+      setLoading(false);
+    };
+
+    loadRecipe();
+  }, [id, navigate, user, isAuthenticated]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files || event.target.files.length === 0) return;
     const newFile = event.target.files[0];
     const newImageUrl = URL.createObjectURL(newFile);
+    setImageFile(newFile);
     setImagePreview(newImageUrl);
     console.log('New image uploaded:', newImageUrl);
     event.target.value = '';
   };
 
-  const handleSave = () => {
-    if (!recipe || !title.trim()) {
+  const handleSave = async () => {
+    if (!recipe || !title.trim() || saving) {
       alert('Please fill in the recipe title');
       return;
     }
 
-    // Create updated recipe object
-    const updatedRecipe: UIRecipe = {
-      ...recipe,
-      title: title.trim(),
-      description: description,
-      cooking_time: `${totalMinutes} mins`,
-      category: category,
-      ingredients: ingredients,
-      steps: steps,
-      image: (imagePreview && imagePreview.trim()) || recipe.image,
-    };
-
-    console.log('Debug - imagePreview:', imagePreview);
-    console.log('Debug - recipe.image:', recipe.image);
-    console.log('Debug - final image:', updatedRecipe.image);
-
-    // In a real app, this would be an API call
-    console.log('Saving recipe updates:', updatedRecipe);
+    setSaving(true);
     
-    // save to localStorage to demonstrate
-    const savedRecipes = localStorage.getItem('edited-recipes');
-    const editedRecipes = savedRecipes ? JSON.parse(savedRecipes) : {};
-    editedRecipes[recipe.id] = updatedRecipe;
-    localStorage.setItem('edited-recipes', JSON.stringify(editedRecipes));
-    
-    // Show success modal
-    setShowSuccessModal(true);
+    try {
+      // Prepare updates data
+      const updates = {
+        title: title.trim(),
+        description: description,
+        cookingTime: `${totalMinutes} mins`,
+        category: category,
+        ingredients: ingredients,
+        steps: steps.map(step => ({
+          stepNumber: step.step_number,
+          instruction: step.instruction,
+          imageUrl: step.image_url
+        }))
+      };
+
+      // Update recipe data first
+      let updatedRecipe = await updateRecipe(recipe.id, updates);
+      
+      // If there's a new image file, upload it separately
+      if (imageFile) {
+        updatedRecipe = await updateRecipeImage(recipe.id, imageFile);
+      }
+
+      console.log('Recipe updated successfully:', updatedRecipe);
+      
+      // Dispatch custom event to notify other components about recipe update
+      window.dispatchEvent(new CustomEvent('recipeUpdated', { 
+        detail: { recipeId: recipe.id, updatedRecipe } 
+      }));
+      
+      // Show success modal
+      setShowSuccessModal(true);
+    } catch (error) {
+      console.error('Error updating recipe:', error);
+      alert('Failed to update recipe. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancel = () => {
@@ -340,14 +372,28 @@ const EditRecipePage = () => {
           Steps
         </Typography>
         <AddStep 
-          initialSteps={recipe.steps} 
-          onChange={(newSteps) => setSteps(newSteps)}
+          initialSteps={recipe.steps.map(step => ({
+            stepNumber: step.step_number,
+            instruction: step.instruction,
+            imageUrl: step.image_url
+          }))} 
+          onChange={(newSteps) => {
+            console.log('📝 EditRecipePage received steps:', newSteps);
+            const convertedSteps = newSteps.map(step => ({
+              step_number: step.stepNumber,
+              instruction: step.instruction,
+              image_url: step.imageUrl
+            }));
+            console.log('📝 Converted steps:', convertedSteps);
+            setSteps(convertedSteps);
+          }}
         />
       </Box>
 
       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 4 }}>
         <Button
           onClick={handleSave}
+          disabled={saving}
           sx={{
             textTransform: 'none',
             backgroundColor: 'primary.main',
@@ -364,10 +410,14 @@ const EditRecipePage = () => {
             '&:focus': {
               outline: 'none',
               boxShadow: 'none'
+            },
+            '&:disabled': {
+              backgroundColor: 'grey.300',
+              color: 'grey.500'
             }
           }}
         >
-          Save Changes
+          {saving ? 'Saving...' : 'Save Changes'}
         </Button>
         <Button
           onClick={handleCancel}

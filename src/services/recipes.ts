@@ -66,13 +66,13 @@ function convertBackendRecipeToUI(backendRecipe: BackendRecipe): UIRecipe {
 function mapBackendCategoryToUI(backendCategory: string): UIRecipeCategory {
   switch (backendCategory.toUpperCase()) {
     case 'DESSERT':
-      return 'Dessert';
+      return 'DESSERT';
     case 'DRINK':
-      return 'Drink';
+      return 'DRINK';
     case 'MAIN_DISH':
-      return 'Main Dish';
+      return 'MAIN_DISH';
     default:
-      return 'Main Dish';
+      return 'MAIN_DISH';
   }
 }
 
@@ -90,7 +90,8 @@ export async function listRecipes(
   pageSize: number,
   filters: RecipeFilters,
   searchText?: string,
-  authorId?: string
+  authorId?: string,
+  bustCache = false
 ): Promise<ListResult> {
   try {
     const params: Record<string, string> = {
@@ -108,6 +109,10 @@ export async function listRecipes(
 
     if (authorId) {
       params.authorId = authorId;
+    }
+
+    if (bustCache) {
+      params._t = Date.now().toString();
     }
 
     console.log("Request params:", params);
@@ -131,9 +136,10 @@ export async function listRecipes(
 export async function getUserRecipes(
   userId: string,
   page = 1,
-  pageSize = 20
+  pageSize = 20,
+  bustCache = false
 ): Promise<ListResult> {
-  return listRecipes(page, pageSize, {}, undefined, userId);
+  return listRecipes(page, pageSize, {}, undefined, userId, bustCache);
 }
 
 function convertUIIdToBackendId(uiRecipeId: number): string {
@@ -141,13 +147,82 @@ function convertUIIdToBackendId(uiRecipeId: number): string {
   return mapping[uiRecipeId] || uiRecipeId.toString();
 }
 
-export async function getRecipeById(uiId: number): Promise<UIRecipe> {
+export async function getRecipeById(uiId: number, bustCache = false): Promise<UIRecipe> {
   try {
     const backendId = convertUIIdToBackendId(uiId);
-    const response = await axiosClient.get(`/recipes/${backendId}`);
+    const url = bustCache 
+      ? `/recipes/${backendId}?_t=${Date.now()}` 
+      : `/recipes/${backendId}`;
+    const response = await axiosClient.get(url);
     return convertBackendRecipeToUI(response.data);
   } catch (error) {
     console.error("Failed to fetch recipe:", error);
     throw new Error("Failed to fetch recipe");
+  }
+}
+
+// Map UI category to backend category
+function mapUICategoryToBackend(uiCategory: UIRecipeCategory): string {
+  switch (uiCategory) {
+    case 'DESSERT':
+      return 'DESSERT';
+    case 'DRINK':
+      return 'DRINK';
+    case 'MAIN_DISH':
+      return 'MAIN_DISH';
+    default:
+      return 'MAIN_DISH';
+  }
+}
+
+export async function updateRecipe(
+  uiRecipeId: number,
+  updates: {
+    title?: string;
+    description?: string;
+    cookingTime?: string;
+    category?: UIRecipeCategory;
+    ingredients?: {name: string; quantity: string}[];
+    steps?: {stepNumber?: number; instruction: string; imageUrl?: string}[];
+  }
+): Promise<UIRecipe> {
+  try {
+    const backendId = convertUIIdToBackendId(uiRecipeId);
+    
+    const payload: any = {};
+    
+    if (updates.title !== undefined) payload.title = updates.title;
+    if (updates.description !== undefined) payload.description = updates.description;
+    if (updates.cookingTime !== undefined) payload.cookingTime = updates.cookingTime;
+    if (updates.category !== undefined) payload.category = mapUICategoryToBackend(updates.category);
+    if (updates.ingredients !== undefined) payload.ingredients = updates.ingredients;
+    if (updates.steps !== undefined) payload.steps = updates.steps;
+
+    const response = await axiosClient.patch(`/recipes/${backendId}`, payload);
+    return convertBackendRecipeToUI(response.data);
+  } catch (error) {
+    console.error("Failed to update recipe:", error);
+    throw new Error("Failed to update recipe");
+  }
+}
+
+export async function updateRecipeImage(
+  uiRecipeId: number,
+  imageFile: File
+): Promise<UIRecipe> {
+  try {
+    const backendId = convertUIIdToBackendId(uiRecipeId);
+    
+    const formData = new FormData();
+    formData.append('image', imageFile);
+
+    const response = await axiosClient.post(`/recipes/${backendId}/image`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    
+    return convertBackendRecipeToUI(response.data);
+  } catch (error) {
+    console.error("Failed to update recipe image:", error);
+    throw new Error("Failed to update recipe image");
   }
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Container, Paper, Box, CircularProgress, Alert } from '@mui/material';
 import { muiTheme } from '@/lib/muiTheme';
@@ -200,6 +200,31 @@ const Profile = () => {
     loadUser();
   }, [navigate, searchParams]);
 
+  // No complex logic needed - favoriteCount is automatically stable!
+
+  const loadMyRecipes = useCallback(async (userId: string, forceRefresh = false) => {
+    try {
+      setMyRecipesLoading(true);
+      console.log('Loading recipes for user:', userId, { forceRefresh });
+      
+      if (forceRefresh) {
+        clearCurrentUserCache();
+      }
+      
+      const result = await getUserRecipes(userId, 1, 20, forceRefresh);
+      setMyRecipes(result.data);
+      
+      syncFromLocalStorage();
+      
+      console.log('User recipes loaded:', result);
+    } catch (err) {
+      console.error('Failed to load user recipes:', err);
+      setError('Failed to load your recipes. Please try again.');
+    } finally {
+      setMyRecipesLoading(false);
+    }
+  }, [syncFromLocalStorage]);
+
   useEffect(() => {
     const handleFavoriteChange = (event: CustomEvent) => {
       const { recipeId, isFavorited } = event.detail;
@@ -212,37 +237,32 @@ const Profile = () => {
       }
     };
 
+    const handleRecipeUpdate = (event: CustomEvent) => {
+      const { recipeId, updatedRecipe } = event.detail;
+      console.log('Recipe updated:', { recipeId, updatedRecipe });
+      
+      // Update the recipe in myRecipes list
+      setMyRecipes(prev => 
+        prev.map(recipe => 
+          recipe.id === recipeId ? updatedRecipe : recipe
+        )
+      );
+      
+      // Also refresh the list to get fresh data from backend with cache busting
+      if (user?.id) {
+        console.log('🔄 Force refreshing recipes after update...');
+        loadMyRecipes(user.id, true);
+      }
+    };
+
     window.addEventListener('favoriteChanged', handleFavoriteChange as EventListener);
+    window.addEventListener('recipeUpdated', handleRecipeUpdate as EventListener);
     
     return () => {
       window.removeEventListener('favoriteChanged', handleFavoriteChange as EventListener);
+      window.removeEventListener('recipeUpdated', handleRecipeUpdate as EventListener);
     };
-  }, []);
-
-  // No complex logic needed - favoriteCount is automatically stable!
-
-  const loadMyRecipes = async (userId: string, forceRefresh = false) => {
-    try {
-      setMyRecipesLoading(true);
-      console.log('Loading recipes for user:', userId, { forceRefresh });
-      
-      if (forceRefresh) {
-        clearCurrentUserCache();
-      }
-      
-      const result = await getUserRecipes(userId);
-      setMyRecipes(result.data);
-      
-      syncFromLocalStorage();
-      
-      console.log('User recipes loaded:', result);
-    } catch (err) {
-      console.error('Failed to load user recipes:', err);
-      setError('Failed to load your recipes. Please try again.');
-    } finally {
-      setMyRecipesLoading(false);
-    }
-  };
+  }, [user?.id, loadMyRecipes]);
 
   // Load user's favorite recipes
   const loadFavoriteRecipes = async (forceRefresh = false) => {

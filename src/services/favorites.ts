@@ -32,13 +32,13 @@ function convertBackendRecipeToUI(backendRecipe: BackendRecipe): UIRecipe {
 function mapBackendCategoryToUI(backendCategory: string): UIRecipe['category'] {
   switch (backendCategory.toUpperCase()) {
     case 'DESSERT':
-      return 'Dessert';
+      return 'DESSERT';
     case 'DRINK':
-      return 'Drink';
+      return 'DRINK';
     case 'MAIN_DISH':
-      return 'Main Dish';
+      return 'MAIN_DISH';
     default:
-      return 'Main Dish';
+      return 'MAIN_DISH';
   }
 }
 
