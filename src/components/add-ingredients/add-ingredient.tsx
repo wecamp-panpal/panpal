@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Box, TextField, IconButton, Button, FormControl, Select, MenuItem } from '@mui/material';
 import { Add, Delete } from '@mui/icons-material';
 
@@ -11,7 +11,6 @@ const AddIngredient = ({ initialIngredients, onChange }: AddIngredientProps) => 
   const [ingredients, setIngredients] = useState(() => {
     if (initialIngredients && initialIngredients.length > 0) {
       return initialIngredients.map(ing => {
-        // Parse quantity and unit from "2 cups" format
         const parts = ing.quantity.split(' ');
         const qty = parts[0] || '';
         const unit = parts.slice(1).join(' ') || '';
@@ -20,52 +19,39 @@ const AddIngredient = ({ initialIngredients, onChange }: AddIngredientProps) => 
     }
     return [{ qty: '', unit: '', item: '' }];
   });
+
   const units = ['g', 'kg', 'ml', 'l', 'tsp', 'cup', 'pcs'];
 
-  // Update ingredients when initialIngredients prop changes
+  const notifyParent = useCallback(
+    (newIngredients: typeof ingredients) => {
+      const formatted = newIngredients
+        .filter(ing => ing.item.trim())
+        .map(ing => ({
+          name: ing.item,
+          quantity: `${ing.qty} ${ing.unit}`.trim(),
+        }));
+      onChange?.(formatted);
+    },
+    [onChange]
+  );
+
   useEffect(() => {
-    if (initialIngredients && initialIngredients.length > 0) {
-      const parsedIngredients = initialIngredients.map(ing => {
-        const parts = ing.quantity.split(' ');
-        const qty = parts[0] || '';
-        const unit = parts.slice(1).join(' ') || '';
-        return { qty, unit, item: ing.name };
-      });
-      setIngredients(parsedIngredients);
-    }
-  }, [initialIngredients]);
+    notifyParent(ingredients);
+  }, [ingredients, notifyParent]);
 
   const handleChange = (i: number, field: string, value: string) => {
     const updated = [...ingredients];
     (updated[i] as any)[field] = value;
     setIngredients(updated);
-    
-    // Call onChange with formatted data
-    const formatted = updated
-      .filter(ing => ing.item.trim())
-      .map(ing => ({
-        name: ing.item,
-        quantity: `${ing.qty} ${ing.unit}`.trim()
-      }));
-    onChange?.(formatted);
   };
 
   const addIngredient = () => {
-    setIngredients([...ingredients, { qty: '', unit: '', item: '' }]);
+    setIngredients(prev => [...prev, { qty: '', unit: '', item: '' }]);
   };
 
   const removeIngredient = (i: number) => {
     const updated = ingredients.filter((_, index) => index !== i);
     setIngredients(updated.length ? updated : [{ qty: '', unit: '', item: '' }]);
-    
-    // Call onChange with updated data
-    const formatted = updated
-      .filter(ing => ing.item.trim())
-      .map(ing => ({
-        name: ing.item,
-        quantity: `${ing.qty} ${ing.unit}`.trim()
-      }));
-    onChange?.(formatted);
   };
 
   return (
@@ -75,10 +61,9 @@ const AddIngredient = ({ initialIngredients, onChange }: AddIngredientProps) => 
           <TextField
             value={ingredient.qty}
             onChange={e => handleChange(i, 'qty', e.target.value)}
-            placeholder='qty'
+            placeholder="qty"
             sx={{
               width: 100,
-
               justifyContent: 'center',
               '& .MuiInputBase-root': {
                 borderRadius: 2,
@@ -97,10 +82,8 @@ const AddIngredient = ({ initialIngredients, onChange }: AddIngredientProps) => 
               },
               '& .MuiInputBase-input': {
                 color: '#391F06',
-
                 '&::placeholder': {
                   color: '#BFA980',
-
                   fontSize: 16,
                   opacity: 1,
                 },
@@ -125,19 +108,14 @@ const AddIngredient = ({ initialIngredients, onChange }: AddIngredientProps) => 
                     border: '1px solid',
                     borderColor: 'secondary.main',
                     boxShadow: 3,
-
                     '& .MuiMenuItem-root': {
                       color: '#391F06',
-
                       '&:hover': { backgroundColor: '#e6d2b7' },
-
                       '&.Mui-focusVisible': { backgroundColor: '#f0d9b5' },
-
                       '&.Mui-selected': {
                         backgroundColor: '#e6d2b7 !important',
                         color: '#391F06',
                       },
-
                       '&.Mui-selected.Mui-focusVisible': {
                         backgroundColor: '#d8c2a5 !important',
                       },
@@ -150,7 +128,6 @@ const AddIngredient = ({ initialIngredients, onChange }: AddIngredientProps) => 
                 <MenuItem
                   key={u}
                   value={u}
-                  
                   sx={{
                     color: '#391F06',
                     fontSize: 16,
@@ -178,10 +155,9 @@ const AddIngredient = ({ initialIngredients, onChange }: AddIngredientProps) => 
           <TextField
             value={ingredient.item}
             onChange={e => handleChange(i, 'item', e.target.value)}
-            placeholder='Ingredient name...'
+            placeholder="Ingredient name..."
             sx={{
               flex: 1,
-
               justifyContent: 'center',
               '& .MuiInputBase-root': {
                 borderRadius: 2,
@@ -200,10 +176,8 @@ const AddIngredient = ({ initialIngredients, onChange }: AddIngredientProps) => 
               },
               '& .MuiInputBase-input': {
                 color: '#391F06',
-
                 '&::placeholder': {
                   color: '#BFA980',
-
                   fontSize: 16,
                   opacity: 1,
                 },
@@ -222,13 +196,23 @@ const AddIngredient = ({ initialIngredients, onChange }: AddIngredientProps) => 
           color: '#391F06',
           textTransform: 'none',
           paddingBottom: 2,
+          border: 'none',
+          boxShadow: 'none',
           '&:hover': {
             background: '#e6d2b7',
             color: '#391F06',
+            border: 'none',
+            boxShadow: 'none',
+          },
+          '&:focus': {
+            border: 'none',
+            boxShadow: 'none',
+            outline: 'none',
           },
         }}
         startIcon={<Add sx={{ color: '#391F06', '&:hover': { color: '#fff' } }} />}
         onClick={addIngredient}
+       
       >
         Add ingredient
       </Button>

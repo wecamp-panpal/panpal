@@ -9,6 +9,7 @@ import AddIngredient from '@/components/add-ingredients/add-ingredient';
 import AddStep from '@/components/add-step/add-step';
 import axiosClient from '@/lib/axiosClient';
 import { clearCurrentUserCache } from '@/services/auth';
+import { toast } from 'react-hot-toast';
 
 const AddRecipePage = () => {
   const navigate = useNavigate();
@@ -83,11 +84,11 @@ const [category, setCategory] = useState<RecipeCategory | null>(null);
       await Promise.all(jobs);
 
       clearCurrentUserCache();
-      alert('Recipe created successfully! Redirecting to your profile...');
+      toast.success('Recipe create successfully')
       navigate('/profile?tab=1');
     } catch (err: any) {
       console.error(err?.response?.data || err);
-      alert('Failed to create recipe');
+      toast.error("Failed to create recipe")
     }
   };
 

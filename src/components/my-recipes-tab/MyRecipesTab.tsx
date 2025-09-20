@@ -20,7 +20,6 @@ interface MyRecipesTabProps {
 const MyRecipesTab: React.FC<MyRecipesTabProps> = ({
   myRecipes,
   onAddNewRecipe,
-  onEditRecipe,
   onViewRecipe,
   onToggleFavorite,
   favorites = new Set(),

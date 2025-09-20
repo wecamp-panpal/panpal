@@ -1,19 +1,19 @@
-import type { UIRecipe, UIRecipeCategory, BackendRecipe } from "@/types/ui-recipe";
+import type { UIRecipe, UIRecipeCategory, BackendRecipe } from '@/types/ui-recipe';
 import axiosClient from '@/lib/axiosClient';
 import { storeRecipeIdMapping } from '@/services/favorites';
 
 // Convert backend recipe to frontend UI recipe format
 function convertBackendRecipeToUI(backendRecipe: BackendRecipe): UIRecipe {
   const uiId = parseInt(backendRecipe.id.slice(-8), 16); // Convert UUID to number for UI compatibility
-  
+
   // Store ID mapping for favorites API
   storeRecipeIdMapping(uiId, backendRecipe.id);
-  
+
   // If backend provides isFavorite info, sync it with localStorage favorites
   if (backendRecipe.isFavorite !== undefined) {
     const saved = localStorage.getItem('favorite-recipes');
     let favoriteIds: number[] = [];
-    
+
     if (saved) {
       try {
         favoriteIds = JSON.parse(saved);
@@ -21,9 +21,9 @@ function convertBackendRecipeToUI(backendRecipe: BackendRecipe): UIRecipe {
         favoriteIds = [];
       }
     }
-    
+
     const isCurrentlyInLocalStorage = favoriteIds.includes(uiId);
-    
+
     if (backendRecipe.isFavorite && !isCurrentlyInLocalStorage) {
       // Backend says it's favorited but not in localStorage - add it
       favoriteIds.push(uiId);
@@ -34,7 +34,7 @@ function convertBackendRecipeToUI(backendRecipe: BackendRecipe): UIRecipe {
       localStorage.setItem('favorite-recipes', JSON.stringify(favoriteIds));
     }
   }
-  
+
   return {
     id: uiId,
     title: backendRecipe.title,
@@ -50,13 +50,13 @@ function convertBackendRecipeToUI(backendRecipe: BackendRecipe): UIRecipe {
     category: mapBackendCategoryToUI(backendRecipe.category),
     ingredients: backendRecipe.ingredients.map(ing => ({
       name: ing.name,
-      quantity: ing.quantity
+      quantity: ing.quantity,
     })),
     steps: backendRecipe.steps.map(step => ({
       step_number: step.stepNumber,
       instruction: step.instruction,
-      image_url: step.imageUrl || undefined
-    }))
+      image_url: step.imageUrl || undefined,
+    })),
   };
 }
 
@@ -115,20 +115,20 @@ export async function listRecipes(
       params._t = Date.now().toString();
     }
 
-    console.log("Request params:", params);
+    console.log('Request params:', params);
 
     const response = await axiosClient.get('/recipes', { params });
     const result = response.data;
 
-    console.log("API result:", result);
+    console.log('API result:', result);
 
     return {
       data: (result.items ?? []).map(convertBackendRecipeToUI),
       total: result.total ?? 0,
     };
   } catch (error) {
-    console.error("Failed to fetch recipes:", error);
-    throw new Error("Failed to fetch recipes");
+    console.error('Failed to fetch recipes:', error);
+    throw new Error('Failed to fetch recipes');
   }
 }
 
@@ -150,14 +150,12 @@ function convertUIIdToBackendId(uiRecipeId: number): string {
 export async function getRecipeById(uiId: number, bustCache = false): Promise<UIRecipe> {
   try {
     const backendId = convertUIIdToBackendId(uiId);
-    const url = bustCache 
-      ? `/recipes/${backendId}?_t=${Date.now()}` 
-      : `/recipes/${backendId}`;
+    const url = bustCache ? `/recipes/${backendId}?_t=${Date.now()}` : `/recipes/${backendId}`;
     const response = await axiosClient.get(url);
     return convertBackendRecipeToUI(response.data);
   } catch (error) {
-    console.error("Failed to fetch recipe:", error);
-    throw new Error("Failed to fetch recipe");
+    console.error('Failed to fetch recipe:', error);
+    throw new Error('Failed to fetch recipe');
   }
 }
 
@@ -182,15 +180,15 @@ export async function updateRecipe(
     description?: string;
     cookingTime?: string;
     category?: UIRecipeCategory;
-    ingredients?: {name: string; quantity: string}[];
-    steps?: {stepNumber?: number; instruction: string; imageUrl?: string}[];
+    ingredients?: { name: string; quantity: string }[];
+    steps?: { stepNumber?: number; instruction: string; imageUrl?: string }[];
   }
 ): Promise<UIRecipe> {
   try {
     const backendId = convertUIIdToBackendId(uiRecipeId);
-    
+
     const payload: any = {};
-    
+
     if (updates.title !== undefined) payload.title = updates.title;
     if (updates.description !== undefined) payload.description = updates.description;
     if (updates.cookingTime !== undefined) payload.cookingTime = updates.cookingTime;
@@ -201,28 +199,35 @@ export async function updateRecipe(
     const response = await axiosClient.patch(`/recipes/${backendId}`, payload);
     return convertBackendRecipeToUI(response.data);
   } catch (error) {
-    console.error("Failed to update recipe:", error);
-    throw new Error("Failed to update recipe");
+    console.error('Failed to update recipe:', error);
+    throw new Error('Failed to update recipe');
   }
 }
 
-export async function updateRecipeImage(
-  uiRecipeId: number,
-  imageFile: File
-): Promise<UIRecipe> {
+export async function updateRecipeImage(uiRecipeId: number, imageFile: File): Promise<UIRecipe> {
   try {
     const backendId = convertUIIdToBackendId(uiRecipeId);
-    
+
     const formData = new FormData();
     formData.append('image', imageFile);
 
     const response = await axiosClient.post(`/recipes/${backendId}/image`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
-    
+
     return convertBackendRecipeToUI(response.data);
   } catch (error) {
-    console.error("Failed to update recipe image:", error);
-    throw new Error("Failed to update recipe image");
+    console.error('Failed to update recipe image:', error);
+    throw new Error('Failed to update recipe image');
+  }
+}
+
+export async function deleteRecipe(uiRecipeId: number): Promise<void> {
+  try {
+    const backendId = convertUIIdToBackendId(uiRecipeId);
+    await axiosClient.delete(`/recipes/${backendId}`);
+  } catch (error) {
+    console.error('Failed to delete recipe:', error);
+    throw new Error('Failed to delete recipe');
   }
 }
