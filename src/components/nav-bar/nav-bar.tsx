@@ -6,7 +6,8 @@ import SearchBar from '../search-bar/search-bar';
 import { useState, useEffect } from 'react';
 import { getThemeColors } from '@/lib/muiTheme';
 import { getCurrentUser, logoutUser } from '@/services/auth';
-
+import { signIn, signOut } from '@/stores/user-slice';
+import { useAppDispatch } from '@/hooks/use-app-dispatch';
 interface NavBarProps {
   onSearch?: (query: string) => void;
 }
@@ -36,30 +37,67 @@ const NavBarLink = styled(Link)(({ isActive }: { isActive?: boolean }) => ({
 
 const NavBar = ({ onSearch }: NavBarProps) => {
   const colors = getThemeColors();
-  const {  isAuthenticated } = useAppSelector((state) => state.user)
+  const dispatch = useAppDispatch();
+  const { isAuthenticated } = useAppSelector(state => state.user);
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
-  const [isAuthenticate, setAuthenticate] = useState(false);
+  // const [isAuthenticate, setAuthenticate] = useState(false);
 
   // Check authentication status on component mount and location change
   useEffect(() => {
     const checkAuth = async () => {
-      const user = await getCurrentUser();
-      setAuthenticate(!!user);
+      const token = localStorage.getItem('access_token');
+      // setAuthenticate(!!user);
+      if (token && !isAuthenticated) {
+        // have token but not in redux, fetch user data
+        const user = await getCurrentUser();
+        if (user) {
+          dispatch(signIn(user));
+        } else {
+          // token invalid, clear it
+          localStorage.removeItem('access_token');
+        }
+      } else if (!token && isAuthenticated) {
+        // no token but in redux, clear redux state
+        dispatch(signOut());
+      }
     };
-    
+
     // Only check auth on mount and when navigating to/from auth pages
-    if (pathname === '/sign-in' || pathname === '/sign-up' || 
-        pathname === '/profile' || pathname === '/') {
+    if (
+      pathname === '/sign-in' ||
+      pathname === '/sign-up' ||
+      pathname === '/profile' ||
+      pathname === '/'
+    ) {
       checkAuth();
     }
-  }, [pathname]);
+  }, [pathname, isAuthenticated, dispatch]);
 
   const handleLogout = async () => {
-    await logoutUser();
-    setAuthenticate(false);
-    navigate('/');
+    try {
+      console.log('Starting logout process...');
+
+      // Clear Redux state first
+      dispatch(signOut());
+
+      // Clear localStorage
+      await logoutUser();
+
+      // Navigate using React Router
+      navigate('/sign-in', { replace: true });
+
+      console.log('Logout completed successfully');
+    } catch (error) {
+      console.error('Logout failed:', error);
+
+      // Fallback: force clear và navigate
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
+      dispatch(signOut());
+      navigate('/sign-in', { replace: true });
+    }
   };
   if (pathname === '/sign-in' || pathname === '/sign-up') {
     return (
@@ -219,7 +257,7 @@ const NavBar = ({ onSearch }: NavBarProps) => {
             gap: 6,
           }}
         >
-          { isAuthenticated ? (
+          {isAuthenticated ? (
             <>
               <Tooltip title="User profile">
                 <IconButton

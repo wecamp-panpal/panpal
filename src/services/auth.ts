@@ -131,16 +131,18 @@ export function clearCurrentUserCache() {
 }
 
 export async function logoutUser(): Promise<void> {
-  localStorage.removeItem('access_token');
+    // Clear localStorage
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user');
+    
+    // Clear cache
+    clearCurrentUserCache();
+    
   
-  clearCurrentUserCache();
-  
-  // Optional: Call backend logout endpoint if it exists
-  try {
-    await axiosClient.post('/auth/logout');
-  } catch (error) {
-    // Ignore errors on logout call, as we're clearing local state anyway
-    console.log('Logout endpoint not available or failed, but local token cleared');
-  }
+}
+
+// Utitlity function to check authentication status
+export function isAuthenticated():boolean{
+    return !!localStorage.getItem('access_token');
 }
 

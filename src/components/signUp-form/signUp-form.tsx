@@ -18,6 +18,7 @@ export default function SignUpForm() {
   const [focusInput, setFocusInput] = useState<string | null>('firstName');
   const [loading, setLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [loadingMessage, setLoadingMessage] = useState<string>('');
   const formRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
