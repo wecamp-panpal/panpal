@@ -3,15 +3,17 @@ import { Typography, Box } from '@mui/material';
 import type { UIRecipe } from '@/types/ui-recipe';
 import { useFavorites } from '@/hooks/useFavorites';
 
+
 const PAGE_SIZE = 24;
 
-import { useMemo, useState } from 'react';
-import { makeMockRecipes } from '@/mocks/recipes.mock';
+import { useEffect, useMemo, useState } from 'react';
+
 import { useNavigate } from 'react-router-dom';
+import { trendingRecipe } from '@/services/recipes';
 
 const Trending = () => {
-  const [recipes, setRecipes] = useState<UIRecipe[]>(makeMockRecipes(8));
-  const [loading, setLoading] = useState(false);
+  const [recipes, setRecipes] = useState<UIRecipe[]>([]);
+  const [loading, setLoading] = useState(true);
   const { favorites, handleToggleFavorite } = useFavorites();
 
   const favoriteRecipes = useMemo(() => {
@@ -19,6 +21,23 @@ const Trending = () => {
   }, [recipes, favorites]);
 
   const navigate = useNavigate();
+
+   useEffect(() => {
+    const fetchTrendingRecipes = async () => {
+      try {
+        setLoading(true);
+        const trendingRecipes = await trendingRecipe("8"); 
+        setRecipes(trendingRecipes);
+      } catch (error) {
+        console.error('Failed to fetch trending recipes:', error);
+        setRecipes([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrendingRecipes();
+  }, []);
 
   return (
     <section className="w-full pt-16 pb-32 px-8 relative">

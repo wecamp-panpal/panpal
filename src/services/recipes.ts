@@ -231,3 +231,13 @@ export async function deleteRecipe(uiRecipeId: number): Promise<void> {
     throw new Error('Failed to delete recipe');
   }
 }
+
+export async function trendingRecipe(number: string): Promise<UIRecipe[]> {
+  try {
+    const response = await axiosClient.get(`/recipes/trending`, { params: { number } });
+    return (response.data.items ?? []).map(convertBackendRecipeToUI);
+  } catch (error) {
+    console.error('Failed to fetch trending recipes:', error);
+    throw new Error('Failed to fetch trending recipes');
+  }
+}
