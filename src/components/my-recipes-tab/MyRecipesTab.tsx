@@ -11,10 +11,10 @@ import type { UIRecipe } from '@/types/ui-recipe';
 interface MyRecipesTabProps {
   myRecipes: UIRecipe[];
   onAddNewRecipe?: () => void;
-  onEditRecipe?: (recipeId: number) => void;
-  onViewRecipe?: (recipeId: number) => void;
-  onToggleFavorite?: (recipeId: number) => void;
-  favorites?: Set<number>;
+  onEditRecipe?: (recipeId: string) => void;
+  onViewRecipe?: (recipeId: string) => void;
+  onToggleFavorite?: (recipeId: string) => void;
+  favorites?: Set<string>;
 }
 
 const MyRecipesTab: React.FC<MyRecipesTabProps> = ({

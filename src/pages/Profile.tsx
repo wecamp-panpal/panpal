@@ -501,7 +501,7 @@ const Profile = () => {
           tabValue={tabValue}
           isEditing={isEditing}
           myRecipesCount={myRecipes.length}
-          favoriteRecipesCount={favoriteCount}
+          favoriteRecipesCount={favoriteRecipes.length}
           onTabChange={handleTabChange}
           onEdit={handleEdit}
           onSave={handleSave}

@@ -4,21 +4,21 @@ import { clearCurrentUserCache } from '@/services/auth';
 
 // State shape
 interface FavoriteState {
-  favorites: Set<number>;
+  favorites: Set<string>;
   isLoading: boolean;
   lastSyncTime: number;
   hasInitialized: boolean;
-  lastAction?: { type: 'add' | 'remove'; recipeId: number };
+  lastAction?: { type: 'add' | 'remove'; recipeId: string };
 }
 
 // Actions
 type FavoriteAction =
-  | { type: 'INITIALIZE'; payload: number[] }
+  | { type: 'INITIALIZE'; payload: string[] }
   | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'ADD_FAVORITE'; payload: number }
-  | { type: 'REMOVE_FAVORITE'; payload: number }
-  | { type: 'SYNC_FROM_BACKEND'; payload: number[] }
-  | { type: 'SYNC_FROM_STORAGE'; payload: number[] };
+  | { type: 'ADD_FAVORITE'; payload: string }
+  | { type: 'REMOVE_FAVORITE'; payload: string }
+  | { type: 'SYNC_FROM_BACKEND'; payload: string[] }
+  | { type: 'SYNC_FROM_STORAGE'; payload: string[] };
 
 // Reducer
 const favoriteReducer = (state: FavoriteState, action: FavoriteAction): FavoriteState => {
@@ -174,7 +174,7 @@ export const useFavorites = () => {
   }, [state.hasInitialized, syncWithBackend]);
 
   // Toggle favorite (optimistic with backend sync)
-  const toggleFavorite = useCallback(async (recipeId: number) => {
+  const toggleFavorite = useCallback(async (recipeId: string) => {
     const wasCurrentlyFavorited = state.favorites.has(recipeId);
     
     // Optimistic update

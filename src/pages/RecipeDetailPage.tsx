@@ -61,7 +61,7 @@ export default function RecipeDetailPage() {
       const { recipeId } = event.detail;
       console.log('🔄 Recipe updated event received:', { recipeId, currentId: id });
 
-      if (recipeId === Number(id) && id) {
+      if (recipeId === id && id) {
         console.log('Refreshing current recipe detail...');
         const loadData = async () => {
           try {
@@ -69,7 +69,7 @@ export default function RecipeDetailPage() {
 
             // Force cache bust when refreshing due to update
             const [fetchedRecipe, fetchedComments] = await Promise.all([
-              getRecipeById(Number(id), true), // Force cache bust
+              getRecipeById(id, true), // Force cache bust
               getCommentsByRecipeId(id),
             ]);
 
@@ -104,7 +104,7 @@ export default function RecipeDetailPage() {
           location.search.includes('updated=') || location.search.includes('refresh=');
 
         const [fetchedRecipe, fetchedComments] = await Promise.all([
-          getRecipeById(Number(recipeId), shouldBustCache),
+          getRecipeById(recipeId, shouldBustCache),
           getCommentsByRecipeId(recipeId),
         ]);
 
@@ -165,7 +165,7 @@ export default function RecipeDetailPage() {
       return;
     }
 
-    const recipeId = Number(id);
+    const recipeId = id;
     await toggleFavorite(recipeId);
   };
 
@@ -308,7 +308,7 @@ export default function RecipeDetailPage() {
           )}
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {favorites.has(Number(id)) && (
+          {favorites.has(id) && (
             <Typography
               sx={{
                 fontFamily: 'Montserrat',
@@ -321,7 +321,7 @@ export default function RecipeDetailPage() {
             </Typography>
           )}
 
-          <Tooltip title={favorites.has(Number(id)) ? 'Remove from favorites' : 'Add to favorites'}>
+          <Tooltip title={favorites.has(id) ? 'Remove from favorites' : 'Add to favorites'}>
             <IconButton
               onClick={handleToggleFavorite}
               sx={{
@@ -341,7 +341,7 @@ export default function RecipeDetailPage() {
                 height: 56,
               }}
             >
-              {favorites.has(Number(id)) ? (
+              {favorites.has(id) ? (
                 <Favorite sx={{ color: '#dc3545', fontSize: 28 }} />
               ) : (
                 <FavoriteBorder sx={{ color: '#8B6B47', fontSize: 28 }} />

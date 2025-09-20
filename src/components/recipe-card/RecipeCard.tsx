@@ -12,7 +12,7 @@ import {
 import { Favorite, FavoriteBorder } from '@mui/icons-material';
 
 interface Recipe {
-  id: number;
+  id: string;
   title: string;
   description: string;
   image: string;
@@ -31,7 +31,7 @@ interface RecipeCardProps {
   onEdit?: () => void;
   onView?: () => void;
   onClick?: () => void;
-  onToggleFavorite?: (recipeId: number) => void;
+  onToggleFavorite?: (recipeId: string) => void;
   isFavorited?: boolean;
 }
 
