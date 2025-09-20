@@ -1,18 +1,35 @@
 import RecipeCard from '../recipe-card/RecipeCard';
 import { Typography, Box } from '@mui/material';
 import type { UIRecipe } from '@/types/ui-recipe';
+import { trendingRecipe } from '@/services/recipes';
 
 const PAGE_SIZE = 24;
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { makeMockRecipes } from '@/mocks/recipes.mock';
 import { useNavigate } from 'react-router-dom';
 
 const TrendingPublic = () => {
-  const [recipes] = useState<UIRecipe[]>(makeMockRecipes(8));
-  const [loading] = useState(false);
+ const [recipes, setRecipes] = useState<UIRecipe[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
+   useEffect(() => {
+      const fetchTrendingRecipes = async () => {
+        try {
+          setLoading(true);
+          const trendingRecipes = await trendingRecipe("8"); 
+          setRecipes(trendingRecipes);
+        } catch (error) {
+          console.error('Failed to fetch trending recipes:', error);
+          setRecipes([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchTrendingRecipes();
+    }, []);
 
   return (
     <section className="w-full pt-4 pb-32 px-8 relative">
