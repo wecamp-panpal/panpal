@@ -146,7 +146,8 @@ const Profile = () => {
   const [favoriteRecipes, setFavoriteRecipes] = useState<UIRecipe[]>([]);
   const [myRecipesLoading, setMyRecipesLoading] = useState(false);
   const [favoriteRecipesLoading, setFavoriteRecipesLoading] = useState(false);
-  const { favorites, favoriteCount, handleToggleFavorite, refreshFavorites, syncFromLocalStorage } = useFavorites();
+  const { favorites, favoriteCount, handleToggleFavorite, refreshFavorites, syncFromLocalStorage } =
+    useFavorites();
 
   const userToProfile = (user: User): UserProfile => ({
     fullName: user.name || '',
@@ -176,13 +177,13 @@ const Profile = () => {
         const profileData = userToProfile(userData);
         setUserProfile(profileData);
         setEditedProfile(profileData);
-        
+
         console.log('User loaded:', {
           userData,
           avatarUrl: userData.avatarUrl,
-          profileAvatar: profileData.avatar
+          profileAvatar: profileData.avatar,
         });
-        
+
         // Load user's recipes and favorites
         const shouldForceRefresh = searchParams.get('tab') === '1'; // Force refresh if coming to My Recipes tab
         loadMyRecipes(userData.id, shouldForceRefresh);
@@ -202,34 +203,37 @@ const Profile = () => {
 
   // No complex logic needed - favoriteCount is automatically stable!
 
-  const loadMyRecipes = useCallback(async (userId: string, forceRefresh = false) => {
-    try {
-      setMyRecipesLoading(true);
-      console.log('Loading recipes for user:', userId, { forceRefresh });
-      
-      if (forceRefresh) {
-        clearCurrentUserCache();
+  const loadMyRecipes = useCallback(
+    async (userId: string, forceRefresh = false) => {
+      try {
+        setMyRecipesLoading(true);
+        console.log('Loading recipes for user:', userId, { forceRefresh });
+
+        if (forceRefresh) {
+          clearCurrentUserCache();
+        }
+
+        const result = await getUserRecipes(userId, 1, 20, forceRefresh);
+        setMyRecipes(result.data);
+
+        syncFromLocalStorage();
+
+        console.log('User recipes loaded:', result);
+      } catch (err) {
+        console.error('Failed to load user recipes:', err);
+        setError('Failed to load your recipes. Please try again.');
+      } finally {
+        setMyRecipesLoading(false);
       }
-      
-      const result = await getUserRecipes(userId, 1, 20, forceRefresh);
-      setMyRecipes(result.data);
-      
-      syncFromLocalStorage();
-      
-      console.log('User recipes loaded:', result);
-    } catch (err) {
-      console.error('Failed to load user recipes:', err);
-      setError('Failed to load your recipes. Please try again.');
-    } finally {
-      setMyRecipesLoading(false);
-    }
-  }, [syncFromLocalStorage]);
+    },
+    [syncFromLocalStorage]
+  );
 
   useEffect(() => {
     const handleFavoriteChange = (event: CustomEvent) => {
       const { recipeId, isFavorited } = event.detail;
       console.log('Favorite changed:', { recipeId, isFavorited });
-      
+
       if (isFavorited) {
       } else {
         // Recipe was unfavorited - remove from favoriteRecipes
@@ -240,14 +244,10 @@ const Profile = () => {
     const handleRecipeUpdate = (event: CustomEvent) => {
       const { recipeId, updatedRecipe } = event.detail;
       console.log('Recipe updated:', { recipeId, updatedRecipe });
-      
+
       // Update the recipe in myRecipes list
-      setMyRecipes(prev => 
-        prev.map(recipe => 
-          recipe.id === recipeId ? updatedRecipe : recipe
-        )
-      );
-      
+      setMyRecipes(prev => prev.map(recipe => (recipe.id === recipeId ? updatedRecipe : recipe)));
+
       // Also refresh the list to get fresh data from backend with cache busting
       if (user?.id) {
         console.log('🔄 Force refreshing recipes after update...');
@@ -257,7 +257,7 @@ const Profile = () => {
 
     window.addEventListener('favoriteChanged', handleFavoriteChange as EventListener);
     window.addEventListener('recipeUpdated', handleRecipeUpdate as EventListener);
-    
+
     return () => {
       window.removeEventListener('favoriteChanged', handleFavoriteChange as EventListener);
       window.removeEventListener('recipeUpdated', handleRecipeUpdate as EventListener);
@@ -269,20 +269,20 @@ const Profile = () => {
     try {
       setFavoriteRecipesLoading(true);
       console.log('Loading favorite recipes', { forceRefresh });
-      
+
       // Don't force refresh favorites on tab switch since favorites are already synced real-time
       // Only refresh if explicitly requested (e.g., initial load)
       if (forceRefresh && favoriteRecipes.length === 0) {
         console.log('Initial load - refreshing favorites cache');
         await refreshFavorites();
       }
-      
+
       const result = await favoriteService.getFavoriteRecipes();
       setFavoriteRecipes(result.data);
-      
+
       // Sync favorites state after favorite recipes are loaded
       syncFromLocalStorage();
-      
+
       console.log('Favorite recipes loaded:', result);
     } catch (err) {
       console.error('Failed to load favorite recipes:', err);
@@ -295,20 +295,20 @@ const Profile = () => {
   // Refresh recipes when switching to different tabs
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
-    
+
     // Update URL to persist tab state on refresh
     setSearchParams(prevParams => {
       const newParams = new URLSearchParams(prevParams);
       newParams.set('tab', newValue.toString());
       return newParams;
     });
-    
+
     // If switching to My Recipes tab (index 1) and user exists, refresh recipes
     if (newValue === 1 && user?.id) {
       console.log('Switching to My Recipes tab, refreshing...');
       loadMyRecipes(user.id, true);
     }
-    
+
     // If switching to Favorite Recipes tab (index 2), load favorites without forcing refresh
     if (newValue === 2) {
       console.log('Switching to Favorite Recipes tab, loading...');
@@ -334,16 +334,16 @@ const Profile = () => {
       }
       const updatedUser = await userService.updateUserById(user.id, updateData);
       setUser(updatedUser);
-      
+
       // Clear auth cache so navbar gets updated user info
       clearCurrentUserCache();
-      
+
       const updatedProfile = userToProfile(updatedUser);
       setUserProfile(updatedProfile);
       setEditedProfile(updatedProfile);
       setIsEditing(false);
       setEmailError('');
-      
+
       console.log('Profile updated successfully:', updatedUser);
     } catch (err) {
       console.error('Failed to update profile:', err);
@@ -387,7 +387,11 @@ const Profile = () => {
       // Validate file size (10MB limit)
       const maxSize = 10 * 1024 * 1024; // 10MB in bytes
       if (file.size > maxSize) {
-        setError(`File size too large. Maximum allowed size is ${Math.round(maxSize / (1024 * 1024))}MB. Your file is ${Math.round(file.size / (1024 * 1024))}MB.`);
+        setError(
+          `File size too large. Maximum allowed size is ${Math.round(
+            maxSize / (1024 * 1024)
+          )}MB. Your file is ${Math.round(file.size / (1024 * 1024))}MB.`
+        );
         event.target.value = ''; // Reset input
         return;
       }
@@ -403,24 +407,24 @@ const Profile = () => {
       try {
         setAvatarUploading(true);
         setError(null);
-        
+
         if (!user?.id) {
           throw new Error('User not found');
         }
         const updatedUser = await userService.uploadAvatar(user.id, file);
         setUser(updatedUser);
-        
+
         // Clear auth cache so navbar gets updated user info
         clearCurrentUserCache();
-        
+
         const updatedProfile = userToProfile(updatedUser);
         setUserProfile(updatedProfile);
         setEditedProfile(updatedProfile);
-        
+
         console.log('Avatar uploaded successfully!', {
           updatedUser,
           avatarUrl: updatedUser.avatarUrl,
-          profileAvatar: updatedProfile.avatar
+          profileAvatar: updatedProfile.avatar,
         });
       } catch (err) {
         console.error('Failed to upload avatar:', err);
@@ -447,9 +451,30 @@ const Profile = () => {
     navigate(`/recipes/${recipeId}`);
   };
 
+  useEffect(() => {
+    const handleRecipeDeleted = (event: CustomEvent) => {
+      const { recipeId } = event.detail;
+   
+
+     
+      if (user?.id) {
+        loadMyRecipes(user.id, true); 
+      }
+    };
+
+    window.addEventListener('recipeDeleted', handleRecipeDeleted as EventListener);
+
+    return () => {
+      window.removeEventListener('recipeDeleted', handleRecipeDeleted as EventListener);
+    };
+  }, [user?.id]);
+
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 2, my: 6, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Container
+        maxWidth="lg"
+        sx={{ py: 2, my: 6, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+      >
         <CircularProgress />
       </Container>
     );
@@ -462,7 +487,7 @@ const Profile = () => {
           {error}
         </Alert>
       )}
-      
+
       <Paper
         elevation={0}
         sx={{

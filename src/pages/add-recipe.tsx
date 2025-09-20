@@ -17,14 +17,14 @@ const AddRecipePage = () => {
   const [totalMinutes, setTotalMinutes] = useState(0);
   const [description, setDescription] = useState('');
   const [title, setTitle] = useState('');
-const [category, setCategory] = useState<RecipeCategory | null>(null);
+  const [category, setCategory] = useState<RecipeCategory | null>(null);
   const [ingredients, setIngredients] = useState<{ name: string; quantity: string }[]>([]);
   const [steps, setSteps] = useState<
     { stepNumber: number; instruction: string; imageUrl?: string; file?: File }[]
   >([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const f = event.target.files?.[0];
     if (!f) return;
     setImageFile(f);
@@ -74,24 +74,60 @@ const [category, setCategory] = useState<RecipeCategory | null>(null);
         if (!feStep?.file) return;
         const fd = new FormData();
         fd.append('stepImage', feStep.file);
-        await axiosClient.post(
-          `/recipes/${recipeId}/steps/${beStep.id}/image`,
-          fd,
-          { headers: { 'Content-Type': 'multipart/form-data' } }
-        );
+        await axiosClient.post(`/recipes/${recipeId}/steps/${beStep.id}/image`, fd, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
       });
 
       await Promise.all(jobs);
 
       clearCurrentUserCache();
-      toast.success('Recipe create successfully')
+      toast.success('Recipe create successfully');
       navigate('/profile?tab=1');
     } catch (err: any) {
       console.error(err?.response?.data || err);
-      toast.error("Failed to create recipe")
+      toast.error('Failed to create recipe');
     }
   };
+  const handleCancel = () => {
+    const hasContent =
+      title ||
+      description ||
+      category ||
+      totalMinutes > 0 ||
+      ingredients.length > 0 ||
+      steps.length > 0 ||
+      imageFile;
 
+    if (hasContent) {
+      const confirmed = window.confirm(
+        'Are you sure you want to clear all fields? This action cannot be undone.'
+      );
+
+      if (confirmed) {
+        setTitle('');
+        setDescription('');
+        setCategory(null);
+        setTotalMinutes(0);
+        setIngredients([]);
+        setSteps([]);
+        setImageFile(null);
+        setImagePreview(null);
+        toast.success('All fields cleared');
+      }
+      return;
+    }
+
+    setTitle('');
+    setDescription('');
+    setCategory(null);
+    setTotalMinutes(0);
+    setIngredients([]);
+    setSteps([]);
+    setImageFile(null);
+    setImagePreview(null);
+    toast.success('All fields cleared');
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 } }}>
@@ -277,7 +313,7 @@ const [category, setCategory] = useState<RecipeCategory | null>(null);
           Category
         </Typography>
         <Box sx={{ mb: 2.5 }}>
-         <CategorySelect value={category} onChange={setCategory} />
+          <CategorySelect value={category} onChange={setCategory} />
         </Box>
 
         <Typography
@@ -286,7 +322,11 @@ const [category, setCategory] = useState<RecipeCategory | null>(null);
           Ingredient
         </Typography>
         <Box sx={{ mb: 2 }}>
-          <AddIngredient initialIngredients={ingredients} onChange={setIngredients} />
+          <AddIngredient
+            key={`ingredients-${ingredients.length}`}
+            initialIngredients={ingredients}
+            onChange={setIngredients}
+          />
         </Box>
 
         <Typography
@@ -294,7 +334,7 @@ const [category, setCategory] = useState<RecipeCategory | null>(null);
         >
           Steps
         </Typography>
-        <AddStep initialSteps={steps} onChange={setSteps} />
+        <AddStep key={`steps-${steps.length}`} initialSteps={steps} onChange={setSteps} />
       </Box>
 
       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 4 }}>
@@ -344,6 +384,7 @@ const [category, setCategory] = useState<RecipeCategory | null>(null);
               boxShadow: 'none',
             },
           }}
+          onClick={handleCancel}
         >
           Cancel
         </Button>

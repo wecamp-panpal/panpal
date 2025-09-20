@@ -19,6 +19,7 @@ import { getRecipeById, deleteRecipe } from '@/services/recipes';
 import { getCurrentUser } from '@/services/auth';
 import { getCommentsByRecipeId, createComment, deleteCommentById } from '@/services/comments';
 import { useFavorites } from '@/hooks/useFavorites';
+import toast from 'react-hot-toast';
 
 export default function RecipeDetailPage() {
   const { id } = useParams();
@@ -191,11 +192,14 @@ export default function RecipeDetailPage() {
     if (confirmed) {
       try {
         await deleteRecipe(recipe.id);
-        alert('Recipe deleted successfully!');
+         window.dispatchEvent(new CustomEvent('recipeDeleted', {
+        detail: { recipeId: recipe.id }
+      }));
+        toast.success('Recipe delete sucessfully')
         navigate('/profile?tab=1'); 
       } catch (error) {
-        console.error('Failed to delete recipe:', error);
-        alert('Failed to delete recipe. Please try again.');
+  
+        toast.error('Failed to delete recipe ')
       }
     }
   };
