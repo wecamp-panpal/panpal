@@ -10,6 +10,8 @@ import AddStep from '@/components/add-step/add-step';
 import axiosClient from '@/lib/axiosClient';
 import { clearCurrentUserCache } from '@/services/auth';
 import Protected from '@/components/protected/Protected';
+import { toast } from 'react-hot-toast';
+
 const AddRecipePage = () => {
   const navigate = useNavigate();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -19,15 +21,15 @@ const AddRecipePage = () => {
   const [category, setCategory] = useState<RecipeCategory | null>(null);
   const [ingredients, setIngredients] = useState<{ name: string; quantity: string }[]>([]);
   const [steps, setSteps] = useState<
-    { stepNumber: number; instruction: string; imageUrl?: string }[]
+    { stepNumber: number; instruction: string; imageUrl?: string; file?: File }[]
   >([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files || event.target.files.length === 0) return;
-    const newFile = event.target.files[0];
-    setImageFile(newFile);
-    setImagePreview(URL.createObjectURL(newFile));
+    const f = event.target.files?.[0];
+    if (!f) return;
+    setImageFile(f);
+    setImagePreview(URL.createObjectURL(f));
     event.target.value = '';
   };
 
@@ -48,28 +50,44 @@ const AddRecipePage = () => {
         form.append(`ingredients[${i}][quantity]`, ing.quantity);
       });
 
-      steps.forEach((st, i) => {
-        if (st.stepNumber != null) form.append(`steps[${i}][stepNumber]`, String(st.stepNumber));
-        form.append(`steps[${i}][instruction]`, st.instruction);
-        if (st.imageUrl) form.append(`steps[${i}][imageUrl]`, st.imageUrl);
+      const textSteps = steps.filter(s => s.instruction?.trim());
+      textSteps.forEach((st, i) => {
+        form.append(`steps[${i}][stepNumber]`, String(i + 1));
+        form.append(`steps[${i}][instruction]`, st.instruction.trim());
       });
 
-      await axiosClient.post('/recipes', form, {
+      const createRes = await axiosClient.post('/recipes', form, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      // Clear user cache to refresh recipes in profile
+      const created = createRes.data as {
+        id: string;
+        steps?: { id: string; stepNumber: number }[];
+      };
+
+      const recipeId = created.id;
+      const createdSteps = created.steps ?? [];
+
+      const jobs = createdSteps.map(async beStep => {
+        const feStep =
+          textSteps.find(s => s.stepNumber === beStep.stepNumber) ??
+          textSteps[beStep.stepNumber - 1];
+        if (!feStep?.file) return;
+        const fd = new FormData();
+        fd.append('stepImage', feStep.file);
+        await axiosClient.post(`/recipes/${recipeId}/steps/${beStep.id}/image`, fd, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      });
+
+      await Promise.all(jobs);
+
       clearCurrentUserCache();
-
-      alert('Recipe created successfully! Redirecting to your profile...');
-
-      // Redirect to profile page My Recipes tab to see the new recipe
-      setTimeout(() => {
-        navigate('/profile?tab=1'); // Tab 1 is My Recipes
-      }, 1000);
+      toast.success('Recipe create successfully');
+      navigate('/profile?tab=1');
     } catch (err: any) {
       console.error(err?.response?.data || err);
-      alert('Failed to create recipe');
+      toast.error('Failed to create recipe');
     }
   };
 

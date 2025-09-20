@@ -1,33 +1,44 @@
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { Box, Typography, Rating, Skeleton, IconButton, Tooltip, Button, Collapse } from "@mui/material";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { Delete } from "@mui/icons-material";
-import { Favorite, FavoriteBorder, Edit } from "@mui/icons-material";
-import type { UIRecipe } from "@/types/ui-recipe";
-import type { User } from "@/types/user";
-import { getRecipeById } from "@/services/recipes";
-import { getCurrentUser } from "@/services/auth";
-import { getCommentsByRecipeId, createComment, deleteCommentById } from "@/services/comments";
-import { useFavorites } from "@/hooks/useFavorites";
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import {
+  Box,
+  Typography,
+  Rating,
+  Skeleton,
+  IconButton,
+  Tooltip,
+  Button,
+  Collapse,
+} from '@mui/material';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { Delete } from '@mui/icons-material';
+import { Favorite, FavoriteBorder, Edit } from '@mui/icons-material';
+import type { UIRecipe } from '@/types/ui-recipe';
+import type { User } from '@/types/user';
+import { getRecipeById, deleteRecipe } from '@/services/recipes';
+import { getCurrentUser } from '@/services/auth';
+import { getCommentsByRecipeId, createComment, deleteCommentById } from '@/services/comments';
+import { useFavorites } from '@/hooks/useFavorites';
 
 export default function RecipeDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const [recipe, setRecipe] = useState<UIRecipe | null>(null);
-  const [comments, setComments] = useState<Array<{
-    id: string;
-    user_id: string;
-    user?: { id: string; name: string };
-    content: string;
-    rating: number;
-    image_url?: string;
-    created_at: string;
-    updated_at: string;
-  }>>([]);
+  const [comments, setComments] = useState<
+    Array<{
+      id: string;
+      user_id: string;
+      user?: { id: string; name: string };
+      content: string;
+      rating: number;
+      image_url?: string;
+      created_at: string;
+      updated_at: string;
+    }>
+  >([]);
   const [loading, setLoading] = useState(true);
-  const [newComment, setNewComment] = useState("");
+  const [newComment, setNewComment] = useState('');
   const [newRating, setNewRating] = useState<number | null>(null);
   const [newImage, setNewImage] = useState<File | null>(null);
 
@@ -38,7 +49,9 @@ export default function RecipeDetailPage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
-    getCurrentUser().then(setCurrentUser).catch(() => setCurrentUser(null));
+    getCurrentUser()
+      .then(setCurrentUser)
+      .catch(() => setCurrentUser(null));
   }, []);
 
   // Listen for recipe updates to refresh detail page immediately
@@ -46,13 +59,13 @@ export default function RecipeDetailPage() {
     const handleRecipeUpdate = (event: CustomEvent) => {
       const { recipeId } = event.detail;
       console.log('🔄 Recipe updated event received:', { recipeId, currentId: id });
-      
+
       if (recipeId === Number(id) && id) {
         console.log('Refreshing current recipe detail...');
         const loadData = async () => {
           try {
             setLoading(true);
-            
+
             // Force cache bust when refreshing due to update
             const [fetchedRecipe, fetchedComments] = await Promise.all([
               getRecipeById(Number(id), true), // Force cache bust
@@ -67,13 +80,13 @@ export default function RecipeDetailPage() {
             setLoading(false);
           }
         };
-        
+
         loadData();
       }
     };
 
     window.addEventListener('recipeUpdated', handleRecipeUpdate as EventListener);
-    
+
     return () => {
       window.removeEventListener('recipeUpdated', handleRecipeUpdate as EventListener);
     };
@@ -83,11 +96,12 @@ export default function RecipeDetailPage() {
     if (!id) return;
     const recipeId = id;
 
-  async function loadData() {
-    try {
+    async function loadData() {
+      try {
         // Check if we need to bust cache (when coming from edit page with timestamp or force refresh)
-        const shouldBustCache = location.search.includes('updated=') || location.search.includes('refresh=');
-        
+        const shouldBustCache =
+          location.search.includes('updated=') || location.search.includes('refresh=');
+
         const [fetchedRecipe, fetchedComments] = await Promise.all([
           getRecipeById(Number(recipeId), shouldBustCache),
           getCommentsByRecipeId(recipeId),
@@ -104,7 +118,7 @@ export default function RecipeDetailPage() {
         }
 
         let recipeData = fetchedRecipe;
-        const editedRecipesData = localStorage.getItem("edited-recipes");
+        const editedRecipesData = localStorage.getItem('edited-recipes');
         if (editedRecipesData) {
           const editedRecipes = JSON.parse(editedRecipesData);
           if (editedRecipes[recipeId]) {
@@ -115,38 +129,38 @@ export default function RecipeDetailPage() {
 
         setRecipe(recipeData);
         setComments(fetchedComments);
-        } catch (err) {
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-      loadData();
+    }
+    loadData();
   }, [id, location.search]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    if(!currentUser) return;
+    if (!currentUser) return;
     e.preventDefault();
     if (!newRating || !newComment.trim()) return;
 
     const formData = new FormData();
-    formData.append("recipe_id", id ?? "");
-    formData.append("user_id", currentUser?.id || "");
-    formData.append("user_name", currentUser?.name || "");
-    formData.append("rating", newRating.toString());
-    formData.append("content", newComment);
-    if (newImage) formData.append("image", newImage);
+    formData.append('recipe_id', id ?? '');
+    formData.append('user_id', currentUser?.id || '');
+    formData.append('user_name', currentUser?.name || '');
+    formData.append('rating', newRating.toString());
+    formData.append('content', newComment);
+    if (newImage) formData.append('image', newImage);
 
     const created = await createComment(formData);
-    setComments((prev) => [created, ...prev]);
-    setNewComment("");
+    setComments(prev => [created, ...prev]);
+    setNewComment('');
     setNewRating(null);
     setNewImage(null);
   };
 
   const handleToggleFavorite = async () => {
     if (!currentUser) {
-      navigate("/sign-in");
+      navigate('/sign-in');
       return;
     }
 
@@ -161,11 +175,31 @@ export default function RecipeDetailPage() {
   const handleDeleteComment = async (commentId: string) => {
     try {
       await deleteCommentById(commentId);
-      setComments((prev) => prev.filter((c) => c.id !== commentId));
+      setComments(prev => prev.filter(c => c.id !== commentId));
     } catch (err) {
-      console.error("Failed to delete comment:", err);
+      console.error('Failed to delete comment:', err);
     }
   };
+
+  const handleDeleteRecipe = async () => {
+    if (!recipe || !currentUser || !isOwner) return;
+
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this recipe? This action cannot be undone.'
+    );
+
+    if (confirmed) {
+      try {
+        await deleteRecipe(recipe.id);
+        alert('Recipe deleted successfully!');
+        navigate('/profile?tab=1'); 
+      } catch (error) {
+        console.error('Failed to delete recipe:', error);
+        alert('Failed to delete recipe. Please try again.');
+      }
+    }
+  };
+
   // Check if current user owns this recipe
   const isOwner = currentUser?.id && recipe?.author_id === currentUser.id;
 
@@ -182,47 +216,74 @@ export default function RecipeDetailPage() {
   }
 
   return (
-    <Box sx={{ maxWidth: 900, mx: "auto", px: 2, py: 4 }}>
+    <Box sx={{ maxWidth: 900, mx: 'auto', px: 2, py: 4 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
         <Box sx={{ flex: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-            <Typography
-              variant="h3"
-              sx={{ fontFamily: '"Playfair Display", serif' }}
-            >
+            <Typography variant="h3" sx={{ fontFamily: '"Playfair Display", serif' }}>
               {recipe.title}
             </Typography>
-            {/* Show edit button only if user owns this recipe */}
             {isOwner && (
-              <Tooltip title="Edit Recipe">
-                <Button
-                  onClick={handleEditRecipe}
-                  startIcon={<Edit />}
-                  sx={{
-                    backgroundColor: 'primary.main',
-                    color: 'secondary.main',
-                    borderRadius: 2,
-                    px: 2,
-                    py: 1,
-                    mt: 2,
-                    fontFamily: 'Montserrat',
-                    fontWeight: 600,
-                    textTransform: 'none',
-                    '&:hover': {
-                      backgroundColor: 'secondary.main',
-                      color: 'primary.main',
-                      transform: 'scale(1.05)',
-                    },
-                    '&:focus': {
-                      outline: 'none',
-                      boxShadow: 'none',
-                    },
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  Edit
-                </Button>
-              </Tooltip>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Tooltip title="Edit Recipe">
+                  <Button
+                    onClick={handleEditRecipe}
+                    startIcon={<Edit />}
+                    sx={{
+                      backgroundColor: 'primary.main',
+                      color: 'secondary.main',
+                      borderRadius: 2,
+                      px: 2,
+                      py: 1,
+                      mt: 2,
+                      fontFamily: 'Montserrat',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      '&:hover': {
+                        backgroundColor: 'secondary.main',
+                        color: 'primary.main',
+                        transform: 'scale(1.05)',
+                      },
+                      '&:focus': {
+                        outline: 'none',
+                        boxShadow: 'none',
+                      },
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    Edit
+                  </Button>
+                </Tooltip>
+
+                <Tooltip title="Delete Recipe">
+                  <Button
+                    onClick={handleDeleteRecipe}
+                    startIcon={<Delete />}
+                    sx={{
+                      backgroundColor: 'error.main',
+                      color: 'white',
+                      borderRadius: 2,
+                      px: 2,
+                      py: 1,
+                      mt: 2,
+                      fontFamily: 'Montserrat',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      '&:hover': {
+                        backgroundColor: 'error.dark',
+                        transform: 'scale(1.05)',
+                      },
+                      '&:focus': {
+                        outline: 'none',
+                        boxShadow: 'none',
+                      },
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </Tooltip>
+              </Box>
             )}
           </Box>
           {isEditedVersion && (
@@ -235,7 +296,7 @@ export default function RecipeDetailPage() {
                 mt: 0.5,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 0.5
+                gap: 0.5,
               }}
             >
               This recipe has been edited
@@ -255,9 +316,8 @@ export default function RecipeDetailPage() {
               Added to favorites
             </Typography>
           )}
-          
-          
-          <Tooltip title={favorites.has(Number(id)) ? "Remove from favorites" : "Add to favorites"}>
+
+          <Tooltip title={favorites.has(Number(id)) ? 'Remove from favorites' : 'Add to favorites'}>
             <IconButton
               onClick={handleToggleFavorite}
               sx={{
@@ -292,31 +352,31 @@ export default function RecipeDetailPage() {
         src={recipe.image}
         alt={recipe.title}
         sx={{
-          width: "100%",
+          width: '100%',
           maxHeight: 400,
-          objectFit: "cover",
+          objectFit: 'cover',
           borderRadius: 4,
           mb: 3,
         }}
       />
 
-      <Box 
-        sx={{ 
+      <Box
+        sx={{
           mb: 3,
           '& p': { margin: 0, mb: 1 },
           '& h1, & h2, & h3': { mb: 1 },
           '& ul, & ol': { mb: 1, pl: 2 },
-          fontFamily: 'Montserrat'
+          fontFamily: 'Montserrat',
         }}
         dangerouslySetInnerHTML={{ __html: recipe.description }}
       />
 
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <Rating
           value={recipe.rating_avg}
           precision={0.1}
           readOnly
-          sx={{ "& .MuiRating-iconFilled": { color: "#D4A574" } }}
+          sx={{ '& .MuiRating-iconFilled': { color: '#D4A574' } }}
         />
         <Typography>
           {recipe.rating_avg} ({recipe.rating_count})
@@ -352,7 +412,7 @@ export default function RecipeDetailPage() {
         Instructions
       </Typography>
       <Box component="ol" sx={{ pl: 3 }}>
-        {recipe.steps.map((step) => (
+        {recipe.steps.map(step => (
           <li key={step.step_number} style={{ marginBottom: '1rem' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Typography variant="body2">{step.instruction}</Typography>
@@ -360,9 +420,7 @@ export default function RecipeDetailPage() {
                 <IconButton
                   size="small"
                   onClick={() =>
-                    setExpandedStep((prev) =>
-                      prev === step.step_number ? null : step.step_number
-                    )
+                    setExpandedStep(prev => (prev === step.step_number ? null : step.step_number))
                   }
                   sx={{ color: '#8B6B47' }}
                 >
@@ -403,21 +461,31 @@ export default function RecipeDetailPage() {
         Comments
       </Typography>
 
-      {comments.map((c) => (
-        <Box key={c.id} sx={{ borderRadius: 3, border: "1px solid #ddd", p: 2, mb: 2, backgroundColor: "#fff" }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-            <Typography fontWeight={600}>{c.user?.name ?? "Unknown"}</Typography>
+      {comments.map(c => (
+        <Box
+          key={c.id}
+          sx={{ borderRadius: 3, border: '1px solid #ddd', p: 2, mb: 2, backgroundColor: '#fff' }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            <Typography fontWeight={600}>{c.user?.name ?? 'Unknown'}</Typography>
             <Typography fontSize={12} color="text.secondary">
               {new Date(c.created_at).toLocaleString()}
             </Typography>
           </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
             <Rating value={c.rating} precision={0.1} size="small" readOnly />
             <Typography fontSize={14}>{c.rating}</Typography>
           </Box>
-          <Typography variant="body2" sx={{ mb: c.image_url ? 2 : 0 }}>{c.content}</Typography>
+          <Typography variant="body2" sx={{ mb: c.image_url ? 2 : 0 }}>
+            {c.content}
+          </Typography>
           {c.image_url && (
-            <Box component="img" src={c.image_url} alt="Comment image" sx={{ maxWidth: "100%", borderRadius: 2 }} />
+            <Box
+              component="img"
+              src={c.image_url}
+              alt="Comment image"
+              sx={{ maxWidth: '100%', borderRadius: 2 }}
+            />
           )}
           {c.user?.id === currentUser?.id && (
             <Button
@@ -438,30 +506,65 @@ export default function RecipeDetailPage() {
       </Typography>
 
       {currentUser ? (
-        <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2, border: "1px solid #ddd", borderRadius: 3, p: 3, backgroundColor: "#fff" }}>
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            border: '1px solid #ddd',
+            borderRadius: 3,
+            p: 3,
+            backgroundColor: '#fff',
+          }}
+        >
           <Rating value={newRating} precision={0.1} onChange={(_, val) => setNewRating(val)} />
           <textarea
             placeholder="Write your comment..."
             required
-            style={{ resize: "vertical", padding: "8px", minHeight: "80px", fontSize: "0.95rem", borderRadius: "6px", border: "1px solid #ccc", fontFamily: "inherit" }}
+            style={{
+              resize: 'vertical',
+              padding: '8px',
+              minHeight: '80px',
+              fontSize: '0.95rem',
+              borderRadius: '6px',
+              border: '1px solid #ccc',
+              fontFamily: 'inherit',
+            }}
             value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
+            onChange={e => setNewComment(e.target.value)}
           />
           <Box>
-            <Typography fontSize={14} sx={{ mb: 1 }}>Optional image:</Typography>
-            <input type="file" accept="image/*" onChange={(e) => setNewImage(e.target.files?.[0] || null)} />
+            <Typography fontSize={14} sx={{ mb: 1 }}>
+              Optional image:
+            </Typography>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={e => setNewImage(e.target.files?.[0] || null)}
+            />
           </Box>
-          <Box sx={{ textAlign: "right" }}>
+          <Box sx={{ textAlign: 'right' }}>
             <button
               type="submit"
-              style={{ backgroundColor: "#8B6B47", color: "#fff", padding: "8px 16px", border: "none", borderRadius: "6px", fontWeight: 500, fontSize: "0.95rem", cursor: "pointer" }}
+              style={{
+                backgroundColor: '#8B6B47',
+                color: '#fff',
+                padding: '8px 16px',
+                border: 'none',
+                borderRadius: '6px',
+                fontWeight: 500,
+                fontSize: '0.95rem',
+                cursor: 'pointer',
+              }}
             >
               Submit
             </button>
           </Box>
         </Box>
       ) : (
-        <Typography sx={{ fontStyle: "italic", color: "#555" }}>
+        <Typography sx={{ fontStyle: 'italic', color: '#555' }}>
           Please log in to leave a comment.
         </Typography>
       )}

@@ -5,7 +5,7 @@ export interface UIRecipeWithMeta extends UIRecipe {
   created_at: string;
 }
 
-const CATS: UIRecipeCategory[] = ["Dessert", "Drink", "Main Dish"];
+const CATS: UIRecipeCategory[] = ["DESSERT", "DRINK", "MAIN_DISH"];
 const DIFFS = ["Easy", "Medium", "Hard"] as const;
 
 export function makeMockRecipes(count = 60): UIRecipeWithMeta[] {

@@ -1,5 +1,5 @@
 import { AppBar, Box, Link, Toolbar, styled, Tooltip, IconButton, Button } from '@mui/material';
-import { CircleUserRound, Settings, LogOut } from 'lucide-react';
+import { CircleUserRound, LogOut } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppSelector } from '@/hooks/use-app-selector';
 import SearchBar from '../search-bar/search-bar';
@@ -272,19 +272,6 @@ const NavBar = ({ onSearch }: NavBarProps) => {
                   <CircleUserRound color="#EAC9A3" />
                 </IconButton>
               </Tooltip>
-
-              {/* <Tooltip title="Settings">
-                <IconButton
-                  sx={{
-                    '&:focus': {
-                      outline: 'none',
-                      boxShadow: 'none',
-                    },
-                  }}
-                >
-                  <Settings color="#EAC9A3" />
-                </IconButton>
-              </Tooltip> */}
 
               <Tooltip title="Logout">
                 <IconButton

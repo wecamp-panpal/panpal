@@ -1,163 +1,111 @@
 import { useState, useEffect, useRef } from 'react';
-import { Box, TextField, IconButton, Button, Typography, Chip } from '@mui/material';
+import { Box, TextField, IconButton, Button, Typography } from '@mui/material';
 import { Add, Delete, Close } from '@mui/icons-material';
 
+export interface StepDraft {
+  stepNumber: number;
+  instruction: string;
+  file?: File;
+  imageUrl?: string;
+}
+
 interface AddStepProps {
-  initialSteps?: {  stepNumber: number; instruction: string;  imageUrl?: string }[];
-  onChange?: (steps: {  stepNumber: number; instruction: string;  imageUrl?: string }[]) => void;
+  initialSteps?: StepDraft[];
+  onChange?: (steps: StepDraft[]) => void;
 }
 
 const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
-  const hasInitializedRef = useRef(false);
-  
-  const [steps, setSteps] = useState<string[]>(['']);
-  
-  const [stepsFiles, setStepsFiles] = useState<(File | null)[]>([null]);
-  
-  const [existingImages, setExistingImages] = useState<(string | null)[]>([null]);
+  const inited = useRef(false);
+  const [rows, setRows] = useState<StepDraft[]>([{ stepNumber: 1, instruction: '' }]);
 
- 
   useEffect(() => {
-    console.log('🔄 Props changed:', initialSteps, 'Already initialized:', hasInitializedRef.current);
-    
-    // Initialize only once when we first get initial steps
-    if (initialSteps && initialSteps.length > 0 && !hasInitializedRef.current) {
-      const instructions = initialSteps.map(step => step.instruction);
-      const files = initialSteps.map(() => null);
-      const images = initialSteps.map(step => step.imageUrl || null);
-      
-      console.log('🎯 First-time initialization:', { instructions, files, images });
-      
-      setSteps(instructions);
-      setStepsFiles(files);
-      setExistingImages(images);
-      hasInitializedRef.current = true;
+    if (initialSteps && initialSteps.length > 0 && !inited.current) {
+      const norm = initialSteps.map((s, idx) => ({
+        stepNumber: s.stepNumber ?? idx + 1,
+        instruction: s.instruction ?? '',
+        file: s.file,
+        imageUrl: s.imageUrl,
+      }));
+      setRows(norm);
+      inited.current = true;
     }
   }, [initialSteps]);
 
+  const emit = (list: StepDraft[]) => {
+    onChange?.(
+      list
+        .map((s, idx) => ({
+          ...s,
+          stepNumber: idx + 1,
+          instruction: s.instruction.trim(),
+        }))
+        .filter(s => s.instruction)
+    );
+  };
+
   const addSteps = () => {
-    setSteps(prev => [...prev, '']);
-    setStepsFiles(prev => [...prev, null]);
-    setExistingImages(prev => [...prev, null]);
+    setRows(prev => {
+      const next = [...prev, { stepNumber: prev.length + 1, instruction: '' }];
+      emit(next);
+      return next;
+    });
   };
 
   const deleteStep = (i: number) => {
-    console.log('🗑️ Delete step clicked:', i, 'Current steps:', steps);
-    
-    const newSteps = steps.filter((_, idx) => idx !== i);
-    const newFiles = stepsFiles.filter((_, idx) => idx !== i);
-    const newImages = existingImages.filter((_, idx) => idx !== i);
-    
-    console.log('After filter:', { newSteps, newFiles, newImages });
-    
-    // Ensure at least one empty step exists
-    const finalSteps = newSteps.length ? newSteps : [''];
-    const finalFiles = newFiles.length ? newFiles : [null];
-    const finalImages = newImages.length ? newImages : [null];
-    
-    setSteps(finalSteps);
-    setStepsFiles(finalFiles);
-    setExistingImages(finalImages);
-    
-    // Send formatted data to parent (only non-empty steps)
-    const formatted = finalSteps
-      .map((instruction, idx) => ({
-         stepNumber: idx + 1,
-        instruction: instruction.trim(),
-         imageUrl: finalImages[idx] || undefined
-      }))
-      .filter(step => step.instruction); 
-    
-    console.log('Sending to parent:', formatted);
-    onChange?.(formatted);
+    setRows(prev => {
+      const next = prev.filter((_, idx) => idx !== i);
+      const final = next.length ? next : [{ stepNumber: 1, instruction: '' }];
+      emit(final);
+      return final;
+    });
   };
 
-  const handleChange = (i: number, step: string) => {
-    const update = [...steps];
-    update[i] = step;
-    setSteps(update);
-    
-    // CRITICAL FIX: Don't filter while typing! 
-    // Send ALL steps with their original indices to maintain React key consistency
-    const formatted = update
-      .map((instruction, idx) => ({
-         stepNumber: idx + 1,
-        instruction: instruction.trim(), 
-         imageUrl: existingImages[idx] || undefined
-      }))
-      .filter(step => step.instruction); // Only filter non-empty for parent
-    
-    onChange?.(formatted);
+  const handleChange = (i: number, val: string) => {
+    setRows(prev => {
+      const next = [...prev];
+      next[i] = { ...next[i], instruction: val };
+      emit(next);
+      return next;
+    });
   };
 
-  const handleFileChange = (i: number, event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files) return;
-    const chosen = event.target.files[0];
-    setStepsFiles(prev => {
-      const copy = [...prev];
-      copy[i] = chosen;
-      return copy;
+  const handleFileChange = (i: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    const preview = URL.createObjectURL(f);
+    setRows(prev => {
+      const next = [...prev];
+      next[i] = { ...next[i], file: f, imageUrl: preview };
+      emit(next);
+      return next;
     });
-    
-    setExistingImages(prev => {
-      const copy = [...prev];
-      copy[i] = URL.createObjectURL(chosen);
-      return copy;
-    });
-    
-
-    const formatted = steps
-      .map((instruction, idx) => ({
-         stepNumber: idx + 1,
-        instruction: instruction.trim(),
-         imageUrl: idx === i ? URL.createObjectURL(chosen) : existingImages[idx] || undefined
-      }))
-      .filter(step => step.instruction); // Filter only for parent
-    onChange?.(formatted);
-    
-    event.target.value = '';
+    e.target.value = '';
   };
 
   const removeFile = (i: number) => {
-    setStepsFiles(prev => {
-      const copy = [...prev];
-      copy[i] = null;
-      return copy;
+    setRows(prev => {
+      const next = [...prev];
+      next[i] = { ...next[i], file: undefined, imageUrl: undefined };
+      emit(next);
+      return next;
     });
-    
-    setExistingImages(prev => {
-      const copy = [...prev];
-      copy[i] = null;
-      return copy;
-    });
-    
-    const formatted = steps
-      .map((instruction, idx) => ({
-         stepNumber: idx + 1,
-        instruction: instruction.trim(),
-         imageUrl: idx === i ? undefined : existingImages[idx] || undefined
-      }))
-      .filter(step => step.instruction); // Filter only for parent  
-    onChange?.(formatted);
   };
 
   return (
     <Box>
-      {steps.map((step, i) => {
+      {rows.map((row, i) => {
         const inputId = `file-upload-${i}`;
-        const file = stepsFiles[i];
         return (
           <Box key={i} sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start', mb: 2 }}>
             <TextField
-              value={step}
+              value={row.instruction}
               onChange={e => handleChange(i, e.target.value)}
               placeholder={`Step ${i + 1}...`}
               sx={{
                 height: 60,
                 flex: 1,
-                '& .MuiInputBase-root': { borderRadius: 2 },
                 '& .MuiOutlinedInput-root': {
-                  boxShadow: 'none',
+                  borderRadius: 2,
                   '& fieldset': { borderColor: 'secondary.main' },
                   '&:hover fieldset': { borderColor: 'primary.main' },
                   '&.Mui-focused fieldset': { borderColor: 'primary.main' },
@@ -190,43 +138,20 @@ const AddStep = ({ initialSteps, onChange }: AddStepProps) => {
                     overflow: 'hidden',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: (file || existingImages[i]) ? 'flex-start' : 'center',
+                    justifyContent: (row.file || row.imageUrl) ? 'flex-start' : 'center',
                     '&:hover': { backgroundColor: '#f0e4d3' },
                   }}
                 >
-                  {file ? (
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: '#391F06',
-                        maxWidth: '100%',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      {file.name}
+                  {row.file ? (
+                    <Typography variant="body2" sx={{ color: '#391F06', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {row.file.name}
                     </Typography>
-                  ) : existingImages[i] ? (
+                  ) : row.imageUrl ? (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: '#391F06',
-                          maxWidth: '70%',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                        }}
-                      >
+                      <Typography variant="body2" sx={{ color: '#391F06', maxWidth: '70%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         📷 Step image
                       </Typography>
-                      <IconButton 
-                        size="small" 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          removeFile(i);
-                        }}
-                        sx={{ p: 0.25 }}
-                      >
+                      <IconButton size="small" onClick={(e) => { e.preventDefault(); removeFile(i); }} sx={{ p: 0.25 }}>
                         <Close sx={{ fontSize: 16, color: '#8c7a55' }} />
                       </IconButton>
                     </Box>
