@@ -12,24 +12,33 @@ import ExploreRecipes from '@/pages/ExploreRecipes';
 import RecipeDetailPage from '@/pages/RecipeDetailPage';
 import SignUpPage from '@/pages/SignUpPage';
 import NotFound from '@/pages/not-found';
-
+import { Toaster } from 'react-hot-toast';
 function App() {
   return (
     <ThemeProvider theme={muiTheme}>
-        <Routes>
-          <Route element={<HomeLayout />}>
-            <Route index element={<LandingPage />} />
-            <Route path="/explore" element={<ExploreRecipes />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/add-recipe" element={<AddRecipePage />} />
-            <Route path="/recipes/:id" element={<RecipeDetailPage />} />
-            <Route path="/recipes/:id/edit" element={<EditRecipePage />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-          <Route path="/sign-in" element={<SignInPage />} />
-          <Route path="/sign-up" element={<SignUpPage />} />
-        </Routes>
-      </ThemeProvider>
+      <Routes>
+        <Route element={<HomeLayout />}>
+          <Route index element={<LandingPage />} />
+          <Route path="/explore" element={<ExploreRecipes />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/add-recipe" element={<AddRecipePage />} />
+          <Route path="/recipes/:id" element={<RecipeDetailPage />} />
+          <Route path="/recipes/:id/edit" element={<EditRecipePage />} />
+        </Route>
+        <Route path="*" element={<NotFound />} />
+        <Route path="/sign-in" element={<SignInPage />} />
+        <Route path="/sign-up" element={<SignUpPage />} />
+      </Routes>
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          duration: 4000,
+          style: { background: '#363636', color: '#fff' },
+          success: { style: { background: '#4ade80' } },
+          error: { style: { background: '#ef4444' } },
+        }}
+      />
+    </ThemeProvider>
   );
 }
 

@@ -16,9 +16,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import { loginUser } from '@/services/auth';
 import { useAppDispatch } from '@/hooks/use-app-dispatch';
 import { signIn } from '@/stores/user-slice';
+import { toast } from 'react-hot-toast';
+
 export default function SignInForm() {
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
@@ -28,18 +31,24 @@ export default function SignInForm() {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setLoadingMessage('Signing in...');
+
     // basic validation
     if (!email || !password) {
-      setError('Please fill in all fields');
+      toast.error('Please fill in all fields');
       setLoading(false);
+      setLoadingMessage('');
       return;
     }
+
     try {
       const response = await loginUser({ email, password });
       console.log('Login response:', response);
 
       if (response.success && response.token) {
+        toast.success('Login successful!');
         localStorage.setItem('access_token', response.token);
+
         if (
           response.user &&
           response.user.id &&
@@ -54,20 +63,33 @@ export default function SignInForm() {
               name: response.user.name,
               role: response.user.role,
               created_at: '',
-              updated_at: ''
+              updated_at: '',
             })
           );
+
+          setTimeout(() => {
+            navigate('/');
+            setLoading(false);
+            setLoadingMessage('');
+          }, 2500);
+
+          return; // Important: Return để tránh chạy finally
         } else {
           setError('Invalid user data received.');
+          setLoading(false);
+          setLoadingMessage('');
         }
-        navigate('/');
       } else {
         setError(response.message || 'Login failed');
+        toast.error(response.message || 'Login failed');
+        setLoading(false);
+        setLoadingMessage('');
       }
     } catch (error) {
       setError((error as Error).message);
-    } finally {
+      toast.error((error as Error).message);
       setLoading(false);
+      setLoadingMessage('');
     }
   };
 
@@ -241,7 +263,7 @@ export default function SignInForm() {
             >
               <Box display="flex" alignItems="center" gap="0.3125rem" padding={'0.5rem 1rem'}>
                 <Typography fontWeight={600} color="#fffff6">
-                  Log in
+                  {loadingMessage || 'Log in'}
                 </Typography>
               </Box>
             </Button>

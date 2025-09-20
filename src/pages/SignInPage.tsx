@@ -2,7 +2,6 @@ import { Box, Typography } from '@mui/material';
 
 import SignInForm from '@/components/signIn-form/signIn-form';
 import NavBar from '../components/nav-bar/nav-bar';
-
 const SignInPage: React.FC = () => {
   return (
     <Box display="flex" flexDirection="column" minHeight="100vh">
@@ -51,7 +50,7 @@ const SignInPage: React.FC = () => {
           alignItems="center"
           color={'#FDF2E5'}
           sx={{
-            mt: { xs: 6, sm: 0 }, 
+            mt: { xs: 6, sm: 0 },
           }}
         >
           <SignInForm />
