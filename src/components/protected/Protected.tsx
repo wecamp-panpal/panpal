@@ -61,14 +61,40 @@ export default function Protected({ children, type = 'action' }: ProtectedProps)
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ gap: 1, p: 2 }}>
-          <Button onClick={handleClose} sx={{ fontFamily: 'Montserrat' }}>
+          <Button onClick={handleClose} sx={{ 
+            fontFamily: 'Montserrat, sans-serif',
+            color: 'primary.main',
+            backgroundColor: 'secondary.main',
+            border: '2px solid',
+            borderColor: 'primary.main',
+            px: 3,
+            py: 1,
+            borderRadius: 2,
+            fontWeight: 600,
+            textTransform: 'none',
+            '&:hover': {
+              backgroundColor: '#e6d2b7',
+            }
+          }}>
             Close
           </Button>
           <Button
             onClick={handleSignIn}
             variant="contained"
             autoFocus
-            sx={{ fontFamily: 'Montserrat' }}
+           sx={{ 
+            fontFamily: 'Montserrat, sans-serif',
+            backgroundColor: 'primary.main',
+            color: 'secondary.main',
+            px: 3,
+            py: 1,
+            borderRadius: 2,
+            fontWeight: 600,
+            textTransform: 'none',
+            '&:hover': {
+              backgroundColor: '#2a1604',
+            }
+          }}
           >
             Sign In
           </Button>

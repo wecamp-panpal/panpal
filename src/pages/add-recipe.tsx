@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Box, Container, Typography, TextField, Button } from '@mui/material';
 import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
@@ -6,11 +6,12 @@ import { useNavigate } from 'react-router-dom';
 import DescriptionEditor from '@/components/text-editor/text-editor';
 import CategorySelect, { type RecipeCategory } from '@/components/category-select/category-select';
 import AddIngredient from '@/components/add-ingredients/add-ingredient';
-import AddStep from '@/components/add-step/add-step';
+import AddStep, { type StepDraft } from '@/components/add-step/add-step';
 import axiosClient from '@/lib/axiosClient';
 import { clearCurrentUserCache } from '@/services/auth';
 import Protected from '@/components/protected/Protected';
 import { toast } from 'react-hot-toast';
+import ConfirmDialog from '@/components/pop-up/confirm-dialog';
 
 const AddRecipePage = () => {
   const navigate = useNavigate();
@@ -24,6 +25,12 @@ const AddRecipePage = () => {
     { stepNumber: number; instruction: string; imageUrl?: string; file?: File }[]
   >([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [resetKey, setResetKey] = useState(0);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+  const handleStepsChange = useCallback((s: StepDraft[]) => {
+    setSteps(s);
+  }, []);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const f = event.target.files?.[0];
@@ -101,21 +108,7 @@ const AddRecipePage = () => {
       imageFile;
 
     if (hasContent) {
-      const confirmed = window.confirm(
-        'Are you sure you want to clear all fields? This action cannot be undone.'
-      );
-
-      if (confirmed) {
-        setTitle('');
-        setDescription('');
-        setCategory(null);
-        setTotalMinutes(0);
-        setIngredients([]);
-        setSteps([]);
-        setImageFile(null);
-        setImagePreview(null);
-        toast.success('All fields cleared');
-      }
+      setShowConfirmDialog(true);
       return;
     }
 
@@ -125,9 +118,32 @@ const AddRecipePage = () => {
     setTotalMinutes(0);
     setIngredients([]);
     setSteps([]);
+    setResetKey(k => k + 1);
     setImageFile(null);
     setImagePreview(null);
     toast.success('All fields cleared');
+  };
+
+  const clearAllFields = () => {
+    setTitle('');
+    setDescription('');
+    setCategory(null);
+    setTotalMinutes(0);
+    setIngredients([]);
+    setSteps([]);
+    setResetKey(k => k + 1);
+    setImageFile(null);
+    setImagePreview(null);
+    toast.success('All fields cleared');
+  };
+
+  const handleConfirmClear = () => {
+    setShowConfirmDialog(false);
+    clearAllFields();
+  };
+
+  const handleCancelClear = () => {
+    setShowConfirmDialog(false);
   };
 
   return (
@@ -315,30 +331,31 @@ const AddRecipePage = () => {
             Category
           </Typography>
           <Box sx={{ mb: 2.5 }}>
-             <CategorySelect value={category} onChange={setCategory} />
+            <CategorySelect value={category} onChange={setCategory} />
           </Box>
 
-        <Typography
-          sx={{ color: 'primary.main', fontFamily: 'Montserrat', fontWeight: 500, mb: 0.75 }}
-        >
-          Ingredient
-        </Typography>
-        <Box sx={{ mb: 2 }}>
-          <AddIngredient
-            key={`ingredients-${ingredients.length}`}
-            initialIngredients={ingredients}
-            onChange={setIngredients}
-          />
+          <Typography
+            sx={{ color: 'primary.main', fontFamily: 'Montserrat', fontWeight: 500, mb: 0.75 }}
+          >
+            Ingredient
+          </Typography>
+          <Box sx={{ mb: 2 }}>
+            <AddIngredient
+              key={`ingredients-${ingredients.length}`}
+              initialIngredients={ingredients}
+              onChange={setIngredients}
+            />
+          </Box>
+
+          <Typography
+            sx={{ color: 'primary.main', fontFamily: 'Montserrat', fontWeight: 500, mb: 0.75 }}
+          >
+            Steps
+          </Typography>
+          <AddStep key={`steps-${resetKey}`} initialSteps={[]} onChange={handleStepsChange} />
         </Box>
 
-        <Typography
-          sx={{ color: 'primary.main', fontFamily: 'Montserrat', fontWeight: 500, mb: 0.75 }}
-        >
-          Steps
-        </Typography>
-        <AddStep key={`steps-${steps.length}`} initialSteps={steps} onChange={setSteps} />
-      </Box>
-
+        {/* Buttons */}
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 4 }}>
           <Button
             sx={{
@@ -350,7 +367,6 @@ const AddRecipePage = () => {
               borderRadius: 3,
               fontFamily: 'Montserrat',
               fontWeight: 700,
-
               '&:hover': {
                 backgroundColor: 'secondary.main',
                 color: 'primary.main',
@@ -386,11 +402,22 @@ const AddRecipePage = () => {
                 boxShadow: 'none',
               },
             }}
-          onClick={handleCancel}
+            onClick={handleCancel}
           >
             Cancel
           </Button>
         </Box>
+
+        {/* Thêm ConfirmDialog */}
+        <ConfirmDialog
+          open={showConfirmDialog}
+          title="Clear All Fields"
+          message="Are you sure you want to clear all fields? This action cannot be undone."
+          confirmText="Clear All"
+          cancelText="Keep Editing"
+          onConfirm={handleConfirmClear}
+          onCancel={handleCancelClear}
+        />
       </Container>
     </Protected>
   );
