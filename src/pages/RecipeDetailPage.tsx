@@ -44,7 +44,7 @@ export default function RecipeDetailPage() {
   const [newImage, setNewImage] = useState<File | null>(null);
 
   // Use favorites hook for consistent state management
-  const { favorites, toggleFavorite } = useFavorites();
+  const { favorites, handleToggleFavorite } = useFavorites();
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
   const [isEditedVersion, setIsEditedVersion] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -159,14 +159,14 @@ export default function RecipeDetailPage() {
     setNewImage(null);
   };
 
-  const handleToggleFavorite = async () => {
+  const handleFavoriteClick = async () => {
     if (!currentUser) {
       navigate('/sign-in');
       return;
     }
-
-    const recipeId = id;
-    await toggleFavorite(recipeId);
+    if (id) {
+      await handleToggleFavorite(id);
+    }
   };
 
   const handleEditRecipe = () => {
@@ -308,7 +308,7 @@ export default function RecipeDetailPage() {
           )}
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {favorites.has(id) && (
+          {favorites.includes(id!) && (
             <Typography
               sx={{
                 fontFamily: 'Montserrat',
@@ -321,9 +321,9 @@ export default function RecipeDetailPage() {
             </Typography>
           )}
 
-          <Tooltip title={favorites.has(id) ? 'Remove from favorites' : 'Add to favorites'}>
+          <Tooltip title={favorites.includes(id!) ? 'Remove from favorites' : 'Add to favorites'}>
             <IconButton
-              onClick={handleToggleFavorite}
+              onClick={handleFavoriteClick }
               sx={{
                 backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 backdropFilter: 'blur(4px)',
@@ -341,7 +341,7 @@ export default function RecipeDetailPage() {
                 height: 56,
               }}
             >
-              {favorites.has(id) ? (
+              {favorites.includes(id!) ? (
                 <Favorite sx={{ color: '#dc3545', fontSize: 28 }} />
               ) : (
                 <FavoriteBorder sx={{ color: '#8B6B47', fontSize: 28 }} />

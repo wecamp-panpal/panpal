@@ -143,11 +143,8 @@ const Profile = () => {
   ];
 
   const [myRecipes, setMyRecipes] = useState<UIRecipe[]>([]);
-  const [favoriteRecipes, setFavoriteRecipes] = useState<UIRecipe[]>([]);
   const [myRecipesLoading, setMyRecipesLoading] = useState(false);
-  const [favoriteRecipesLoading, setFavoriteRecipesLoading] = useState(false);
-  const { favorites, favoriteCount, handleToggleFavorite, refreshFavorites, syncFromLocalStorage } =
-    useFavorites();
+  const { favorites, handleToggleFavorite, refreshFavorites } = useFavorites();
 
   const userToProfile = (user: User): UserProfile => ({
     fullName: user.name || '',
@@ -187,7 +184,7 @@ const Profile = () => {
         // Load user's recipes and favorites
         const shouldForceRefresh = searchParams.get('tab') === '1'; // Force refresh if coming to My Recipes tab
         loadMyRecipes(userData.id, shouldForceRefresh);
-        loadFavoriteRecipes();
+        refreshFavorites();
       } catch (err) {
         console.error('Failed to load user:', err);
         setError('Failed to load user profile. Please try again.');
@@ -212,13 +209,8 @@ const Profile = () => {
         if (forceRefresh) {
           clearCurrentUserCache();
         }
-
         const result = await getUserRecipes(userId, 1, 20, forceRefresh);
         setMyRecipes(result.data);
-
-        syncFromLocalStorage();
-
-        console.log('User recipes loaded:', result);
       } catch (err) {
         console.error('Failed to load user recipes:', err);
         setError('Failed to load your recipes. Please try again.');
@@ -226,93 +218,22 @@ const Profile = () => {
         setMyRecipesLoading(false);
       }
     },
-    [syncFromLocalStorage]
+    []
   );
 
-  useEffect(() => {
-    const handleFavoriteChange = (event: CustomEvent) => {
-      const { recipeId, isFavorited } = event.detail;
-      console.log('Favorite changed:', { recipeId, isFavorited });
-
-      if (isFavorited) {
-      } else {
-        // Recipe was unfavorited - remove from favoriteRecipes
-        setFavoriteRecipes(prev => prev.filter(recipe => recipe.id !== recipeId));
-      }
-    };
-
-    const handleRecipeUpdate = (event: CustomEvent) => {
-      const { recipeId, updatedRecipe } = event.detail;
-      console.log('Recipe updated:', { recipeId, updatedRecipe });
-
-      // Update the recipe in myRecipes list
-      setMyRecipes(prev => prev.map(recipe => (recipe.id === recipeId ? updatedRecipe : recipe)));
-
-      // Also refresh the list to get fresh data from backend with cache busting
-      if (user?.id) {
-        console.log('🔄 Force refreshing recipes after update...');
-        loadMyRecipes(user.id, true);
-      }
-    };
-
-    window.addEventListener('favoriteChanged', handleFavoriteChange as EventListener);
-    window.addEventListener('recipeUpdated', handleRecipeUpdate as EventListener);
-
-    return () => {
-      window.removeEventListener('favoriteChanged', handleFavoriteChange as EventListener);
-      window.removeEventListener('recipeUpdated', handleRecipeUpdate as EventListener);
-    };
-  }, [user?.id, loadMyRecipes]);
-
-  // Load user's favorite recipes
-  const loadFavoriteRecipes = async (forceRefresh = false) => {
-    try {
-      setFavoriteRecipesLoading(true);
-      console.log('Loading favorite recipes', { forceRefresh });
-
-      // Don't force refresh favorites on tab switch since favorites are already synced real-time
-      // Only refresh if explicitly requested (e.g., initial load)
-      if (forceRefresh && favoriteRecipes.length === 0) {
-        console.log('Initial load - refreshing favorites cache');
-        await refreshFavorites();
-      }
-
-      const result = await favoriteService.getFavoriteRecipes();
-      setFavoriteRecipes(result.data);
-
-      // Sync favorites state after favorite recipes are loaded
-      syncFromLocalStorage();
-
-      console.log('Favorite recipes loaded:', result);
-    } catch (err) {
-      console.error('Failed to load favorite recipes:', err);
-      setError('Failed to load favorite recipes. Please try again.');
-    } finally {
-      setFavoriteRecipesLoading(false);
-    }
-  };
-
-  // Refresh recipes when switching to different tabs
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
-
-    // Update URL to persist tab state on refresh
     setSearchParams(prevParams => {
       const newParams = new URLSearchParams(prevParams);
       newParams.set('tab', newValue.toString());
       return newParams;
     });
 
-    // If switching to My Recipes tab (index 1) and user exists, refresh recipes
     if (newValue === 1 && user?.id) {
-      console.log('Switching to My Recipes tab, refreshing...');
       loadMyRecipes(user.id, true);
     }
-
-    // If switching to Favorite Recipes tab (index 2), load favorites without forcing refresh
     if (newValue === 2) {
-      console.log('Switching to Favorite Recipes tab, loading...');
-      loadFavoriteRecipes(false); // Don't force refresh to prevent count flashing
+      refreshFavorites();
     }
   };
 
@@ -442,12 +363,12 @@ const Profile = () => {
     navigate('/add-recipe');
   };
 
-  const handleEditRecipe = (recipeId: number) => {
+  const handleEditRecipe = (recipeId: string) => {
     console.log('Edit recipe:', recipeId);
     // Navigate to edit recipe page
   };
 
-  const handleViewRecipe = (recipeId: number) => {
+  const handleViewRecipe = (recipeId: string) => {
     navigate(`/recipes/${recipeId}`);
   };
 
@@ -501,7 +422,7 @@ const Profile = () => {
           tabValue={tabValue}
           isEditing={isEditing}
           myRecipesCount={myRecipes.length}
-          favoriteRecipesCount={favoriteRecipes.length}
+          favoriteRecipesCount={favorites.length}
           onTabChange={handleTabChange}
           onEdit={handleEdit}
           onSave={handleSave}
@@ -543,18 +464,11 @@ const Profile = () => {
         </TabPanel>
 
         <TabPanel value={tabValue} index={2}>
-          {favoriteRecipesLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            <FavoriteRecipesTab
-              favoriteRecipes={favoriteRecipes}
-              onViewRecipe={handleViewRecipe}
-              onToggleFavorite={handleToggleFavorite}
-              favorites={favorites}
-            />
-          )}
+          <FavoriteRecipesTab
+            favorites={favorites}
+            onViewRecipe={handleViewRecipe}
+            onToggleFavorite={handleToggleFavorite}
+          />
         </TabPanel>
       </Paper>
     </Container>

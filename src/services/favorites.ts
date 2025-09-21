@@ -11,7 +11,7 @@ function convertBackendRecipeToUI(backendRecipe: BackendRecipe): UIRecipe {
     author_id: backendRecipe.authorId,
     cooking_time: backendRecipe.cookingTime || '',
     image: backendRecipe.imageUrl || '/api/placeholder/400/300',
-    difficulty: 'Medium', // Default difficulty since backend doesn't have this
+    difficulty: 'Medium',
     rating: backendRecipe.myRating || 0,
     rating_avg: backendRecipe.ratingAvg || 0,
     rating_count: backendRecipe.ratingCount || 0,
@@ -44,38 +44,31 @@ export const favoriteService = {
     });
   },
 
-  // Get user's favorite recipe IDs
-  async getFavoriteIds(): Promise<number[]> {
+  async getFavoriteIds(): Promise<string[]> {
     try {
       const response = await axiosClient.get('/favorites');
-      const favoriteData = response.data.data || [];
-      
-      // Convert backend recipe IDs to frontend number IDs
-      return favoriteData.map((fav: any) => {       
-        return fav.recipeId;
-      });
+      const items = response.data?.items || [];
+      return items.map((fav: any) => String(fav.recipe?.id)).filter(Boolean);
     } catch (error) {
       console.error('Failed to load favorite IDs:', error);
       return [];
     }
   },
 
-  // Get user's favorite recipes with full data
   async getFavoriteRecipes(page = 1, limit = 20): Promise<FavoriteListResult> {
     try {
       const response = await axiosClient.get('/favorites/recipes', {
-        params: { page, limit }
+        params: { page, limit },
       });
 
       const result = response.data;
-      const recipes = (result.items || []).map((backendRecipe: BackendRecipe) => {
-        const uiRecipe = convertBackendRecipeToUI(backendRecipe);
-        return uiRecipe;
-      });
+      const recipes = (result.items || []).map((backendRecipe: BackendRecipe) =>
+        convertBackendRecipeToUI(backendRecipe)
+      );
 
       return {
         data: recipes,
-        total: result.total || 0
+        total: result.total || 0,
       };
     } catch (error) {
       console.error('Failed to load favorite recipes:', error);
@@ -83,7 +76,6 @@ export const favoriteService = {
     }
   },
 
-  // Toggle favorite status (add or remove)
   async toggleFavorite(recipeId: string, currentlyFavorited: boolean): Promise<void> {
     if (currentlyFavorited) {
       await this.removeFavorite(recipeId);

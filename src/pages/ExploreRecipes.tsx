@@ -18,27 +18,13 @@ export default function ExploreRecipes() {
   const [recipes, setRecipes] = useState<UIRecipe[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const { favorites, handleToggleFavorite, syncFromLocalStorage } = useFavorites();
-
-  // Listen for favorite changes to keep UI in sync across components
-  useEffect(() => {
-    const handleFavoriteChange = () => {
-      // Sync favorites state when changes occur from other pages
-      syncFromLocalStorage();
-    };
-
-    window.addEventListener('favoriteChanged', handleFavoriteChange);
-    
-    return () => {
-      window.removeEventListener('favoriteChanged', handleFavoriteChange);
-    };
-  }, [syncFromLocalStorage]);
+  const { favorites, handleToggleFavorite } = useFavorites();
 
   const location = useLocation();
   const navigate = useNavigate();
 
   const searchQuery = new URLSearchParams(location.search).get('q') || '';
-  
+
   const filters: RecipeFilters = useMemo(() => {
     return selected ? { categories: [selected] } : {};
   }, [selected]);
@@ -49,12 +35,9 @@ export default function ExploreRecipes() {
 
     listRecipes(page, PAGE_SIZE, filters, searchQuery || undefined)
       .then(({ data, total }) => {
-        console.log("API result:", { data, total });
         if (!ignore) {
           setRecipes(data);
           setTotal(total);
-          // Sync favorites after recipes are loaded
-          syncFromLocalStorage();
         }
       })
       .finally(() => {
@@ -79,10 +62,7 @@ export default function ExploreRecipes() {
         Explore Recipes
       </Typography>
 
-      <FilterBar
-        selected={selected}
-        onToggle={onToggle}
-      />
+      <FilterBar selected={selected} onToggle={onToggle} />
 
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
         <Typography variant="h5" sx={{ m: 0, fontFamily: '"Playfair Display", serif' }}>
@@ -123,7 +103,7 @@ export default function ExploreRecipes() {
               variant="public"
               onClick={() => navigate(`/recipes/${r.id}`)}
               onToggleFavorite={handleToggleFavorite}
-              isFavorited={favorites.has(r.id)}
+              isFavorited={favorites.includes(r.id)}
             />
           ))
         )}

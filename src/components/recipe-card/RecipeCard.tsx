@@ -1,4 +1,3 @@
-
 import {
   Box,
   Card,
@@ -35,27 +34,29 @@ interface RecipeCardProps {
   isFavorited?: boolean;
 }
 
-const RecipeCard: React.FC<RecipeCardProps> = ({ 
-  recipe, 
-  type = 'my-recipe', 
-  variant = 'default', 
-  onEdit, 
-  onView, 
-  onClick, 
+const RecipeCard: React.FC<RecipeCardProps> = ({
+  recipe,
+  type = 'my-recipe',
+  variant = 'default',
+  onEdit,
+  onView,
+  onClick,
   onToggleFavorite,
-  isFavorited = false 
+  isFavorited = false,
 }) => {
   const isPublic = variant === 'public';
   const username = type === 'my-recipe' ? '@johndoe' : '@chef_master';
 
   const handleLikeClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click when clicking like button
-    onToggleFavorite?.(recipe.id);
+    e.stopPropagation();
+    if (onToggleFavorite) {
+      onToggleFavorite(recipe.id);
+    }
   };
 
   const card = (
     <Card
-      className='recipe-card'
+      className="recipe-card"
       sx={{
         mx: 'auto',
         height: '100%',
@@ -86,7 +87,6 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             aspectRatio: '1/1'
           }}
         />
-        {/* Like Button */}
         <IconButton
           onClick={handleLikeClick}
           sx={{
@@ -119,7 +119,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
 
       <CardContent sx={{ flexGrow: 1, p: 3, pb: 2 }}>
         <Typography
-          variant="h6" 
+          variant="h6"
           sx={{
             mb: 0.5,
             color: '#2D1810',
@@ -141,7 +141,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           <Rating
             value={recipe.rating}
             precision={0.1}
-            size="small" 
+            size="small"
             readOnly
             sx={{
               '& .MuiRating-iconFilled': {
@@ -150,7 +150,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             }}
           />
           <Typography
-            variant="body2" 
+            variant="body2"
             sx={{
               color: '#6B4E37',
               fontWeight: 500,
@@ -162,7 +162,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         </Box>
 
         <Typography
-          variant="body2" 
+          variant="body2"
           sx={{
             color: '#8B6B47',
             fontSize: '0.9rem',
