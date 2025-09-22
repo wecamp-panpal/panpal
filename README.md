@@ -1,7 +1,7 @@
 <header id="#header">
 <p align="center" >
   <a name="header"></a>
-  <img src="./public/bigLogo.png" alt="Big Logo" />
+  <img src="./public/bigLogo.svg" alt="Big Logo" />
 </p>
 
 <p  align="center" >
@@ -82,17 +82,20 @@ PanPal is a modern recipe sharing web application built with React, TypeScript, 
 ### Installation
 
 1. Clone the repository
+
 ```bash
 git clone https://github.com/your-username/panpal-frontend.git
 cd panpal-frontend
 ```
 
 2. Install dependencies
+
 ```bash
 npm install
 ```
 
 3. Create environment file
+
 ```bash
 cp .env.example .env.local
 ```
@@ -115,7 +118,18 @@ npm run dev
 # Build for production
 npm run build
 
+# Preview production build
+npm run preview
 
+# Run type checking
+npm run type-check
+
+# Run linting
+npm run lint
+
+# Fix linting issues
+npm run lint:fix
+```
 
 ## 📁 Project Structure
 
@@ -158,15 +172,18 @@ src/
 PanPal uses a warm, cooking-inspired design system:
 
 ### Colors
+
 - **Primary**: `#391F06` (Rich Brown)
 - **Secondary**: `#f5e2cc` (Warm Cream)
 - **Accent**: `#BFA980` (Light Brown)
 
 ### Typography
+
 - **Headings**: Playfair Display (serif)
 - **Body Text**: Montserrat (sans-serif)
 
 ### Components
+
 - Consistent Material-UI theming
 - Custom styled components
 - Responsive breakpoints
@@ -182,6 +199,7 @@ The frontend communicates with the backend API using:
 - **Loading States**: Loading indicators for async operations
 
 ### API Endpoints Used
+
 - `/auth/login` - User authentication
 - `/auth/register` - User registration
 - `/recipes` - Recipe CRUD operations
@@ -190,16 +208,39 @@ The frontend communicates with the backend API using:
 
 ## 📱 Screenshots
 
-*Replace with actual screenshots of your application*
+_Replace with actual screenshots of your application showing:_
 
+- Home page with trending recipes
+- Recipe detail page with ingredients and steps
+- Add recipe form with image upload
+- User profile and recipe management
+- Mobile responsive views
 
+## 📦 Build & Deployment
+
+### Production Build
+
+```bash
+npm run build
+```
+
+This creates an optimized production build in the `dist/` directory.
 
 ### Deployment Options
 
-- **Vercel**: Connect your GitHub repository
-- **Netlify**: Drag and drop the `dist` folder
+- **Vercel**: Connect your GitHub repository for automatic deployments
+- **Netlify**: Drag and drop the `dist` folder or connect via Git
 - **GitHub Pages**: Use GitHub Actions for deployment
 - **Docker**: Build and deploy using containers
+
+### Environment Setup for Production
+
+Make sure to set the correct environment variables for production:
+
+```env
+VITE_API_BASE_URL=https://your-api-domain.com/api
+VITE_APP_NAME=PanPal
+```
 
 ## 🤝 Contributing
 
@@ -218,6 +259,7 @@ We welcome contributions! Please follow these steps:
 - Maintain consistent code formatting
 - Write meaningful commit messages
 - Test your changes thoroughly
+- Update documentation as needed
 
 ## 📄 License
 
@@ -225,8 +267,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Team
 
-WeCamp Batch 8 - Team PanPal Frontend
+**WeCamp Batch 8 - Team PanPal Frontend**
 
+### Contributors
+
+- **Frontend Lead**: [Your Name]
+- **UI/UX Designer**: [Designer Name]
+- **Developer**: [Developer Name]
+
+### Special Thanks
+
+- WeCamp instructors and mentors
+- The amazing cooking community that inspired this project
 
 ---
 
