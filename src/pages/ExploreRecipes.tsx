@@ -1,14 +1,15 @@
 import { useMemo, useState, useEffect } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Button, Tooltip, CircularProgress } from '@mui/material';
+import CasinoIcon from '@mui/icons-material/Casino';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { UIRecipe, UIRecipeCategory } from '@/types/ui-recipe';
 import type { RecipeFilters } from '@/services/recipes';
-import { listRecipes } from '@/services/recipes';
+import { listRecipes, getRandomRecipe } from '@/services/recipes';
 import FilterBar from '@/components/recipes/FilterBar';
 import type { FilterState } from '@/components/recipes/FilterBar';
 import RecipeCard from '@/components/recipe-card/RecipeCard';
 import { useFavorites } from '@/hooks/useFavorites';
-
+import { toast } from 'react-hot-toast';
 const PAGE_SIZE = 24;
 
 export default function ExploreRecipes() {
@@ -17,6 +18,7 @@ export default function ExploreRecipes() {
   const [total, setTotal] = useState(0);
   const [recipes, setRecipes] = useState<UIRecipe[]>([]);
   const [loading, setLoading] = useState(false);
+  const [randomLoading, setRandomLoading] = useState(false);
 
   const { favorites, handleToggleFavorite } = useFavorites();
 
@@ -28,6 +30,20 @@ export default function ExploreRecipes() {
   const filters: RecipeFilters = useMemo(() => {
     return selected ? { categories: [selected] } : {};
   }, [selected]);
+
+  const handleRandom = async () => {
+    try {
+      setRandomLoading(true);
+      const category = selected ?? undefined;
+      const recipe = await getRandomRecipe(category as UIRecipeCategory | undefined);
+      navigate(`/recipes/${recipe.id}`);
+    } catch (err) {
+      console.error('Failed to fetch random recipe', err);
+      toast.error('No recipes found. Please adjust filters and try again.');
+    } finally {
+      setRandomLoading(false);
+    }
+  };
 
   useEffect(() => {
     let ignore = false;
@@ -68,9 +84,53 @@ export default function ExploreRecipes() {
         <Typography variant="h5" sx={{ m: 0, fontFamily: '"Playfair Display", serif' }}>
           All Recipes
         </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {loading ? 'Loading…' : `${total} result${total === 1 ? '' : 's'}`}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Typography variant="body2" color="text.secondary">
+            {loading ? 'Loading…' : `${total} result${total === 1 ? '' : 's'}`}
+          </Typography>
+          <Tooltip title={selected ? `Feeling Lucky in ${selected}` : 'Feeling Lucky'}>
+            <Button
+              size="small"
+              variant="contained"
+              disableElevation
+              onClick={handleRandom}
+              disabled={randomLoading}
+              startIcon={!randomLoading ? <CasinoIcon sx={{ fontSize: 18 }} /> : undefined}
+              sx={{
+                textTransform: 'none',
+                borderRadius: 999,
+                px: 1.8,
+                py: 0.7,
+                fontWeight: 600,
+                fontSize: 13,
+                letterSpacing: 0.2,
+                background: 'linear-gradient(45deg, #D4A574, #B8864D)',
+                color: '#fff',
+                boxShadow: '0 8px 18px rgba(184, 134, 77, 0.35)',
+                transition: 'transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease',
+                '&:hover': {
+                  transform: 'translateY(-1px) scale(1.02)',
+                  boxShadow: '0 10px 22px rgba(184, 134, 77, 0.45)',
+                  filter: 'brightness(1.03)',
+                },
+                '&:disabled': {
+                  opacity: 0.8,
+                },
+              }}
+            >
+              {randomLoading ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CircularProgress size={14} sx={{ color: '#fff' }} />
+                  Finding...
+                </Box>
+              ) : selected ? (
+                `Feeling Lucky (${selected})`
+              ) : (
+                'Feeling Lucky'
+              )}
+            </Button>
+          </Tooltip>
+        </Box>
       </Box>
 
       <Box

@@ -9,7 +9,7 @@ import LandingPage from '@/pages/LandingPage';
 import './App.css';
 import ProfilePage from '@/pages/Profile';
 import ExploreRecipes from '@/pages/ExploreRecipes';
-import RecipeDetailPage from '@/pages/RecipeDetailPage';
+import RecipeDetailPage from '@/pages/RecipeDetailPageNew';
 import SignUpPage from '@/pages/SignUpPage';
 import NotFound from '@/pages/not-found';
 import { Toaster } from 'react-hot-toast';
