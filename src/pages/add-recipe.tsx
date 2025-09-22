@@ -42,8 +42,8 @@ const AddRecipePage = () => {
 
   const handleSubmit = async () => {
     try {
-      if (!title.trim()) return alert('Missing title');
-      if (!category) return alert('Please choose a category');
+      if (!title.trim()) return toast.error('Missing title');
+      if (!category) return toast.error('Please choose a category');
 
       const form = new FormData();
       form.append('title', title);
