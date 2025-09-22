@@ -118,17 +118,6 @@ npm run dev
 # Build for production
 npm run build
 
-# Preview production build
-npm run preview
-
-# Run type checking
-npm run type-check
-
-# Run linting
-npm run lint
-
-# Fix linting issues
-npm run lint:fix
 ```
 
 ## 📁 Project Structure
@@ -233,14 +222,7 @@ This creates an optimized production build in the `dist/` directory.
 - **GitHub Pages**: Use GitHub Actions for deployment
 - **Docker**: Build and deploy using containers
 
-### Environment Setup for Production
 
-Make sure to set the correct environment variables for production:
-
-```env
-VITE_API_BASE_URL=https://your-api-domain.com/api
-VITE_APP_NAME=PanPal
-```
 
 ## 🤝 Contributing
 
@@ -267,18 +249,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Team
 
-**WeCamp Batch 8 - Team PanPal Frontend**
+**WeCamp Batch 8 - Team PanPal**
 
-### Contributors
 
-- **Frontend Lead**: [Your Name]
-- **UI/UX Designer**: [Designer Name]
-- **Developer**: [Developer Name]
+
 
 ### Special Thanks
 
 - WeCamp instructors and mentors
-- The amazing cooking community that inspired this project
+
 
 ---
 
