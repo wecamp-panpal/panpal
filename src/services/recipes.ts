@@ -105,6 +105,20 @@ export async function getRecipeById(recipeId: string, bustCache = false): Promis
   }
 }
 
+export async function getRandomRecipe(category?: UIRecipeCategory): Promise<UIRecipe> {
+  try {
+    const params: Record<string, string> = {};
+    if (category) {
+      params.category = category;
+    }
+    const response = await axiosClient.get('/recipes/random', { params });
+    return convertBackendRecipeToUI(response.data);
+  } catch (error) {
+    console.error('Failed to fetch random recipe:', error);
+    throw new Error('Failed to fetch random recipe');
+  }
+}
+
 export async function updateRecipe(
   recipeId: string,
   updates: {
