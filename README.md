@@ -221,8 +221,6 @@ This creates an optimized production build in the `dist/` directory.
 - **GitHub Pages**: Use GitHub Actions for deployment
 - **Docker**: Build and deploy using containers
 
-
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -231,10 +229,21 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **WeCamp Batch 8 - Team PanPal**
 
+| Name                     | GitHub                                                         |
+| ------------------------ | -------------------------------------------------------------- |
+| Hoàng Thị Minh Khuê      | [@htmkhue39](https://github.com/htmkhue39)                     |
+| Trần Đồng Trúc Lam       | [@limelight-hub](https://github.com/limelight-hub)             |
+| Võ Thị Hồng Minh         | [@vominh-source](https://github.com/vominh-source)             |
+| Võ Lê Việt Tú            | [@voleviettu](https://github.com/voleviettu)                   |
+| Hoàng Ngọc Quỳnh Anh     | [@quynhanhhoang572004](https://github.com/quynhanhhoang572004) |
+| Phạm Ngọc Diễm (Advisor) | [@diem-github](https://github.com/diem-github)                 |
+
 ### Special Thanks
 
 - WeCamp instructors and mentors
+
 ---
+
 <p align="center">
   Made with ❤️ and 🍳 by the PanPal team
 </p>
