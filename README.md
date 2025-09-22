@@ -39,7 +39,6 @@ PanPal is a modern recipe sharing web application built with React, TypeScript, 
 - [🔌 API Integration](#-api-integration)
 - [📱 Screenshots](#-screenshots)
 - [📦 Build & Deployment](#-build--deployment)
-- [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
 - [👥 Team](#-team)
 
@@ -224,25 +223,6 @@ This creates an optimized production build in the `dist/` directory.
 
 
 
-## 🤝 Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Guidelines
-
-- Follow TypeScript best practices
-- Use Material-UI components when possible
-- Maintain consistent code formatting
-- Write meaningful commit messages
-- Test your changes thoroughly
-- Update documentation as needed
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -251,16 +231,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **WeCamp Batch 8 - Team PanPal**
 
-
-
-
 ### Special Thanks
 
 - WeCamp instructors and mentors
-
-
 ---
-
 <p align="center">
   Made with ❤️ and 🍳 by the PanPal team
 </p>
