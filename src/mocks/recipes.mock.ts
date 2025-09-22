@@ -20,7 +20,7 @@ export function makeMockRecipes(count = 60): UIRecipeWithMeta[] {
     const created = new Date(now - i * 24 * 60 * 60 * 1000).toISOString();
 
     out.push({
-      id: i + 1,
+      id: String(i + 1),
       title: `${cat} Recipe #${i + 1}`,
       description: `Tasty ${cat} recipe number ${i + 1}`,
       author_name: `Chef ${String.fromCharCode(65 + (i % 26))}`,
