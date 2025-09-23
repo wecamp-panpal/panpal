@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Box, Typography, Rating, Button, IconButton, Chip, CircularProgress } from '@mui/material';
-import { CloudUpload, Close, Star } from '@mui/icons-material';
+import { CloudUpload, Close } from '@mui/icons-material';
 import { upsertRating, uploadRatingImages } from '@/services/ratings';
 import toast from 'react-hot-toast';
 
