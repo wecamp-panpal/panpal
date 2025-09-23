@@ -50,12 +50,10 @@ export default function RecipeDetailPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Recipe data
   const [recipe, setRecipe] = useState<UIRecipe | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Comments & Ratings
   const [comments, setComments] = useState<Comment[]>([]);
   const [ratingSummary, setRatingSummary] = useState<RatingSummary | null>(null);
   const [userRating, setUserRating] = useState<Comment | null>(null);
@@ -64,10 +62,7 @@ export default function RecipeDetailPage() {
   const [editingComment, setEditingComment] = useState<Comment | null>(null);
   const [commentsLoading, setCommentsLoading] = useState(false);
 
-  // Favorites
   const { favorites, handleToggleFavorite } = useFavorites();
-
-  // State for UI
 
   const loadRecipeData = useCallback(async () => {
     if (!id) return;
@@ -135,7 +130,7 @@ export default function RecipeDetailPage() {
 
     try {
       await createCommentWithImages(data, images);
-      await loadCommentsData(); // Reload all data
+      await loadCommentsData();
       setShowCommentForm(false);
     } catch (err) {
       console.error('Failed to create comment:', err);
@@ -273,7 +268,20 @@ export default function RecipeDetailPage() {
           <Button
             onClick={() => navigate('/')}
             variant="contained"
-            sx={{ backgroundColor: '#391F06' }}
+            sx={{
+              textTransform: 'none',
+              backgroundColor: 'primary.main',
+              color: 'secondary.main',
+              px: 4,
+              py: 1.25,
+              borderRadius: 3,
+              fontFamily: 'Montserrat',
+              fontWeight: 700,
+              '&:hover': {
+                backgroundColor: 'secondary.main',
+                color: 'primary.main',
+              },
+            }}
           >
             Back to Home
           </Button>
@@ -284,7 +292,6 @@ export default function RecipeDetailPage() {
 
   return (
     <Box sx={{ backgroundColor: '#F5E2CC', minHeight: '100vh' }}>
-      {/* Hero Image Section */}
       <Box
         sx={{
           position: 'relative',
@@ -346,7 +353,6 @@ export default function RecipeDetailPage() {
           </Box>
         </Container>
 
-        {/* Action buttons overlay */}
         <Box
           sx={{
             position: 'absolute',
@@ -418,9 +424,7 @@ export default function RecipeDetailPage() {
         </Box>
       </Box>
 
-      {/* Main Content */}
       <Container maxWidth="md" sx={{ py: { xs: 4, md: 6 } }}>
-        {/* Recipe Meta */}
         <Card sx={{ mb: 4, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
           <CardContent sx={{ p: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
@@ -486,7 +490,6 @@ export default function RecipeDetailPage() {
           </CardContent>
         </Card>
 
-        {/* Recipe Description */}
         <Card sx={{ mb: 4, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
           <CardContent sx={{ p: 4 }}>
             <Typography
@@ -532,7 +535,6 @@ export default function RecipeDetailPage() {
           </CardContent>
         </Card>
 
-        {/* Ingredients */}
         <Card sx={{ mb: 4, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
           <CardContent sx={{ p: 4 }}>
             <Typography
@@ -586,7 +588,6 @@ export default function RecipeDetailPage() {
           </CardContent>
         </Card>
 
-        {/* Instructions */}
         <Card sx={{ mb: 6, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
           <CardContent sx={{ p: 4 }}>
             <Typography
@@ -666,10 +667,9 @@ export default function RecipeDetailPage() {
           </CardContent>
         </Card>
 
-        {/* Rating Summary */}
         {ratingSummary && <RatingDistribution stats={ratingSummary} />}
 
-        {/* Comment Form */}
+      
         {currentUser && (canRate || userRating) && (
           <Box sx={{ mb: 4 }}>
             {!showCommentForm && !editingComment ? (
@@ -679,8 +679,9 @@ export default function RecipeDetailPage() {
                     sx={{
                       fontSize: '1.25rem',
                       fontWeight: 600,
-                      color: '#374151',
+                      color: 'primary.main', 
                       mb: 2,
+                      fontFamily: 'Montserrat', 
                     }}
                   >
                     Share Your Experience
@@ -689,16 +690,23 @@ export default function RecipeDetailPage() {
                     onClick={() => setShowCommentForm(true)}
                     variant="contained"
                     sx={{
-                      backgroundColor: '#D4A574',
-                      color: '#fff',
-                      borderRadius: 2,
-                      px: 4,
-                      py: 1.5,
+                     
                       textTransform: 'none',
-                      fontWeight: 600,
+                      backgroundColor: 'primary.main', 
+                      color: 'secondary.main', 
+                      px: 4,
+                      py: 1.25,
+                      borderRadius: 3,
+                      fontFamily: 'Montserrat',
+                      fontWeight: 700,
                       fontSize: '1rem',
                       '&:hover': {
-                        backgroundColor: '#c59660',
+                        backgroundColor: 'secondary.main',
+                        color: 'primary.main',
+                      },
+                      '&:focus': {
+                        outline: 'none',
+                        boxShadow: 'none',
                       },
                     }}
                   >
@@ -722,7 +730,92 @@ export default function RecipeDetailPage() {
           </Box>
         )}
 
-        {/* Comments List */}
+      
+        {!currentUser && (
+          <Card sx={{ mb: 4, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
+            <CardContent sx={{ p: 4, textAlign: 'center' }}>
+              <Typography
+                sx={{
+                  fontSize: '1.25rem',
+                  fontWeight: 600,
+                  color: 'primary.main', 
+                  mb: 2,
+                  fontFamily: 'Montserrat', 
+                }}
+              >
+                Want to Rate This Recipe?
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: '1rem',
+                  color: '#64748b',
+                  mb: 3,
+                  fontFamily: 'Montserrat', 
+                }}
+              >
+                Join PanPal to share your cooking experience and help other food lovers!
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Button
+                  onClick={() => navigate('/sign-in')}
+                  variant="contained"
+                  sx={{
+                  
+                    textTransform: 'none',
+                    backgroundColor: 'primary.main',
+                    color: 'secondary.main',
+                    px: 4,
+                    py: 1.25,
+                    borderRadius: 3,
+                    fontFamily: 'Montserrat',
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    '&:hover': {
+                      backgroundColor: 'secondary.main',
+                      color: 'primary.main',
+                    },
+                    '&:focus': {
+                      outline: 'none',
+                      boxShadow: 'none',
+                    },
+                  }}
+                >
+                  Sign In to Review
+                </Button>
+                <Button
+                  onClick={() => navigate('/sign-up')}
+                  variant="outlined"
+                  sx={{
+             
+                    textTransform: 'none',
+                    color: 'primary.main',
+                    backgroundColor: 'secondary.main',
+                    border: '1.5px solid',
+                    borderColor: 'primary.main',
+                    px: 4,
+                    py: 1.25,
+                    borderRadius: 3,
+                    fontFamily: 'Montserrat',
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    '&:hover': {
+                      borderColor: 'secondary.main',
+                      backgroundColor: 'secondary.main',
+                      color: 'primary.main',
+                    },
+                    '&:focus': {
+                      outline: 'none',
+                      boxShadow: 'none',
+                    },
+                  }}
+                >
+                  Join PanPal
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
+        )}
+
         <Box>
           <Typography
             variant="h4"

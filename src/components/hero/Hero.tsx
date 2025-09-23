@@ -25,12 +25,12 @@ useEffect(() => {
   fetchUser();
 }, []);
   return (
-    <section className="w-full pt-48 pb-36 px-8 relative">
-      <div className="max-w-7xl mx-auto py-5">
+    <section className="w-full pt-20 pb-28 px-8 relative">
+      <div className="max-w-7xl mx-auto py-3">
         <div className="flex items-center justify-start relative">
           {isAuthenticated ? (
             <>
-              <div className="max-w-2xl relative z-30 text-center lg:text-left w-full lg:w-auto">
+              <div className="max-w-2xl relative z-30 text-center lg:text-left w-full lg:w-auto pt-15">
                 <Typography
                   variant="h1"
                   sx={{
@@ -126,7 +126,7 @@ useEffect(() => {
                   className="absolute -bottom-12 -right-64 w-[1052px] h-auto z-10"
                 />
 
-                {/* Bread - bự hơn và ở góc dưới phải */}
+        
                 <img
                   src="/src/assets/bread.png"
                   alt="Bread"
@@ -136,7 +136,7 @@ useEffect(() => {
             </>
           ) : (
             <>
-              <div className="max-w-2xl relative z-30 text-center lg:text-left w-full lg:w-auto">
+              <div className="max-w-2xl relative z-30 text-center lg:text-left w-full lg:w-auto pt-1">
                 <Typography
                   variant="h1"
                   sx={{

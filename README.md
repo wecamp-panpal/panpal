@@ -27,20 +27,20 @@ PanPal is a modern recipe sharing web application built with React, TypeScript, 
 
 ## 📋 Table of Contents
 
-- [🍳 Features](#-features)
-- [🛠️ Tech Stack](#️-tech-stack)
-- [🚀 Getting Started](#-getting-started)
+- [Features](#-features)
+- [Tech Stack](#️-tech-stack)
+- [Getting Started](#-getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
   - [Environment Variables](#environment-variables)
   - [Available Scripts](#available-scripts)
-- [📁 Project Structure](#-project-structure)
-- [🎨 Design System](#-design-system)
-- [🔌 API Integration](#-api-integration)
-- [📱 Screenshots](#-screenshots)
-- [📦 Build & Deployment](#-build--deployment)
-- [📄 License](#-license)
-- [👥 Team](#-team)
+- [Project Structure](#-project-structure)
+- [Design System](#-design-system)
+- [API Integration](#-api-integration)
+- [Screenshots](#-screenshots)
+- [Build & Deployment](#-build--deployment)
+- [License](#-license)
+- [Team](#-team)
 
 ## 🍳 Features
 
@@ -242,12 +242,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - WeCamp instructors and mentors
 
+
+**Team PanPal** - Connecting food enthusiasts worldwide through the art of cooking.
+
+
 ---
 
 <p align="center">
-  Made with ❤️ and 🍳 by the PanPal team
-</p>
-
-<p align="center">
-  <a href="#header">Back to top ⬆️</a>
+  <a href="#header">Back to top </a>
 </p>
