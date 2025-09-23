@@ -88,7 +88,7 @@ export default function ExploreRecipes() {
           <Typography variant="body2" color="text.secondary">
             {loading ? 'Loading…' : `${total} result${total === 1 ? '' : 's'}`}
           </Typography>
-          <Tooltip title={selected ? `Feeling Lucky in ${selected}` : 'Feeling Lucky'}>
+          <Tooltip title={selected ? `Feeling Lucky in ${selected}` : 'Tired of browsing? Try this Random Recipe button'}>
             <Button
               size="small"
               variant="contained"
@@ -121,10 +121,10 @@ export default function ExploreRecipes() {
               {randomLoading ? (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <CircularProgress size={14} sx={{ color: '#fff' }} />
-                  Finding...
+                  Randomizing...
                 </Box>
               ) : selected ? (
-                `Feeling Lucky (${selected})`
+                `(${selected})`
               ) : (
                 'Feeling Lucky'
               )}
