@@ -25,7 +25,7 @@ import {
   type RatingFilter,
 } from '@/services/ratings';
 import { getCurrentUser } from '@/services/auth';
-import { User } from '@/types/user';
+import type { User } from '@/types/user';
 import toast from 'react-hot-toast';
 
 interface RatingListProps {
