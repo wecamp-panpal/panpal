@@ -110,7 +110,7 @@ export default function SignUpForm() {
     if (form.password !== form.confirmPassword) {
       toast.error('Passwords must match');
       setError('Passwords must match');
-      setLoadingMessage('');
+  
       setLoading(false);
       return;
     }
@@ -118,7 +118,7 @@ export default function SignUpForm() {
     if (form.password.length < 6) {
       toast.error('Password must be at least 6 characters');
       setLoading(false);
-      setLoadingMessage('');
+     
       return;
     }
 
@@ -149,13 +149,13 @@ export default function SignUpForm() {
         setTimeout(() => {
           navigate('/');
           setLoading(false);
-          setLoadingMessage('');
+        
         }, 2500);
       } else {
         toast.error(response.message || 'Registration failed');
         setError(response.message || 'Registration failed');
         setLoading(false);
-        setLoadingMessage('');
+   
       }
     } catch (error: any) {
       console.error('Registration failed:', error);
@@ -182,7 +182,7 @@ export default function SignUpForm() {
 
       setError(errorMessage);
       setLoading(false);
-      setLoadingMessage('');
+ 
     }
   };
 
@@ -636,3 +636,4 @@ export default function SignUpForm() {
     </Box>
   );
 }
+

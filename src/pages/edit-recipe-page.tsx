@@ -4,11 +4,11 @@ import { Box, Container, Typography, TextField, Button } from '@mui/material';
 import { useAppSelector } from '@/hooks/use-app-selector';
 import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
 
-import DescriptionEditor from '@/components/text-editor/text-editor';
-import CategorySelectSingle from '@/components/category-select-single/CategorySelectSingle';
-import AddIngredient from '@/components/add-ingredients/add-ingredient';
-import AddStep from '@/components/add-step/add-step';
-import SimpleSuccessModal from '@/components/success-modal/SimpleSuccessModal';
+import DescriptionEditor from '@/components/recipes/text-editor';
+import CategorySelectSingle from '@/components/recipes/category-select-single';
+import AddIngredient from '@/components/recipes/add-ingredient';
+import AddStep from '@/components/recipes/add-step';
+import SimpleSuccessModal from '@/components/common/simple-success-modal';
 import type { UIRecipe } from '@/types/ui-recipe';
 import { getRecipeById, updateRecipe, updateRecipeImage } from '@/services/recipes';
 
@@ -22,28 +22,36 @@ const EditRecipePage = () => {
   const [description, setDescription] = useState('');
   const [totalMinutes, setTotalMinutes] = useState(0);
   const [category, setCategory] = useState<UIRecipe['category']>('MAIN_DISH');
-  const [ingredients, setIngredients] = useState<{name: string; quantity: string}[]>([]);
-  const [steps, setSteps] = useState<{step_number: number; instruction: string; image_url?: string}[]>([]);
+  const [ingredients, setIngredients] = useState<{ name: string; quantity: string }[]>([]);
+  const [steps, setSteps] = useState<
+    { step_number: number; instruction: string; image_url?: string }[]
+  >([]);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Get current user from Redux store
-  const { user, isAuthenticated } = useAppSelector((state) => state.user);
+  const { user, isAuthenticated } = useAppSelector(state => state.user);
 
   // Memoize onChange handlers to prevent infinite re-renders
-  const handleIngredientsChange = useCallback((newIngredients: {name: string; quantity: string}[]) => {
-    setIngredients(newIngredients);
-  }, []);
+  const handleIngredientsChange = useCallback(
+    (newIngredients: { name: string; quantity: string }[]) => {
+      setIngredients(newIngredients);
+    },
+    []
+  );
 
-  const handleStepsChange = useCallback((newSteps: {stepNumber: number; instruction: string; imageUrl?: string}[]) => {
-    const convertedSteps = newSteps.map(step => ({
-      step_number: step.stepNumber,
-      instruction: step.instruction,
-      image_url: step.imageUrl
-    }));
-    setSteps(convertedSteps);
-  }, []);
+  const handleStepsChange = useCallback(
+    (newSteps: { stepNumber: number; instruction: string; imageUrl?: string }[]) => {
+      const convertedSteps = newSteps.map(step => ({
+        step_number: step.stepNumber,
+        instruction: step.instruction,
+        image_url: step.imageUrl,
+      }));
+      setSteps(convertedSteps);
+    },
+    []
+  );
 
   useEffect(() => {
     const loadRecipe = async () => {
@@ -57,15 +65,15 @@ const EditRecipePage = () => {
         if (localStorage.getItem('edited-recipes')) {
           localStorage.removeItem('edited-recipes');
         }
-        
+
         const found = await getRecipeById(id);
-        
+
         // Check if current user owns this recipe
         if (found.author_id !== user?.id) {
           navigate('/recipes/' + id); // Redirect back to detail page if not owner
           return;
         }
-        
+
         setRecipe(found);
         setTitle(found.title);
         setDescription(found.description);
@@ -73,7 +81,7 @@ const EditRecipePage = () => {
         setCategory(found.category);
         setIngredients(found.ingredients);
         setSteps(found.steps);
-        
+
         // Extract minutes from cooking_time string (e.g., "30 mins" -> 30)
         const timeMatch = found.cooking_time.match(/(\d+)/);
         if (timeMatch) {
@@ -83,7 +91,7 @@ const EditRecipePage = () => {
         console.error('Error loading recipe:', error);
         navigate('/'); // Redirect to home if recipe not found or error
       }
-      
+
       setLoading(false);
     };
 
@@ -106,7 +114,7 @@ const EditRecipePage = () => {
     }
 
     setSaving(true);
-    
+
     try {
       // Prepare updates data
       const updates = {
@@ -118,23 +126,25 @@ const EditRecipePage = () => {
         steps: steps.map(step => ({
           stepNumber: step.step_number,
           instruction: step.instruction,
-          imageUrl: step.image_url
-        }))
+          imageUrl: step.image_url,
+        })),
       };
 
       // Update recipe data first
       let updatedRecipe = await updateRecipe(recipe.id, updates);
-      
+
       // If there's a new image file, upload it separately
       if (imageFile) {
         updatedRecipe = await updateRecipeImage(recipe.id, imageFile);
       }
-      
+
       // Dispatch custom event to notify other components about recipe update
-      window.dispatchEvent(new CustomEvent('recipeUpdated', { 
-        detail: { recipeId: recipe.id, updatedRecipe } 
-      }));
-      
+      window.dispatchEvent(
+        new CustomEvent('recipeUpdated', {
+          detail: { recipeId: recipe.id, updatedRecipe },
+        })
+      );
+
       // Show success modal
       setShowSuccessModal(true);
     } catch (error) {
@@ -209,7 +219,7 @@ const EditRecipePage = () => {
         <TextField
           fullWidth
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={e => setTitle(e.target.value)}
           placeholder="Input your recipe name..."
           sx={{
             mb: 2.5,
@@ -244,10 +254,7 @@ const EditRecipePage = () => {
           Description
         </Typography>
         <Box sx={{ mb: 3 }}>
-          <DescriptionEditor 
-            value={recipe.description} 
-            onChange={(html) => setDescription(html)}
-          />
+          <DescriptionEditor value={recipe.description} onChange={html => setDescription(html)} />
         </Box>
 
         <Typography
@@ -360,9 +367,9 @@ const EditRecipePage = () => {
           Category
         </Typography>
         <Box sx={{ mb: 2.5 }}>
-          <CategorySelectSingle 
-            initialValue={recipe.category} 
-            onChange={(newCategory) => setCategory(newCategory)}
+          <CategorySelectSingle
+            initialValue={recipe.category}
+            onChange={newCategory => setCategory(newCategory)}
           />
         </Box>
 
@@ -372,8 +379,8 @@ const EditRecipePage = () => {
           Ingredient
         </Typography>
         <Box sx={{ mb: 2 }}>
-          <AddIngredient 
-            initialIngredients={recipe.ingredients} 
+          <AddIngredient
+            initialIngredients={recipe.ingredients}
             onChange={handleIngredientsChange}
           />
         </Box>
@@ -383,12 +390,12 @@ const EditRecipePage = () => {
         >
           Steps
         </Typography>
-        <AddStep 
+        <AddStep
           initialSteps={recipe.steps.map(step => ({
             stepNumber: step.step_number,
             instruction: step.instruction,
-            imageUrl: step.image_url
-          }))} 
+            imageUrl: step.image_url,
+          }))}
           onChange={handleStepsChange}
         />
       </Box>
@@ -408,16 +415,16 @@ const EditRecipePage = () => {
             fontWeight: 700,
             '&:hover': {
               backgroundColor: 'secondary.main',
-              color: 'primary.main'
+              color: 'primary.main',
             },
             '&:focus': {
               outline: 'none',
-              boxShadow: 'none'
+              boxShadow: 'none',
             },
             '&:disabled': {
               backgroundColor: 'grey.300',
-              color: 'grey.500'
-            }
+              color: 'grey.500',
+            },
           }}
         >
           {saving ? 'Saving...' : 'Save Changes'}
@@ -438,12 +445,12 @@ const EditRecipePage = () => {
             '&:hover': {
               borderColor: 'secondary.main',
               backgroundColor: 'secondary.main',
-              color: 'primary.main'
+              color: 'primary.main',
             },
             '&:focus': {
               outline: 'none',
-              boxShadow: 'none'
-            }
+              boxShadow: 'none',
+            },
           }}
         >
           Cancel

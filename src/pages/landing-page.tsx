@@ -1,8 +1,8 @@
-import Hero from '@/components/hero/Hero';
-import Community from '@/components/community/Community';
-import FeaturedSection from '@/components/feature-section/FeaturedSection';
-import Trending from '@/components/home-trending/home-trending';
-import TrendingPublic from '@/components/trending-public/TrendingPublic';
+import Hero from '@/components/home-page/hero';
+import Community from '@/components/home-page/community';
+import FeaturedSection from '@/components/home-page/feature-section';
+import Trending from '@/components/home-page/home-trending';
+import TrendingPublic from '@/components/home-page/trending-public';
 import { useAppSelector } from '@/hooks/use-app-selector';
 
 const LandingPage = () => {

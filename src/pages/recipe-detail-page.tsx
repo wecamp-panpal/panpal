@@ -27,11 +27,11 @@ import type { UIRecipe } from '@/types/ui-recipe';
 import type { User } from '@/types/user';
 import { getRecipeById, deleteRecipe } from '@/services/recipes';
 import { getCurrentUser } from '@/services/auth';
-import { useFavorites } from '@/hooks/useFavorites';
+import { useFavorites } from '@/hooks/use-favourite';
 import toast from 'react-hot-toast';
-import RatingDistribution from '@/components/rating-distribution/RatingDistribution';
-import CommentCard from '@/components/comment-card/CommentCard';
-import CommentForm from '@/components/comment-form/CommentForm';
+import RatingDistribution from '@/components/rating/rating-distribution';
+import CommentCard from '@/components/rating/comment-card';
+import CommentForm from '@/components/rating/comment-form';
 import {
   getComments,
   getRatingSummary,
@@ -669,7 +669,6 @@ export default function RecipeDetailPage() {
 
         {ratingSummary && <RatingDistribution stats={ratingSummary} />}
 
-      
         {currentUser && (canRate || userRating) && (
           <Box sx={{ mb: 4 }}>
             {!showCommentForm && !editingComment ? (
@@ -679,9 +678,9 @@ export default function RecipeDetailPage() {
                     sx={{
                       fontSize: '1.25rem',
                       fontWeight: 600,
-                      color: 'primary.main', 
+                      color: 'primary.main',
                       mb: 2,
-                      fontFamily: 'Montserrat', 
+                      fontFamily: 'Montserrat',
                     }}
                   >
                     Share Your Experience
@@ -690,10 +689,9 @@ export default function RecipeDetailPage() {
                     onClick={() => setShowCommentForm(true)}
                     variant="contained"
                     sx={{
-                     
                       textTransform: 'none',
-                      backgroundColor: 'primary.main', 
-                      color: 'secondary.main', 
+                      backgroundColor: 'primary.main',
+                      color: 'secondary.main',
                       px: 4,
                       py: 1.25,
                       borderRadius: 3,
@@ -730,7 +728,6 @@ export default function RecipeDetailPage() {
           </Box>
         )}
 
-      
         {!currentUser && (
           <Card sx={{ mb: 4, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
             <CardContent sx={{ p: 4, textAlign: 'center' }}>
@@ -738,9 +735,9 @@ export default function RecipeDetailPage() {
                 sx={{
                   fontSize: '1.25rem',
                   fontWeight: 600,
-                  color: 'primary.main', 
+                  color: 'primary.main',
                   mb: 2,
-                  fontFamily: 'Montserrat', 
+                  fontFamily: 'Montserrat',
                 }}
               >
                 Want to Rate This Recipe?
@@ -750,7 +747,7 @@ export default function RecipeDetailPage() {
                   fontSize: '1rem',
                   color: '#64748b',
                   mb: 3,
-                  fontFamily: 'Montserrat', 
+                  fontFamily: 'Montserrat',
                 }}
               >
                 Join PanPal to share your cooking experience and help other food lovers!
@@ -760,7 +757,6 @@ export default function RecipeDetailPage() {
                   onClick={() => navigate('/sign-in')}
                   variant="contained"
                   sx={{
-                  
                     textTransform: 'none',
                     backgroundColor: 'primary.main',
                     color: 'secondary.main',
@@ -786,7 +782,6 @@ export default function RecipeDetailPage() {
                   onClick={() => navigate('/sign-up')}
                   variant="outlined"
                   sx={{
-             
                     textTransform: 'none',
                     color: 'primary.main',
                     backgroundColor: 'secondary.main',

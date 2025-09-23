@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 
-import SignInForm from '@/components/signIn-form/signIn-form';
-import NavBar from '../components/nav-bar/nav-bar';
+import SignInForm from '@/components/auth/signIn-form';
+import NavBar from '../components/common/nav-bar';
 const SignInPage: React.FC = () => {
   return (
     <Box display="flex" flexDirection="column" minHeight="100vh">

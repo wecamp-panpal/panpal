@@ -3,15 +3,15 @@ import { Box, Container, Typography, TextField, Button } from '@mui/material';
 import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
-import DescriptionEditor from '@/components/text-editor/text-editor';
-import CategorySelect, { type RecipeCategory } from '@/components/category-select/category-select';
-import AddIngredient from '@/components/add-ingredients/add-ingredient';
-import AddStep, { type StepDraft } from '@/components/add-step/add-step';
+import DescriptionEditor from '@/components/recipes/text-editor';
+import CategorySelect, { type RecipeCategory } from '@/components/recipes/category-select';
+import AddIngredient from '@/components/recipes/add-ingredient';
+import AddStep, { type StepDraft } from '@/components/recipes/add-step';
 import axiosClient from '@/lib/axiosClient';
 import { clearCurrentUserCache } from '@/services/auth';
-import Protected from '@/components/protected/Protected';
+import Protected from '@/components/auth/protected';
 import { toast } from 'react-hot-toast';
-import ConfirmDialog from '@/components/pop-up/confirm-dialog';
+import ConfirmDialog from '@/components/common/confirm-dialog';
 
 const AddRecipePage = () => {
   const navigate = useNavigate();

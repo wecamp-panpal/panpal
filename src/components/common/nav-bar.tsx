@@ -2,15 +2,12 @@ import { AppBar, Box, Link, Toolbar, styled, Tooltip, IconButton, Button } from 
 import { CircleUserRound, LogOut } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppSelector } from '@/hooks/use-app-selector';
-import SearchBar from '../search-bar/search-bar';
+import SearchBar from './search-bar';
 import { useEffect } from 'react';
 import { getThemeColors } from '@/lib/muiTheme';
 import { getCurrentUser, logoutUser } from '@/services/auth';
 import { signIn, signOut } from '@/stores/user-slice';
 import { useAppDispatch } from '@/hooks/use-app-dispatch';
-interface NavBarProps {
-  onSearch?: (query: string) => void;
-}
 
 const NavBarLink = styled(Link)(({ isActive }: { isActive?: boolean }) => ({
   underline: 'hover',
@@ -35,7 +32,7 @@ const NavBarLink = styled(Link)(({ isActive }: { isActive?: boolean }) => ({
   },
 }));
 
-const NavBar = ({ onSearch }: NavBarProps) => {
+const NavBar = () => {
   const colors = getThemeColors();
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAppSelector(state => state.user);

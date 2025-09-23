@@ -1,16 +1,16 @@
 import { Route, Routes } from 'react-router-dom';
-import SignInPage from '@/pages/SignInPage';
+import SignInPage from '@/pages/sign-in-page';
 import AddRecipePage from './pages/add-recipe';
-import EditRecipePage from './pages/EditRecipePage';
+import EditRecipePage from './pages/edit-recipe-page';
 import HomeLayout from './layouts/home-layout';
 import { ThemeProvider } from '@mui/material/styles';
 import { muiTheme } from '@/lib/muiTheme';
-import LandingPage from '@/pages/LandingPage';
+import LandingPage from '@/pages/landing-page';
 import './App.css';
-import ProfilePage from '@/pages/Profile';
-import ExploreRecipes from '@/pages/ExploreRecipes';
-import RecipeDetailPage from '@/pages/RecipeDetailPageNew';
-import SignUpPage from '@/pages/SignUpPage';
+import ProfilePage from '@/pages/profile';
+import ExploreRecipes from '@/pages/explore-recipe';
+import RecipeDetailPage from '@/pages/recipe-detail-page';
+import SignUpPage from '@/pages/sign-up-page';
 import NotFound from '@/pages/not-found';
 import { Toaster } from 'react-hot-toast';
 function App() {

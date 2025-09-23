@@ -1,7 +1,7 @@
-import React, { useState, useRef, useLayoutEffect } from 'react';
+
 import { Box } from '@mui/material';
-import SignUpForm from '@/components/signUp-form/signUp-form';
-import NavBar from '../components/nav-bar/nav-bar';
+import SignUpForm from '@/components/auth/signUp-form';
+import NavBar from '../components/common/nav-bar';
 
 const SignUpPage: React.FC = () => {
   return (

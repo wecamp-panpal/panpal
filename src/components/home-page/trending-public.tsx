@@ -1,4 +1,4 @@
-import RecipeCard from '../recipe-card/RecipeCard';
+import RecipeCard from '../recipes/recipe-card';
 import { Typography, Box } from '@mui/material';
 import type { UIRecipe } from '@/types/ui-recipe';
 import { trendingRecipe } from '@/services/recipes';
@@ -6,30 +6,30 @@ import { trendingRecipe } from '@/services/recipes';
 const PAGE_SIZE = 24;
 
 import { useEffect, useState } from 'react';
-import { makeMockRecipes } from '@/mocks/recipes.mock';
+
 import { useNavigate } from 'react-router-dom';
 
 const TrendingPublic = () => {
- const [recipes, setRecipes] = useState<UIRecipe[]>([]);
+  const [recipes, setRecipes] = useState<UIRecipe[]>([]);
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
-   useEffect(() => {
-      const fetchTrendingRecipes = async () => {
-        try {
-          setLoading(true);
-          const trendingRecipes = await trendingRecipe("8"); 
-          setRecipes(trendingRecipes);
-        } catch (error) {
-          console.error('Failed to fetch trending recipes:', error);
-          setRecipes([]);
-        } finally {
-          setLoading(false);
-        }
-      };
-  
-      fetchTrendingRecipes();
-    }, []);
+  useEffect(() => {
+    const fetchTrendingRecipes = async () => {
+      try {
+        setLoading(true);
+        const trendingRecipes = await trendingRecipe('8');
+        setRecipes(trendingRecipes);
+      } catch (error) {
+        console.error('Failed to fetch trending recipes:', error);
+        setRecipes([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrendingRecipes();
+  }, []);
 
   return (
     <section className="w-full pt-4 pb-32 px-8 relative">
@@ -54,7 +54,7 @@ const TrendingPublic = () => {
             mt: 4,
           }}
         >
-           {loading ? (
+          {loading ? (
             Array.from({ length: PAGE_SIZE }).map((_, i) => (
               <Box
                 key={i}

@@ -2,18 +2,17 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Container, Paper, Box, CircularProgress, Alert } from '@mui/material';
 import { muiTheme } from '@/lib/muiTheme';
-import UserDashboardHeader from '@/components/user-dashboard-header/UserDashboardHeader';
-import TabPanel from '@/components/tab-panel/TabPanel';
-import ProfileInfo from '@/components/profile-info/ProfileInfo';
-import MyRecipesTab from '@/components/my-recipes-tab/MyRecipesTab';
-import FavoriteRecipesTab from '@/components/favorite-recipes-tab/FavoriteRecipesTab';
+import UserDashboardHeader from '@/components/profile/user-header-board';
+import TabPanel from '@/components/profile/tab-panel';
+import ProfileInfo from '@/components/profile/profile-info';
+import MyRecipesTab from '@/components/profile/my-recipes-tab';
+import FavoriteRecipesTab from '@/components/profile/favourite-recipe-tab';
 import type { UIRecipe } from '@/types/ui-recipe';
 import type { User } from '@/types/user';
-import { useFavorites } from '@/hooks/useFavorites';
+import { useFavorites } from '@/hooks/use-favourite';
 import { userService } from '@/services/user';
 import { getCurrentUser, clearCurrentUserCache } from '@/services/auth';
 import { getUserRecipes } from '@/services/recipes';
-import { favoriteService } from '@/services/favorites';
 
 interface UserProfile {
   fullName: string;
@@ -198,28 +197,25 @@ const Profile = () => {
     loadUser();
   }, [navigate, searchParams]);
 
-  // No complex logic needed - favoriteCount is automatically stable!
 
-  const loadMyRecipes = useCallback(
-    async (userId: string, forceRefresh = false) => {
-      try {
-        setMyRecipesLoading(true);
-        console.log('Loading recipes for user:', userId, { forceRefresh });
 
-        if (forceRefresh) {
-          clearCurrentUserCache();
-        }
-        const result = await getUserRecipes(userId, 1, 20, forceRefresh);
-        setMyRecipes(result.data);
-      } catch (err) {
-        console.error('Failed to load user recipes:', err);
-        setError('Failed to load your recipes. Please try again.');
-      } finally {
-        setMyRecipesLoading(false);
+  const loadMyRecipes = useCallback(async (userId: string, forceRefresh = false) => {
+    try {
+      setMyRecipesLoading(true);
+      console.log('Loading recipes for user:', userId, { forceRefresh });
+
+      if (forceRefresh) {
+        clearCurrentUserCache();
       }
-    },
-    []
-  );
+      const result = await getUserRecipes(userId, 1, 20, forceRefresh);
+      setMyRecipes(result.data);
+    } catch (err) {
+      console.error('Failed to load user recipes:', err);
+      setError('Failed to load your recipes. Please try again.');
+    } finally {
+      setMyRecipesLoading(false);
+    }
+  }, []);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -375,11 +371,9 @@ const Profile = () => {
   useEffect(() => {
     const handleRecipeDeleted = (event: CustomEvent) => {
       const { recipeId } = event.detail;
-   
 
-     
       if (user?.id) {
-        loadMyRecipes(user.id, true); 
+        loadMyRecipes(user.id, true);
       }
     };
 

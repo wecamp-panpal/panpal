@@ -1,11 +1,7 @@
 import React from 'react';
-import {
-  Box,
-  Typography,
-  Button,
-} from '@mui/material';
+import { Box, Typography, Button } from '@mui/material';
 import { MenuBook as MenuBookIcon } from '@mui/icons-material';
-import RecipeCard from '../recipe-card/RecipeCard';
+import RecipeCard from '../recipes/recipe-card';
 import type { UIRecipe } from '@/types/ui-recipe';
 
 interface MyRecipesTabProps {
@@ -28,11 +24,11 @@ const MyRecipesTab: React.FC<MyRecipesTabProps> = ({
     <Box sx={{ px: 4, pb: 4 }}>
       {/* My Recipes Content */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography 
-          variant="h5" 
-          sx={{ 
+        <Typography
+          variant="h5"
+          sx={{
             color: 'primary.main',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
           }}
         >
           My Recipes
@@ -44,18 +40,18 @@ const MyRecipesTab: React.FC<MyRecipesTabProps> = ({
             backgroundColor: 'primary.main',
             '&:hover': {
               backgroundColor: 'secondary.main',
-              color: 'primary.main'
+              color: 'primary.main',
             },
             '&:focus': {
               outline: 'none',
-              boxShadow: 'none'
-            }
+              boxShadow: 'none',
+            },
           }}
         >
           + Add New Recipe
         </Button>
       </Box>
-      
+
       {myRecipes.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <MenuBookIcon sx={{ fontSize: 64, color: 'grey.400', mb: 2 }} />
@@ -67,12 +63,14 @@ const MyRecipesTab: React.FC<MyRecipesTabProps> = ({
           </Typography>
         </Box>
       ) : (
-        <Box sx={{ 
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: 2.5
-        }}>
-          {myRecipes.map((recipe) => (
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: 2.5,
+          }}
+        >
+          {myRecipes.map(recipe => (
             <RecipeCard
               key={recipe.id}
               recipe={recipe}

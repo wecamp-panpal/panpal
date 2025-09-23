@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Box, Typography, Button, Divider } from '@mui/material';
 import { Edit, Star } from '@mui/icons-material';
-import RatingDistribution from '../rating-distribution/RatingDistribution';
-import RatingForm from '../rating-form/RatingForm';
-import RatingList from '../rating-list/RatingList';
+import RatingDistribution from './rating-distribution';
+import RatingForm from './rating-form';
+import RatingList from './rating-list';
 import {
   getRatingSummary,
   getUserRatingForRecipe,

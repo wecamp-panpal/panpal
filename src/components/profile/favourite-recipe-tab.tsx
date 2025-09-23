@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Box,
-  Typography,
-  CircularProgress,
-} from '@mui/material';
+import { Box, Typography, CircularProgress } from '@mui/material';
 import { Favorite as FavoriteIcon } from '@mui/icons-material';
-import RecipeCard from '../recipe-card/RecipeCard';
+import RecipeCard from '../recipes/recipe-card';
 import type { UIRecipe } from '@/types/ui-recipe';
 import { favoriteService } from '@/services/favorites';
 
@@ -51,7 +47,7 @@ const FavoriteRecipesTab: React.FC<FavoriteRecipesTabProps> = ({
         sx={{
           mb: 3,
           color: 'primary.main',
-          fontWeight: 'bold'
+          fontWeight: 'bold',
         }}
       >
         My Favorite Recipes
@@ -72,12 +68,14 @@ const FavoriteRecipesTab: React.FC<FavoriteRecipesTabProps> = ({
           </Typography>
         </Box>
       ) : (
-        <Box sx={{
+        <Box
+          sx={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: 2.5
-          }}>
-          {recipes.map((recipe) => (
+            gap: 2.5,
+          }}
+        >
+          {recipes.map(recipe => (
             <RecipeCard
               key={recipe.id}
               recipe={recipe}

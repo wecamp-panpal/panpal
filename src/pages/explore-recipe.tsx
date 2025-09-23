@@ -5,10 +5,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import type { UIRecipe, UIRecipeCategory } from '@/types/ui-recipe';
 import type { RecipeFilters } from '@/services/recipes';
 import { listRecipes, getRandomRecipe } from '@/services/recipes';
-import FilterBar from '@/components/recipes/FilterBar';
-import type { FilterState } from '@/components/recipes/FilterBar';
-import RecipeCard from '@/components/recipe-card/RecipeCard';
-import { useFavorites } from '@/hooks/useFavorites';
+import FilterBar from '@/components/recipes/filter-bar';
+import type { FilterState } from '@/components/recipes/filter-bar';
+import RecipeCard from '@/components/recipes/recipe-card';
+import { useFavorites } from '@/hooks/use-favourite';
 import { toast } from 'react-hot-toast';
 const PAGE_SIZE = 24;
 
@@ -88,7 +88,13 @@ export default function ExploreRecipes() {
           <Typography variant="body2" color="text.secondary">
             {loading ? 'Loading…' : `${total} result${total === 1 ? '' : 's'}`}
           </Typography>
-          <Tooltip title={selected ? `Feeling Lucky in ${selected}` : 'Tired of browsing? Try this Random Recipe button'}>
+          <Tooltip
+            title={
+              selected
+                ? `Feeling Lucky in ${selected}`
+                : 'Tired of browsing? Try this Random Recipe button'
+            }
+          >
             <Button
               size="small"
               variant="contained"
