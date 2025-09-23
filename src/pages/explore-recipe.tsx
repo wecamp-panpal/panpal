@@ -159,7 +159,7 @@ export default function ExploreRecipes() {
           ))
         ) : recipes.length === 0 ? (
           <Box sx={{ py: 6, textAlign: 'center', gridColumn: '1 / -1' }}>
-            <Typography>No recipes found.</Typography>
+            <Typography>No recipes available.</Typography>
           </Box>
         ) : (
           recipes.map(r => (
