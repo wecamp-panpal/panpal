@@ -91,8 +91,8 @@ export default function ExploreRecipes() {
           <Tooltip
             title={
               selected
-                ? `Feeling Lucky in ${selected}`
-                : 'Tired of browsing? Try this Random Recipe button'
+                ? `Tired of browsing? Click here for a random recipe in ${selected}`
+                : 'Tired of browsing? Click here for a random recipe'
             }
           >
             <Button
@@ -130,7 +130,7 @@ export default function ExploreRecipes() {
                   Randomizing...
                 </Box>
               ) : selected ? (
-                `(${selected})`
+                `Feeling lucky in ${selected}`
               ) : (
                 'Feeling Lucky'
               )}
