@@ -1,28 +1,25 @@
 <header id="#header">
-<p align="center" >
-  <a name="header"></a>
-  <img src="./public/bigLogo.svg" alt="Big Logo" />
-</p>
-
-<p  align="center" >
-  A recipe sharing platform for food lovers and cooking enthusiasts.
-</p>
-
-<h1  align="center" >
-  WeCamp Batch 8 - PanPal Frontend
-</h1>
+<table>
+  <tr>
+    <td><img src="./public/bigLogo.svg" width="150" alt="Logo"/></td>
+    <td align="center">
+      <h1 align="center">WeCamp Batch 8 - PanPal</h1>
+    </td>
+  </tr>
+</table>
 <p align="justify">
 PanPal is a modern recipe sharing web application built with React, TypeScript, and Material-UI. This frontend application provides an intuitive interface for users to discover, create, and share delicious recipes with a vibrant cooking community. With features like user authentication, recipe management, advanced search and filtering, favorites system, step-by-step cooking instructions with images, and trending recipes, PanPal offers an engaging cooking experience for both beginners and professional chefs.
 </p>
 
-<p align="center" >
-  <img src="./public/preview-1.png" alt="Home Page with Trending Recipes" width=400 />
-  <img src="./public/preview-2.png" alt="Recipe Detail Page" width=400 />
-</p>
-<p align="center" >
-  <img src="./public/preview-3.png" alt="Add Recipe Form" width=400 />
-  <img src="./public/preview-4.png" alt="User Profile & Recipes" width=400 />
-</p>
+| ![Home Page](./public/preview-1.png) | ![Recipe Detail](./public/preview-2.png) |
+|--------------------------------------|------------------------------------------|
+| Home Page with Trending Recipes      | Recipe Detail Page                       |
+
+| ![Add Recipe](./public/preview-3.png) | ![User Profile](./public/preview-4.png) |
+|---------------------------------------|------------------------------------------|
+| Add Recipe Form                       | User Profile & Recipes                  |
+
+
 </header>
 
 ## 📋 Table of Contents
@@ -242,9 +239,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - WeCamp instructors and mentors
 
-
 **Team PanPal** - Connecting food enthusiasts worldwide through the art of cooking.
-
 
 ---
 
