@@ -25,7 +25,7 @@ useEffect(() => {
   fetchUser();
 }, []);
   return (
-    <section className="w-full py-24 px-8 relative">
+    <section className="w-full pt-48 pb-36 px-8 relative">
       <div className="max-w-7xl mx-auto py-5">
         <div className="flex items-center justify-start relative">
           {isAuthenticated ? (

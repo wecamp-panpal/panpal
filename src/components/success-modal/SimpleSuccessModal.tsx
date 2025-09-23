@@ -5,6 +5,7 @@ import { getThemeColors } from '../../lib/muiTheme';
 interface SimpleSuccessModalProps {
   open: boolean;
   onClose: () => void;
+  onButtonClick?: () => void;
   title?: string;
   message?: string;
   buttonText?: string;
@@ -12,7 +13,8 @@ interface SimpleSuccessModalProps {
 
 const SimpleSuccessModal = ({ 
   open, 
-  onClose, 
+  onClose,
+  onButtonClick,
   title = "Success!", 
   message = "Operation completed successfully",
   buttonText = "Continue"
@@ -68,7 +70,7 @@ const SimpleSuccessModal = ({
         </Typography>
 
         <Button
-          onClick={onClose}
+          onClick={onButtonClick || onClose}
           variant="contained"
           sx={{
             backgroundColor: themeColors.primary,

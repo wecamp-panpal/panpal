@@ -26,6 +26,20 @@ const options: RecipeCategory[] = [
   'SALAD',
 ];
 
+const getCategoryDisplayText = (category: RecipeCategory): string => {
+  const displayMap: Record<RecipeCategory, string> = {
+    APPETIZER: 'Appetizer',
+    DESSERT: 'Dessert',
+    MAIN_DISH: 'Main Dish',
+    SIDE_DISH: 'Side Dish',
+    SOUP: 'Soup',
+    SAUCE: 'Sauce',
+    DRINK: 'Drink',
+    SALAD: 'Salad',
+  };
+  return displayMap[category];
+};
+
 export default function CategorySelect({ value, onChange }: CategorySelectProps) {
   return (
     <Autocomplete<RecipeCategory, false, false, false>
@@ -33,6 +47,7 @@ export default function CategorySelect({ value, onChange }: CategorySelectProps)
       value={value}
       onChange={(_, newValue) => onChange(newValue)}
       isOptionEqualToValue={(opt, val) => opt === val}
+      getOptionLabel={option => getCategoryDisplayText(option)}
       renderInput={params => (
         <TextField
           {...params}

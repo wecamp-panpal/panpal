@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Container, Typography, TextField, Button } from '@mui/material';
 import { useAppSelector } from '@/hooks/use-app-selector';
@@ -31,6 +31,20 @@ const EditRecipePage = () => {
   // Get current user from Redux store
   const { user, isAuthenticated } = useAppSelector((state) => state.user);
 
+  // Memoize onChange handlers to prevent infinite re-renders
+  const handleIngredientsChange = useCallback((newIngredients: {name: string; quantity: string}[]) => {
+    setIngredients(newIngredients);
+  }, []);
+
+  const handleStepsChange = useCallback((newSteps: {stepNumber: number; instruction: string; imageUrl?: string}[]) => {
+    const convertedSteps = newSteps.map(step => ({
+      step_number: step.stepNumber,
+      instruction: step.instruction,
+      image_url: step.imageUrl
+    }));
+    setSteps(convertedSteps);
+  }, []);
+
   useEffect(() => {
     const loadRecipe = async () => {
       if (!id || !isAuthenticated) {
@@ -41,12 +55,10 @@ const EditRecipePage = () => {
       try {
         // Clean up old localStorage data
         if (localStorage.getItem('edited-recipes')) {
-          console.log('Cleaning up old localStorage data...');
           localStorage.removeItem('edited-recipes');
         }
         
-        const recipeId = Number(id);
-        const found = await getRecipeById(recipeId);
+        const found = await getRecipeById(id);
         
         // Check if current user owns this recipe
         if (found.author_id !== user?.id) {
@@ -76,7 +88,7 @@ const EditRecipePage = () => {
     };
 
     loadRecipe();
-  }, [id, navigate, user, isAuthenticated]);
+  }, [id, user?.id, isAuthenticated]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files || event.target.files.length === 0) return;
@@ -84,7 +96,6 @@ const EditRecipePage = () => {
     const newImageUrl = URL.createObjectURL(newFile);
     setImageFile(newFile);
     setImagePreview(newImageUrl);
-    console.log('New image uploaded:', newImageUrl);
     event.target.value = '';
   };
 
@@ -118,8 +129,6 @@ const EditRecipePage = () => {
       if (imageFile) {
         updatedRecipe = await updateRecipeImage(recipe.id, imageFile);
       }
-
-      console.log('Recipe updated successfully:', updatedRecipe);
       
       // Dispatch custom event to notify other components about recipe update
       window.dispatchEvent(new CustomEvent('recipeUpdated', { 
@@ -142,8 +151,11 @@ const EditRecipePage = () => {
 
   const handleSuccessModalClose = () => {
     setShowSuccessModal(false);
-    // Navigate back and force a refresh by adding timestamp
-    navigate('/recipes/' + id + '?updated=' + Date.now());
+  };
+
+  const handleViewRecipe = () => {
+    setShowSuccessModal(false);
+    navigate('/recipes/' + id);
   };
 
   if (loading) {
@@ -362,7 +374,7 @@ const EditRecipePage = () => {
         <Box sx={{ mb: 2 }}>
           <AddIngredient 
             initialIngredients={recipe.ingredients} 
-            onChange={(newIngredients) => setIngredients(newIngredients)}
+            onChange={handleIngredientsChange}
           />
         </Box>
 
@@ -377,16 +389,7 @@ const EditRecipePage = () => {
             instruction: step.instruction,
             imageUrl: step.image_url
           }))} 
-          onChange={(newSteps) => {
-            console.log('📝 EditRecipePage received steps:', newSteps);
-            const convertedSteps = newSteps.map(step => ({
-              step_number: step.stepNumber,
-              instruction: step.instruction,
-              image_url: step.imageUrl
-            }));
-            console.log('📝 Converted steps:', convertedSteps);
-            setSteps(convertedSteps);
-          }}
+          onChange={handleStepsChange}
         />
       </Box>
 
@@ -451,6 +454,7 @@ const EditRecipePage = () => {
       <SimpleSuccessModal
         open={showSuccessModal}
         onClose={handleSuccessModalClose}
+        onButtonClick={handleViewRecipe}
         title="Recipe Updated!"
         message="Your recipe has been successfully updated and saved."
         buttonText="View Recipe"

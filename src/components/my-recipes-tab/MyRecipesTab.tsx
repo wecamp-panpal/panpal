@@ -11,10 +11,10 @@ import type { UIRecipe } from '@/types/ui-recipe';
 interface MyRecipesTabProps {
   myRecipes: UIRecipe[];
   onAddNewRecipe?: () => void;
-  onEditRecipe?: (recipeId: number) => void;
-  onViewRecipe?: (recipeId: number) => void;
-  onToggleFavorite?: (recipeId: number) => void;
-  favorites?: Set<number>;
+  onEditRecipe?: (recipeId: string) => void;
+  onViewRecipe?: (recipeId: string) => void;
+  onToggleFavorite?: (recipeId: string) => void;
+  favorites?: string[];
 }
 
 const MyRecipesTab: React.FC<MyRecipesTabProps> = ({
@@ -22,7 +22,7 @@ const MyRecipesTab: React.FC<MyRecipesTabProps> = ({
   onAddNewRecipe,
   onViewRecipe,
   onToggleFavorite,
-  favorites = new Set(),
+  favorites = [],
 }) => {
   return (
     <Box sx={{ px: 4, pb: 4 }}>
@@ -79,7 +79,7 @@ const MyRecipesTab: React.FC<MyRecipesTabProps> = ({
               variant="public"
               onClick={() => onViewRecipe?.(recipe.id)}
               onToggleFavorite={onToggleFavorite}
-              isFavorited={favorites.has(recipe.id)}
+              isFavorited={favorites.includes(recipe.id)}
             />
           ))}
         </Box>

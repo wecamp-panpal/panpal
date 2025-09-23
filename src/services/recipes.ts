@@ -1,42 +1,10 @@
 import type { UIRecipe, UIRecipeCategory, BackendRecipe } from '@/types/ui-recipe';
 import axiosClient from '@/lib/axiosClient';
-import { storeRecipeIdMapping } from '@/services/favorites';
 
 // Convert backend recipe to frontend UI recipe format
 function convertBackendRecipeToUI(backendRecipe: BackendRecipe): UIRecipe {
-  const uiId = parseInt(backendRecipe.id.slice(-8), 16); // Convert UUID to number for UI compatibility
-
-  // Store ID mapping for favorites API
-  storeRecipeIdMapping(uiId, backendRecipe.id);
-
-  // If backend provides isFavorite info, sync it with localStorage favorites
-  if (backendRecipe.isFavorite !== undefined) {
-    const saved = localStorage.getItem('favorite-recipes');
-    let favoriteIds: number[] = [];
-
-    if (saved) {
-      try {
-        favoriteIds = JSON.parse(saved);
-      } catch (error) {
-        favoriteIds = [];
-      }
-    }
-
-    const isCurrentlyInLocalStorage = favoriteIds.includes(uiId);
-
-    if (backendRecipe.isFavorite && !isCurrentlyInLocalStorage) {
-      // Backend says it's favorited but not in localStorage - add it
-      favoriteIds.push(uiId);
-      localStorage.setItem('favorite-recipes', JSON.stringify(favoriteIds));
-    } else if (!backendRecipe.isFavorite && isCurrentlyInLocalStorage) {
-      // Backend says it's not favorited but it's in localStorage - remove it
-      favoriteIds = favoriteIds.filter(id => id !== uiId);
-      localStorage.setItem('favorite-recipes', JSON.stringify(favoriteIds));
-    }
-  }
-
   return {
-    id: uiId,
+    id: backendRecipe.id,
     title: backendRecipe.title,
     description: backendRecipe.description || '',
     author_name: backendRecipe.authorName,
@@ -47,7 +15,7 @@ function convertBackendRecipeToUI(backendRecipe: BackendRecipe): UIRecipe {
     rating: backendRecipe.myRating || 0,
     rating_avg: backendRecipe.ratingAvg || 0,
     rating_count: backendRecipe.ratingCount || 0,
-    category: mapBackendCategoryToUI(backendRecipe.category),
+    category: backendRecipe.category as UIRecipeCategory,
     ingredients: backendRecipe.ingredients.map(ing => ({
       name: ing.name,
       quantity: ing.quantity,
@@ -58,22 +26,6 @@ function convertBackendRecipeToUI(backendRecipe: BackendRecipe): UIRecipe {
       image_url: step.imageUrl || undefined,
     })),
   };
-}
-
-// ID mapping function is now imported from favorites service
-
-// Map backend category to UI category
-function mapBackendCategoryToUI(backendCategory: string): UIRecipeCategory {
-  switch (backendCategory.toUpperCase()) {
-    case 'DESSERT':
-      return 'DESSERT';
-    case 'DRINK':
-      return 'DRINK';
-    case 'MAIN_DISH':
-      return 'MAIN_DISH';
-    default:
-      return 'MAIN_DISH';
-  }
 }
 
 export interface RecipeFilters {
@@ -142,15 +94,9 @@ export async function getUserRecipes(
   return listRecipes(page, pageSize, {}, undefined, userId, bustCache);
 }
 
-function convertUIIdToBackendId(uiRecipeId: number): string {
-  const mapping = JSON.parse(localStorage.getItem('recipe_id_mapping') || '{}');
-  return mapping[uiRecipeId] || uiRecipeId.toString();
-}
-
-export async function getRecipeById(uiId: number, bustCache = false): Promise<UIRecipe> {
+export async function getRecipeById(recipeId: string, bustCache = false): Promise<UIRecipe> {
   try {
-    const backendId = convertUIIdToBackendId(uiId);
-    const url = bustCache ? `/recipes/${backendId}?_t=${Date.now()}` : `/recipes/${backendId}`;
+    const url = bustCache ? `/recipes/${recipeId}?_t=${Date.now()}` : `/recipes/${recipeId}`;
     const response = await axiosClient.get(url);
     return convertBackendRecipeToUI(response.data);
   } catch (error) {
@@ -159,22 +105,22 @@ export async function getRecipeById(uiId: number, bustCache = false): Promise<UI
   }
 }
 
-// Map UI category to backend category
-function mapUICategoryToBackend(uiCategory: UIRecipeCategory): string {
-  switch (uiCategory) {
-    case 'DESSERT':
-      return 'DESSERT';
-    case 'DRINK':
-      return 'DRINK';
-    case 'MAIN_DISH':
-      return 'MAIN_DISH';
-    default:
-      return 'MAIN_DISH';
+export async function getRandomRecipe(category?: UIRecipeCategory): Promise<UIRecipe> {
+  try {
+    const params: Record<string, string> = {};
+    if (category) {
+      params.category = category;
+    }
+    const response = await axiosClient.get('/recipes/random', { params });
+    return convertBackendRecipeToUI(response.data);
+  } catch (error) {
+    console.error('Failed to fetch random recipe:', error);
+    throw new Error('Failed to fetch random recipe');
   }
 }
 
 export async function updateRecipe(
-  uiRecipeId: number,
+  recipeId: string,
   updates: {
     title?: string;
     description?: string;
@@ -185,18 +131,16 @@ export async function updateRecipe(
   }
 ): Promise<UIRecipe> {
   try {
-    const backendId = convertUIIdToBackendId(uiRecipeId);
-
     const payload: any = {};
 
     if (updates.title !== undefined) payload.title = updates.title;
     if (updates.description !== undefined) payload.description = updates.description;
     if (updates.cookingTime !== undefined) payload.cookingTime = updates.cookingTime;
-    if (updates.category !== undefined) payload.category = mapUICategoryToBackend(updates.category);
+    if (updates.category !== undefined) payload.category = updates.category;
     if (updates.ingredients !== undefined) payload.ingredients = updates.ingredients;
     if (updates.steps !== undefined) payload.steps = updates.steps;
 
-    const response = await axiosClient.patch(`/recipes/${backendId}`, payload);
+    const response = await axiosClient.patch(`/recipes/${recipeId}`, payload);
     return convertBackendRecipeToUI(response.data);
   } catch (error) {
     console.error('Failed to update recipe:', error);
@@ -204,14 +148,12 @@ export async function updateRecipe(
   }
 }
 
-export async function updateRecipeImage(uiRecipeId: number, imageFile: File): Promise<UIRecipe> {
+export async function updateRecipeImage(recipeId: string, imageFile: File): Promise<UIRecipe> {
   try {
-    const backendId = convertUIIdToBackendId(uiRecipeId);
-
     const formData = new FormData();
     formData.append('image', imageFile);
 
-    const response = await axiosClient.post(`/recipes/${backendId}/image`, formData, {
+    const response = await axiosClient.post(`/recipes/${recipeId}/image`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
 
@@ -222,12 +164,21 @@ export async function updateRecipeImage(uiRecipeId: number, imageFile: File): Pr
   }
 }
 
-export async function deleteRecipe(uiRecipeId: number): Promise<void> {
+export async function deleteRecipe(recipeId: string): Promise<void> {
   try {
-    const backendId = convertUIIdToBackendId(uiRecipeId);
-    await axiosClient.delete(`/recipes/${backendId}`);
+    await axiosClient.delete(`/recipes/${recipeId}`);
   } catch (error) {
     console.error('Failed to delete recipe:', error);
     throw new Error('Failed to delete recipe');
+  }
+}
+
+export async function trendingRecipe(number: string): Promise<UIRecipe[]> {
+  try {
+    const response = await axiosClient.get(`/recipes/trending`, { params: { number } });
+    return (response.data.items ?? []).map(convertBackendRecipeToUI);
+  } catch (error) {
+    console.error('Failed to fetch trending recipes:', error);
+    throw new Error('Failed to fetch trending recipes');
   }
 }

@@ -3,7 +3,7 @@ import { CircleUserRound, LogOut } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppSelector } from '@/hooks/use-app-selector';
 import SearchBar from '../search-bar/search-bar';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { getThemeColors } from '@/lib/muiTheme';
 import { getCurrentUser, logoutUser } from '@/services/auth';
 import { signIn, signOut } from '@/stores/user-slice';

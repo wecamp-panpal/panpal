@@ -19,6 +19,7 @@ import { getRecipeById, deleteRecipe } from '@/services/recipes';
 import { getCurrentUser } from '@/services/auth';
 import { getCommentsByRecipeId, createComment, deleteCommentById } from '@/services/comments';
 import { useFavorites } from '@/hooks/useFavorites';
+import toast from 'react-hot-toast';
 
 export default function RecipeDetailPage() {
   const { id } = useParams();
@@ -43,7 +44,7 @@ export default function RecipeDetailPage() {
   const [newImage, setNewImage] = useState<File | null>(null);
 
   // Use favorites hook for consistent state management
-  const { favorites, toggleFavorite } = useFavorites();
+  const { favorites, handleToggleFavorite } = useFavorites();
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
   const [isEditedVersion, setIsEditedVersion] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -60,7 +61,7 @@ export default function RecipeDetailPage() {
       const { recipeId } = event.detail;
       console.log('🔄 Recipe updated event received:', { recipeId, currentId: id });
 
-      if (recipeId === Number(id) && id) {
+      if (recipeId === id && id) {
         console.log('Refreshing current recipe detail...');
         const loadData = async () => {
           try {
@@ -68,7 +69,7 @@ export default function RecipeDetailPage() {
 
             // Force cache bust when refreshing due to update
             const [fetchedRecipe, fetchedComments] = await Promise.all([
-              getRecipeById(Number(id), true), // Force cache bust
+              getRecipeById(id, true), // Force cache bust
               getCommentsByRecipeId(id),
             ]);
 
@@ -103,7 +104,7 @@ export default function RecipeDetailPage() {
           location.search.includes('updated=') || location.search.includes('refresh=');
 
         const [fetchedRecipe, fetchedComments] = await Promise.all([
-          getRecipeById(Number(recipeId), shouldBustCache),
+          getRecipeById(recipeId, shouldBustCache),
           getCommentsByRecipeId(recipeId),
         ]);
 
@@ -158,14 +159,14 @@ export default function RecipeDetailPage() {
     setNewImage(null);
   };
 
-  const handleToggleFavorite = async () => {
+  const handleFavoriteClick = async () => {
     if (!currentUser) {
       navigate('/sign-in');
       return;
     }
-
-    const recipeId = Number(id);
-    await toggleFavorite(recipeId);
+    if (id) {
+      await handleToggleFavorite(id);
+    }
   };
 
   const handleEditRecipe = () => {
@@ -191,11 +192,14 @@ export default function RecipeDetailPage() {
     if (confirmed) {
       try {
         await deleteRecipe(recipe.id);
-        alert('Recipe deleted successfully!');
+         window.dispatchEvent(new CustomEvent('recipeDeleted', {
+        detail: { recipeId: recipe.id }
+      }));
+        toast.success('Recipe delete sucessfully')
         navigate('/profile?tab=1'); 
       } catch (error) {
-        console.error('Failed to delete recipe:', error);
-        alert('Failed to delete recipe. Please try again.');
+  
+        toast.error('Failed to delete recipe ')
       }
     }
   };
@@ -304,7 +308,7 @@ export default function RecipeDetailPage() {
           )}
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {favorites.has(Number(id)) && (
+          {favorites.includes(id!) && (
             <Typography
               sx={{
                 fontFamily: 'Montserrat',
@@ -317,9 +321,9 @@ export default function RecipeDetailPage() {
             </Typography>
           )}
 
-          <Tooltip title={favorites.has(Number(id)) ? 'Remove from favorites' : 'Add to favorites'}>
+          <Tooltip title={favorites.includes(id!) ? 'Remove from favorites' : 'Add to favorites'}>
             <IconButton
-              onClick={handleToggleFavorite}
+              onClick={handleFavoriteClick }
               sx={{
                 backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 backdropFilter: 'blur(4px)',
@@ -337,7 +341,7 @@ export default function RecipeDetailPage() {
                 height: 56,
               }}
             >
-              {favorites.has(Number(id)) ? (
+              {favorites.includes(id!) ? (
                 <Favorite sx={{ color: '#dc3545', fontSize: 28 }} />
               ) : (
                 <FavoriteBorder sx={{ color: '#8B6B47', fontSize: 28 }} />

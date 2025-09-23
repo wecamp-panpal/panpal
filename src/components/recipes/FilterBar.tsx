@@ -1,4 +1,4 @@
-import { Stack, Chip, Box, Button } from "@mui/material";
+import { Stack, Chip, Box } from "@mui/material";
 import type { UIRecipeCategory } from "@/types/ui-recipe";
 
 const CHIPS: UIRecipeCategory[] = ["APPETIZER", "DESSERT", "MAIN_DISH", "SIDE_DISH", "SOUP", "SAUCE", "DRINK", "SALAD"];
