@@ -369,8 +369,8 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    const handleRecipeDeleted = (event: CustomEvent) => {
-      const { recipeId } = event.detail;
+    const handleRecipeDeleted = () => {
+      // const { recipeId } = event.detail;
 
       if (user?.id) {
         loadMyRecipes(user.id, true);
