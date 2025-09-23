@@ -12,7 +12,7 @@ import {
   ImageListItemBar,
   Alert,
 } from '@mui/material';
-import { Star, StarBorder, CloudUpload, Close, PhotoCamera } from '@mui/icons-material';
+import { Star, StarBorder, Close, PhotoCamera } from '@mui/icons-material';
 import type { Comment, CreateCommentRequest } from '@/services/comments-new';
 import toast from 'react-hot-toast';
 

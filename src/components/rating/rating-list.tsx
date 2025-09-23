@@ -12,7 +12,6 @@ import {
   Avatar,
   IconButton,
   Chip,
-  Divider,
   Skeleton,
 } from '@mui/material';
 import { ThumbUp, FilterList, Reply, MoreVert } from '@mui/icons-material';
@@ -20,12 +19,10 @@ import {
   getRatingsByRecipeId,
   markRatingHelpful,
   createRatingReply,
-  type Rating as RatingType,
   type RatingListResponse,
   type RatingFilter,
 } from '@/services/ratings';
 import { getCurrentUser } from '@/services/auth';
-import { User } from '@/types/user';
 import toast from 'react-hot-toast';
 
 interface RatingListProps {

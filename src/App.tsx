@@ -7,7 +7,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { muiTheme } from '@/lib/muiTheme';
 import LandingPage from '@/pages/landing-page';
 import './App.css';
-import ProfilePage from '@/pages/profile';
+import ProfilePage from '@/pages/Profile';
 import ExploreRecipes from '@/pages/explore-recipe';
 import RecipeDetailPage from '@/pages/recipe-detail-page';
 import SignUpPage from '@/pages/sign-up-page';
