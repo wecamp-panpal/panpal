@@ -11,12 +11,17 @@ import {
   Typography,
 } from '@mui/material';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { loginUser } from '@/services/auth';
+import { loginUser, loginWithFirebase } from '@/services/auth';
 import { useAppDispatch } from '@/hooks/use-app-dispatch';
 import { signIn } from '@/stores/user-slice';
 import { toast } from 'react-hot-toast';
+import {
+  signInWithGooglePopup,
+  signInWithGoogleRedirect,
+  getGoogleRedirectResult,
+} from '@/services/firebaseAuth';
 
 export default function SignInForm() {
   const dispatch = useAppDispatch();
@@ -27,6 +32,42 @@ export default function SignInForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+
+  // Handle Google OAuth redirect results
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const redirectResult = await getGoogleRedirectResult();
+        if (redirectResult.success && redirectResult.token) {
+          toast.loading('Processing Google sign-in...');
+          const backendResult = await loginWithFirebase(redirectResult.token);
+
+          if (backendResult.success && backendResult.user) {
+            dispatch(
+              signIn({
+                id: backendResult.user.id,
+                email: backendResult.user.email,
+                name: backendResult.user.name,
+                role: backendResult.user.role || 'user',
+                created_at: '',
+                updated_at: '',
+              })
+            );
+            toast.dismiss();
+            toast.success('Signed in with Google successfully!');
+            navigate('/');
+          }
+        }
+      } catch (error: any) {
+        console.error('Error handling redirect result:', error);
+        if (error.message && !error.message.includes('No redirect result found')) {
+          toast.error(error.message || 'Failed to complete Google sign-in');
+        }
+      }
+    };
+
+    handleRedirectResult();
+  }, [dispatch, navigate]);
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -93,8 +134,73 @@ export default function SignInForm() {
     }
   };
 
-  const handleSignInWithGoogle = () => {
-    window.open('https://your-api-url/auth/google', '_self');
+  const handleSignInWithGoogle = async () => {
+    try {
+      setLoading(true);
+      toast.loading('Signing in with Google...');
+
+      let firebaseResult;
+
+      try {
+        // Try popup first
+        firebaseResult = await signInWithGooglePopup();
+      } catch (popupError: any) {
+        console.log('Popup failed, trying redirect:', popupError.message);
+
+        if (popupError.message === 'popup-blocked') {
+          toast.dismiss();
+          toast('Redirecting to Google sign-in...', { icon: 'ℹ️' });
+          // Use redirect as fallback
+          await signInWithGoogleRedirect();
+          return; // Exit here as redirect will reload the page
+        } else {
+          throw popupError; // Re-throw if it's not a popup issue
+        }
+      }
+
+      if (firebaseResult?.success) {
+        // Send Firebase token to backend
+        console.log('Firebase sign-in successful, sending token to backend...');
+        const backendResult = await loginWithFirebase(firebaseResult.token);
+
+        if (backendResult.success && backendResult.user) {
+          // update redux state
+          dispatch(
+            signIn({
+              id: backendResult.user.id,
+              email: backendResult.user.email,
+              name: backendResult.user.name,
+              role: backendResult.user.role || 'user',
+              created_at: '',
+              updated_at: '',
+            })
+          );
+          toast.dismiss();
+          toast.success('Signed in with Google successfully!');
+          navigate('/');
+        }
+      }
+    } catch (error: any) {
+      console.error('Google sign-in failed:', error);
+      toast.dismiss();
+
+      // Better error handling based on error types
+      if (error.message.includes('popup-closed-by-user')) {
+        toast.error('Sign-in cancelled');
+      } else if (error.message.includes('account-exists-with-different-credential')) {
+        toast.error('Account already exists with different sign-in method');
+      } else if (error.message.includes('Access denied')) {
+        toast.error('Access denied. Please check your backend authentication configuration.');
+      } else if (error.message.includes('401')) {
+        toast.error('Authentication failed. Please check your Firebase token configuration.');
+      } else if (error.message.includes('network')) {
+        toast.error('Network error. Please check your connection and try again.');
+      } else {
+        toast.error(error.message || 'Google sign-in failed');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <Box>

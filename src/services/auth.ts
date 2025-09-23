@@ -1,6 +1,12 @@
 import axiosClient from '@/lib/axiosClient';
 import axios from 'axios';
 
+// Create a separate axios instance for OAuth without automatic token injection
+const oauthAxios = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api",
+  withCredentials: true,
+});
+
 // Cache for getCurrentUser to prevent multiple concurrent requests
 let currentUserPromise: Promise<any> | null = null;
 let lastFetchTime = 0;
@@ -146,3 +152,81 @@ export function isAuthenticated():boolean{
     return !!localStorage.getItem('access_token');
 }
 
+export async function loginWithFirebase(firebaseToken:string):Promise<AuthResponse>{
+    try{
+      console.log('Sending Firebase token to backend:', firebaseToken.substring(0, 20) + '...');
+      
+      // Try with Authorization header first (common pattern for Firebase OAuth)
+      console.log('Trying Authorization header approach...');
+      const response = await oauthAxios.post('/auth/firebase/oauth', {}, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${firebaseToken}`,
+        }
+      });
+      
+      console.log('Backend response:', response.data);
+      
+      if(response.data.accessToken){
+        localStorage.setItem('access_token',response.data.accessToken);
+        localStorage.setItem('user',JSON.stringify(response.data.user));
+        clearCurrentUserCache();
+      }
+      return {
+        success:true,
+        user:response.data.user,
+        token:response.data.accessToken,
+      }
+    }
+    catch(error){
+      if(axios.isAxiosError(error)){
+        console.error('Authorization header approach failed:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+        });
+        
+        // If Authorization header approach fails, try request body approach
+        if (error.response?.status === 401) {
+          console.log('Trying request body approach...');
+          try {
+            const retryResponse = await oauthAxios.post('/auth/firebase/oauth', {
+              token: firebaseToken,
+              idToken: firebaseToken,
+              firebaseToken: firebaseToken // Try multiple field names
+            }, {
+              headers: {
+                'Content-Type': 'application/json',
+              }
+            });
+            
+            console.log('Backend response (request body):', retryResponse.data);
+            
+            if(retryResponse.data.accessToken){
+              localStorage.setItem('access_token',retryResponse.data.accessToken);
+              localStorage.setItem('user',JSON.stringify(retryResponse.data.user));
+              clearCurrentUserCache();
+            }
+            return {
+              success:true,
+              user:retryResponse.data.user,
+              token:retryResponse.data.accessToken,
+            }
+          } catch (retryError) {
+            console.error('Request body approach also failed:', retryError);
+            if (axios.isAxiosError(retryError)) {
+              console.error('Retry error details:', {
+                status: retryError.response?.status,
+                data: retryError.response?.data,
+              });
+            }
+            throw error; // Throw original error
+          }
+        }
+        
+        throw new Error(error.response?.data?.message || `Firebase login failed: ${error.response?.status} ${error.response?.statusText}`);
+      }
+      console.error('Firebase OAuth Non-Axios Error:', error);
+      throw new Error('Firebase login failed');
+    }
+}

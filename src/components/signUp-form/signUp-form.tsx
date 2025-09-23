@@ -11,9 +11,24 @@ import {
 } from '@mui/material';
 
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { useState, useRef, useLayoutEffect } from 'react';
+import { useState, useRef, useLayoutEffect, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { registerUser } from '@/services/auth';
+import { toast } from 'react-hot-toast';
+
+import {
+  signInWithGooglePopup,
+  signInWithGoogleRedirect,
+  getGoogleRedirectResult,
+} from '@/services/firebaseAuth';
+import { loginWithFirebase } from '@/services/auth';
+import { useAppDispatch } from '@/hooks/use-app-dispatch';
+import { signIn } from '@/stores/user-slice';
+import {
+  testBackendConnection,
+  validateFirebaseToken,
+  debugFirebaseAuth,
+} from '@/utils/debug-oauth';
 export default function SignUpForm() {
   const [focusInput, setFocusInput] = useState<string | null>('firstName');
   const [loading, setLoading] = useState<boolean>(false);
@@ -21,6 +36,7 @@ export default function SignUpForm() {
   const [loadingMessage, setLoadingMessage] = useState<string>('');
   const formRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   // Dummy form state
   const [form, setForm] = useState({
@@ -46,6 +62,42 @@ export default function SignUpForm() {
     };
   }, []);
 
+  // Handle Google OAuth redirect results
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const redirectResult = await getGoogleRedirectResult();
+        if (redirectResult.success && redirectResult.token) {
+          toast.loading('Processing Google sign-in...');
+          const backendResult = await loginWithFirebase(redirectResult.token);
+
+          if (backendResult.success && backendResult.user) {
+            dispatch(
+              signIn({
+                id: backendResult.user.id,
+                email: backendResult.user.email,
+                name: backendResult.user.name,
+                role: backendResult.user.role || 'user',
+                created_at: '',
+                updated_at: '',
+              })
+            );
+            toast.dismiss();
+            toast.success('Signed in with Google successfully!');
+            navigate('/');
+          }
+        }
+      } catch (error: any) {
+        console.error('Error handling redirect result:', error);
+        if (error.message && !error.message.includes('No redirect result found')) {
+          toast.error(error.message || 'Failed to complete Google sign-in');
+        }
+      }
+    };
+
+    handleRedirectResult();
+  }, [dispatch, navigate]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -56,8 +108,17 @@ export default function SignUpForm() {
     setError('');
     // Validation
     if (form.password !== form.confirmPassword) {
+      toast.error('Passwords must match');
       setError('Passwords must match');
+      setLoadingMessage('');
       setLoading(false);
+      return;
+    }
+
+    if (form.password.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      setLoading(false);
+      setLoadingMessage('');
       return;
     }
 
@@ -74,19 +135,138 @@ export default function SignUpForm() {
         // localStorage.setItem('user', JSON.stringify(response.user));
 
         // Redirect
-        navigate('/');
+        toast.success('Account created successfully!');
+        // Clear form
+        setForm({
+          firstName: '',
+          lastName: '',
+          email: '',
+          username: '',
+          password: '',
+          confirmPassword: '',
+        });
+        // Redirect after delay
+        setTimeout(() => {
+          navigate('/');
+          setLoading(false);
+          setLoadingMessage('');
+        }, 2500);
       } else {
+        toast.error(response.message || 'Registration failed');
         setError(response.message || 'Registration failed');
+        setLoading(false);
+        setLoadingMessage('');
       }
-    } catch (error) {
-      setError('An error occurred. Please try again.');
-    } finally {
+    } catch (error: any) {
+      console.error('Registration failed:', error);
+
+      let errorMessage = 'Registration failed. Please try again.';
+
+      if (error.response?.status === 409) {
+        // 409 - Email already exists
+        toast.error('Email already exists!');
+        errorMessage = 'Email already exists. Please use a different email.';
+        // Clear email field for user to input again another email
+        setForm(prev => ({ ...prev, email: '' }));
+      } else if (error.response?.status === 400) {
+        errorMessage =
+          error.response?.data?.message || 'Invalid input. Please check your information.';
+        toast.error(errorMessage);
+      } else if (error.response?.status === 500) {
+        errorMessage = 'Server error. Please try again later.';
+        toast.error('Server error. Please try again later.');
+      } else {
+        errorMessage = error.response?.data?.message || error.message || 'Registration failed';
+        toast.error(errorMessage);
+      }
+
+      setError(errorMessage);
       setLoading(false);
+      setLoadingMessage('');
     }
   };
 
-  const handleSignUpWithGoogle = () => {
-    window.open('https://your-api-url/auth/google', '_self');
+  const handleSignUpWithGoogle = async () => {
+    try {
+      setLoading(true);
+      toast.loading('Signing in with Google...');
+
+      // Debug information
+      debugFirebaseAuth();
+      const backendTest = await testBackendConnection();
+      console.log('Backend connection test:', backendTest);
+
+      let firebaseResult;
+
+      try {
+        // Try popup first
+        firebaseResult = await signInWithGooglePopup();
+      } catch (popupError: any) {
+        console.log('Popup failed, trying redirect:', popupError.message);
+
+        if (popupError.message === 'popup-blocked') {
+          toast.dismiss();
+          toast('Redirecting to Google sign-in...', { icon: 'ℹ️' });
+          // Use redirect as fallback
+          await signInWithGoogleRedirect();
+          return; // Exit here as redirect will reload the page
+        } else {
+          throw popupError; // Re-throw if it's not a popup issue
+        }
+      }
+
+      if (firebaseResult?.success) {
+        // Debug token validation
+        const tokenValidation = await validateFirebaseToken(firebaseResult.token);
+        console.log('Token validation result:', tokenValidation);
+
+        if (tokenValidation.success) {
+          // Send Firebase token to backend
+          console.log('Firebase sign-in successful, sending token to backend...');
+          const backendResult = await loginWithFirebase(firebaseResult.token);
+
+          if (backendResult.success && backendResult.user) {
+            // update redux state
+            dispatch(
+              signIn({
+                id: backendResult.user.id,
+                email: backendResult.user.email,
+                name: backendResult.user.name,
+                role: backendResult.user.role || 'user',
+                created_at: '',
+                updated_at: '',
+              })
+            );
+            toast.dismiss();
+            toast.success('Signed in with Google successfully!');
+            navigate('/');
+          }
+        } else {
+          console.error('Token validation failed:', tokenValidation.error);
+          throw new Error(`Backend validation failed: ${tokenValidation.error}`);
+        }
+      }
+    } catch (error: any) {
+      console.error('Google sign-in failed:', error);
+      toast.dismiss();
+
+      // Better error handling based on error types
+      if (error.message.includes('popup-closed-by-user')) {
+        toast.error('Sign-in cancelled');
+      } else if (error.message.includes('account-exists-with-different-credential')) {
+        toast.error('Account already exists with different sign-in method');
+      } else if (error.message.includes('Access denied')) {
+        toast.error('Access denied. Please check your backend authentication configuration.');
+      } else if (error.message.includes('401')) {
+        toast.error('Authentication failed. Please check your Firebase token configuration.');
+      } else if (error.message.includes('network')) {
+        toast.error('Network error. Please check your connection and try again.');
+      } else {
+        toast.error(error.message || 'Google sign-in failed');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

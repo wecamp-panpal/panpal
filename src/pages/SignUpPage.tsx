@@ -1,26 +1,30 @@
 import React, { useState, useRef, useLayoutEffect } from 'react';
-import {
-  Box,
- 
-} from '@mui/material';
+import { Box } from '@mui/material';
 import SignUpForm from '@/components/signUp-form/signUp-form';
 import NavBar from '../components/nav-bar/nav-bar';
 
 const SignUpPage: React.FC = () => {
-
   return (
     <Box display="flex" flexDirection="column" minHeight="100vh">
       <NavBar />
       <Box display="flex" flexDirection="row">
-        <Box flex={1} display="flex" justifyContent="left" alignItems="center" padding={'2rem'} color={'#FDF2E5'} sx={{  mt: { xs: 6, sm: 0 }}}>
-          <SignUpForm/>
+        <Box
+          flex={1}
+          display="flex"
+          justifyContent="left"
+          alignItems="center"
+          padding={'2rem'}
+          color={'#FDF2E5'}
+          sx={{ mt: { xs: 6, sm: 0 } }}
+        >
+          <SignUpForm />
         </Box>
-        <Box 
-          flex={1} 
-          display="flex" 
-          justifyContent="left" 
-          alignItems="left" 
-          style={{ 
+        <Box
+          flex={1}
+          display="flex"
+          justifyContent="left"
+          alignItems="left"
+          style={{
             overflow: 'hidden',
           }}
         >
@@ -35,9 +39,7 @@ const SignUpPage: React.FC = () => {
             }}
           />
         </Box>
-
       </Box>
-      
     </Box>
   );
 };
