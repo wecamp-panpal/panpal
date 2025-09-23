@@ -45,6 +45,7 @@ export default function CommentCard({
         addSuffix: true,
       });
     } catch (error) {
+      console.error('Error formatting date:', error);
       return 'Just now';
     }
   };
