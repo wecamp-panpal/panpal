@@ -18,7 +18,7 @@ const TrendingPublic = () => {
     const fetchTrendingRecipes = async () => {
       try {
         setLoading(true);
-        const trendingRecipes = await trendingRecipe('8');
+        const trendingRecipes = await trendingRecipe(8);
         setRecipes(trendingRecipes);
       } catch (error) {
         console.error('Failed to fetch trending recipes:', error);
