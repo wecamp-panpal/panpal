@@ -21,6 +21,7 @@ interface Recipe {
   rating: number;
   category: string;
   author_name?: string;
+  rating_count?: number;
 }
 
 interface RecipeCardProps {
@@ -84,7 +85,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           sx={{
             objectFit: 'cover',
             width: '100%',
-            aspectRatio: '1/1'
+            aspectRatio: '1/1',
           }}
         />
         <IconButton
@@ -131,7 +132,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             textOverflow: 'ellipsis',
             display: '-webkit-box',
             WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical'
+            WebkitBoxOrient: 'vertical',
           }}
         >
           {recipe.title}
@@ -139,14 +140,14 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
 
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
           <Rating
-            value={recipe.rating}
+            value={Math.max(0, Math.min(5, Number(recipe.rating) || 0))}
             precision={0.1}
             size="small"
             readOnly
             sx={{
               '& .MuiRating-iconFilled': {
-                color: '#D4A574'
-              }
+                color: '#D4A574',
+              },
             }}
           />
           <Typography
@@ -154,10 +155,11 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             sx={{
               color: '#6B4E37',
               fontWeight: 500,
-              fontSize: '0.85rem'
+              fontSize: '0.85rem',
             }}
           >
-            {recipe.rating}
+            {Number(recipe.rating ?? 0).toFixed(1)}
+            {recipe.rating_count ? ` (${recipe.rating_count})` : ''}
           </Typography>
         </Box>
 
@@ -167,17 +169,16 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             color: '#8B6B47',
             fontSize: '0.9rem',
             lineHeight: 1.4,
-            mb: 2
+            mb: 2,
           }}
         >
           {isPublic
-            ? `${recipe.author_name} • ${recipe.cooking_time}`
-            : `${username} • ${recipe.cookTime ?? recipe.cooking_time}`
-          }
+            ? `${recipe.author_name ?? 'Anonymous'} • ${recipe.cooking_time ?? ''}`
+            : `${username} • ${recipe.cookTime ?? recipe.cooking_time ?? ''}`}
         </Typography>
 
-        {!isPublic && (
-          type === 'my-recipe' ? (
+        {!isPublic &&
+          (type === 'my-recipe' ? (
             <Box sx={{ display: 'flex', gap: 1, mt: 'auto' }}>
               <Button
                 variant="contained"
@@ -193,12 +194,12 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                   fontSize: '0.85rem',
                   py: 1,
                   '&:hover': {
-                    backgroundColor: '#6B4E37'
+                    backgroundColor: '#6B4E37',
                   },
                   '&:focus': {
                     outline: 'none',
-                    boxShadow: 'none'
-                  }
+                    boxShadow: 'none',
+                  },
                 }}
               >
                 Edit
@@ -219,12 +220,12 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                   '&:hover': {
                     borderColor: '#6B4E37',
                     backgroundColor: '#F5E2CC',
-                    color: '#6B4E37'
+                    color: '#6B4E37',
                   },
                   '&:focus': {
                     outline: 'none',
-                    boxShadow: 'none'
-                  }
+                    boxShadow: 'none',
+                  },
                 }}
               >
                 View
@@ -245,18 +246,17 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                 fontSize: '0.85rem',
                 py: 1,
                 '&:hover': {
-                  backgroundColor: '#6B4E37'
+                  backgroundColor: '#6B4E37',
                 },
                 '&:focus': {
                   outline: 'none',
-                  boxShadow: 'none'
-                }
+                  boxShadow: 'none',
+                },
               }}
             >
               View Recipe
             </Button>
-          )
-        )}
+          ))}
       </CardContent>
     </Card>
   );
