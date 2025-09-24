@@ -27,7 +27,7 @@ const FeaturedSection = () => {
       >
         <div className="relative">
           <img 
-            src="/src/assets/pancake.png"
+            src="/assets/pancake.png"
             alt="Pancake"
             style={{
               width: '850px',

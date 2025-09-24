@@ -31,7 +31,7 @@ const Community = () => {
       name: "Jocelyn, Korea",
       date: "22 Jul 2025",
       avatar: "/api/placeholder/48/48",
-      image: "/src/assets/ramen.jpg"
+      image: "/assets/ramen.jpg"
     },
     {
       id: 2,
@@ -39,7 +39,7 @@ const Community = () => {
       name: "Marco, Italy",
       date: "18 Jul 2025", 
       avatar: "/api/placeholder/48/48",
-      image: "/src/assets/ramen.jpg"
+      image: "/assets/ramen.jpg"
     },
     {
       id: 3,
@@ -47,7 +47,7 @@ const Community = () => {
       name: "Sakura, Japan",
       date: "15 Jul 2025",
       avatar: "/api/placeholder/48/48", 
-      image: "/src/assets/ramen.jpg"
+      image: "/assets/ramen.jpg"
     }
   ];
   

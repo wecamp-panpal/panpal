@@ -121,14 +121,14 @@ useEffect(() => {
               <div className="hidden lg:block absolute top-0 right-0 w-full h-full pointer-events-none">
                 {/* Vegetables - bự hơn và ở góc trên phải */}
                 <img
-                  src="/src/assets/vegetables.png"
+                  src="/assets/vegetables.png"
                   alt="Vegetables"
                   className="absolute -bottom-12 -right-64 w-[1052px] h-auto z-10"
                 />
 
         
                 <img
-                  src="/src/assets/bread.png"
+                  src="/assets/bread.png"
                   alt="Bread"
                   className="absolute -bottom-32 -right-64 w-[815px] h-auto z-20"
                 />
@@ -216,12 +216,12 @@ useEffect(() => {
               <div className="hidden lg:block absolute top-0 right-0 w-full h-full pointer-events-none">
                 {/* Vegetables - bự hơn và ở góc trên phải */}
                 <img
-                  src="/src/assets/vegetables.png"
+                  src="/assets/vegetables.png"
                   alt="Vegetables"
                   className="absolute -bottom-12 -right-64 w-[1052px] h-auto z-10"
                 />
                 <img
-                  src="/src/assets/bread.png"
+                  src="/assets/bread.png"
                   alt="Bread"
                   className="absolute -bottom-32 -right-64 w-[815px] h-auto z-20"
                 />
